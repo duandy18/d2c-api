@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 PromotionType = Literal["store_campaign"]
 DiscountType = Literal["percentage"]
 ScopeType = Literal["all_store"]
+CouponType = Literal["public_code"]
 
 
 class BackofficePromotionHealthResponse(BaseModel):
@@ -73,6 +74,16 @@ class BackofficePromotionTarget(BaseModel):
 class BackofficePromotionTargetsResponse(BaseModel):
     count: int = Field(..., ge=0)
     promotion_targets: list[BackofficePromotionTarget]
+
+
+class BackofficeCouponCreateRequest(BaseModel):
+    coupon_code: str = Field(..., min_length=1, max_length=64)
+    name: str = Field(..., min_length=1, max_length=160)
+    coupon_type: CouponType = Field(default="public_code")
+    total_limit: int | None = Field(default=None, ge=1)
+    per_customer_limit: int | None = Field(default=None, ge=1)
+    starts_at: datetime | None = None
+    ends_at: datetime | None = None
 
 
 class BackofficeCoupon(BaseModel):

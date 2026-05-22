@@ -7,6 +7,8 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_session
 from app.domains.promotions.contracts.backoffice_promotion_contract import (
+    BackofficeCoupon,
+    BackofficeCouponCreateRequest,
     BackofficeCouponsResponse,
     BackofficeCustomerCouponsResponse,
     BackofficePromotion,
@@ -16,11 +18,17 @@ from app.domains.promotions.contracts.backoffice_promotion_contract import (
     BackofficePromotionTargetsResponse,
 )
 from app.domains.promotions.services.backoffice_promotion_service import (
+    BackofficeCouponDuplicateCodeError,
+    BackofficeCouponInvalidRangeError,
+    BackofficeCouponNotFoundError,
     BackofficePromotionDuplicateCodeError,
     BackofficePromotionInvalidRangeError,
     BackofficePromotionNotFoundError,
+    activate_backoffice_coupon,
     activate_backoffice_promotion,
+    create_backoffice_coupon,
     create_backoffice_promotion,
+    deactivate_backoffice_coupon,
     deactivate_backoffice_promotion,
     get_backoffice_coupons,
     get_backoffice_customer_coupons,
@@ -110,6 +118,66 @@ def backoffice_promotions_deactivate(
     try:
         return deactivate_backoffice_promotion(session, promotion_code)
     except BackofficePromotionNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+
+
+@router.post(
+    "/{promotion_code}/coupons",
+    response_model=BackofficeCoupon,
+    status_code=status.HTTP_201_CREATED,
+)
+def backoffice_promotions_coupon_create(
+    promotion_code: str,
+    payload: BackofficeCouponCreateRequest,
+    _: BackofficeClientDep,
+    session: SessionDep,
+) -> BackofficeCoupon:
+    try:
+        return create_backoffice_coupon(session, promotion_code, payload)
+    except BackofficePromotionNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+    except BackofficeCouponDuplicateCodeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        ) from exc
+    except BackofficeCouponInvalidRangeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(exc),
+        ) from exc
+
+
+@router.post("/coupons/{coupon_code}/activate", response_model=BackofficeCoupon)
+def backoffice_coupons_activate(
+    coupon_code: str,
+    _: BackofficeClientDep,
+    session: SessionDep,
+) -> BackofficeCoupon:
+    try:
+        return activate_backoffice_coupon(session, coupon_code)
+    except BackofficeCouponNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+
+
+@router.post("/coupons/{coupon_code}/deactivate", response_model=BackofficeCoupon)
+def backoffice_coupons_deactivate(
+    coupon_code: str,
+    _: BackofficeClientDep,
+    session: SessionDep,
+) -> BackofficeCoupon:
+    try:
+        return deactivate_backoffice_coupon(session, coupon_code)
+    except BackofficeCouponNotFoundError as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(exc),

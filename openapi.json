@@ -571,6 +571,190 @@
         }
       }
     },
+    "/backoffice/promotions/{promotion_code}/coupons": {
+      "post": {
+        "tags": [
+          "backoffice-promotions"
+        ],
+        "summary": "Backoffice Promotions Coupon Create",
+        "operationId": "backoffice_promotions_coupon_create_backoffice_promotions__promotion_code__coupons_post",
+        "parameters": [
+          {
+            "name": "promotion_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Promotion Code"
+            }
+          },
+          {
+            "name": "X-Backoffice-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Backoffice-Client"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackofficeCouponCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackofficeCoupon"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/backoffice/promotions/coupons/{coupon_code}/activate": {
+      "post": {
+        "tags": [
+          "backoffice-promotions"
+        ],
+        "summary": "Backoffice Coupons Activate",
+        "operationId": "backoffice_coupons_activate_backoffice_promotions_coupons__coupon_code__activate_post",
+        "parameters": [
+          {
+            "name": "coupon_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Coupon Code"
+            }
+          },
+          {
+            "name": "X-Backoffice-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Backoffice-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackofficeCoupon"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/backoffice/promotions/coupons/{coupon_code}/deactivate": {
+      "post": {
+        "tags": [
+          "backoffice-promotions"
+        ],
+        "summary": "Backoffice Coupons Deactivate",
+        "operationId": "backoffice_coupons_deactivate_backoffice_promotions_coupons__coupon_code__deactivate_post",
+        "parameters": [
+          {
+            "name": "coupon_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Coupon Code"
+            }
+          },
+          {
+            "name": "X-Backoffice-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Backoffice-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackofficeCoupon"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/backoffice/promotions/targets": {
       "get": {
         "tags": [
@@ -1540,6 +1724,82 @@
           "updated_at"
         ],
         "title": "BackofficeCoupon"
+      },
+      "BackofficeCouponCreateRequest": {
+        "properties": {
+          "coupon_code": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Coupon Code"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "coupon_type": {
+            "type": "string",
+            "const": "public_code",
+            "title": "Coupon Type",
+            "default": "public_code"
+          },
+          "total_limit": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Limit"
+          },
+          "per_customer_limit": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Per Customer Limit"
+          },
+          "starts_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starts At"
+          },
+          "ends_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "coupon_code",
+          "name"
+        ],
+        "title": "BackofficeCouponCreateRequest"
       },
       "BackofficeCouponsResponse": {
         "properties": {

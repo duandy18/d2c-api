@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.domains.promotions.contracts.backoffice_promotion_contract import (
     BackofficeCoupon,
+    BackofficeCouponCreateRequest,
     BackofficeCouponsResponse,
     BackofficeCustomerCoupon,
     BackofficeCustomerCouponsResponse,
@@ -23,8 +24,11 @@ from app.domains.promotions.models.promotion import (
     PromotionTarget,
 )
 from app.domains.promotions.repos.backoffice_promotion_repo import (
+    create_coupon,
     create_promotion,
     create_promotion_target,
+    get_coupon_by_code,
+    get_coupon_row_by_code,
     get_promotion_by_code,
     list_coupon_rows,
     list_customer_coupon_rows,
@@ -42,6 +46,18 @@ class BackofficePromotionInvalidRangeError(Exception):
 
 
 class BackofficePromotionNotFoundError(Exception):
+    pass
+
+
+class BackofficeCouponDuplicateCodeError(Exception):
+    pass
+
+
+class BackofficeCouponInvalidRangeError(Exception):
+    pass
+
+
+class BackofficeCouponNotFoundError(Exception):
     pass
 
 
@@ -186,6 +202,86 @@ def get_backoffice_promotion_targets(session: Session) -> BackofficePromotionTar
         count=len(targets),
         promotion_targets=targets,
     )
+
+
+def create_backoffice_coupon(
+    session: Session,
+    promotion_code: str,
+    payload: BackofficeCouponCreateRequest,
+) -> BackofficeCoupon:
+    if (
+        payload.ends_at is not None
+        and payload.starts_at is not None
+        and payload.ends_at <= payload.starts_at
+    ):
+        raise BackofficeCouponInvalidRangeError("coupon_effective_range_invalid")
+
+    promotion = get_promotion_by_code(session, promotion_code)
+    if promotion is None:
+        raise BackofficePromotionNotFoundError("promotion_not_found")
+
+    if get_coupon_by_code(session, payload.coupon_code) is not None:
+        raise BackofficeCouponDuplicateCodeError("coupon_code_already_exists")
+
+    coupon = Coupon(
+        coupon_code=payload.coupon_code,
+        name=payload.name,
+        promotion_id=promotion.id,
+        coupon_type=payload.coupon_type,
+        total_limit=payload.total_limit,
+        per_customer_limit=payload.per_customer_limit,
+        starts_at=payload.starts_at,
+        ends_at=payload.ends_at,
+        status="draft",
+        is_active=False,
+    )
+
+    try:
+        create_coupon(session, coupon)
+        session.commit()
+    except IntegrityError as exc:
+        session.rollback()
+        raise BackofficeCouponDuplicateCodeError("coupon_code_already_exists") from exc
+
+    return _build_coupon(coupon, promotion)
+
+
+def activate_backoffice_coupon(
+    session: Session,
+    coupon_code: str,
+) -> BackofficeCoupon:
+    coupon_row = get_coupon_row_by_code(session, coupon_code)
+
+    if coupon_row is None:
+        raise BackofficeCouponNotFoundError("coupon_not_found")
+
+    coupon, promotion = coupon_row
+    now = datetime.now(UTC)
+    coupon.status = "active"
+    coupon.is_active = True
+    coupon.updated_at = now
+    session.commit()
+
+    return _build_coupon(coupon, promotion)
+
+
+def deactivate_backoffice_coupon(
+    session: Session,
+    coupon_code: str,
+) -> BackofficeCoupon:
+    coupon_row = get_coupon_row_by_code(session, coupon_code)
+
+    if coupon_row is None:
+        raise BackofficeCouponNotFoundError("coupon_not_found")
+
+    coupon, promotion = coupon_row
+    now = datetime.now(UTC)
+    coupon.status = "paused"
+    coupon.is_active = False
+    coupon.updated_at = now
+    session.commit()
+
+    return _build_coupon(coupon, promotion)
 
 
 def _build_coupon(coupon: Coupon, promotion: Promotion) -> BackofficeCoupon:
