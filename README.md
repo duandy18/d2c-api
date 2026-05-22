@@ -30,15 +30,14 @@ Step 1:
 
 ## Local startup
 
-D2C API local standard:
+D2C API backend local standard:
 
-    make dev
+    make uvicorn-up
+    make uvicorn-status
+    make uvicorn-logs
+    make uvicorn-restart
+    make uvicorn-down
 
 Default API port: 8025.
 
-Background helpers are also available:
-
-    make up
-    make down
-    make status
-    make logs
+Do not use `make dev` as the backend standard startup command.
