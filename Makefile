@@ -17,7 +17,7 @@ TEST_ENV := D2C_ENVIRONMENT=test D2C_DATABASE_URL="$(DEV_TEST_DB_DSN)" D2C_TEST_
 
 .PHONY: clean-pyc install lint test routes openapi check
 .PHONY: upgrade-dev alembic-check alembic-current alembic-history revision
-.PHONY: uvicorn uvicorn-up uvicorn-down uvicorn-restart uvicorn-status uvicorn-logs
+.PHONY: dev uvicorn uvicorn-up uvicorn-down uvicorn-restart uvicorn-status uvicorn-logs
 .PHONY: up down restart status logs
 
 clean-pyc:
@@ -65,6 +65,8 @@ revision:
 	else \
 		$(DEV_ENV) $(ALEMBIC) revision --autogenerate -m "$(MESSAGE)"; \
 	fi
+
+dev: uvicorn
 
 uvicorn:
 	$(PYTHON) -m uvicorn app.main:app --host $(HOST) --port $(PORT) --reload
