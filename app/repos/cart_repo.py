@@ -1,0 +1,89 @@
+from sqlalchemy import Select, delete, select
+from sqlalchemy.orm import Session
+
+from app.models.cart import Cart, CartLine
+from app.models.catalog import Product, ProductSku
+
+
+def get_active_cart(
+    session: Session,
+    anonymous_id: str,
+    session_code: str,
+) -> Cart | None:
+    statement = (
+        select(Cart)
+        .where(Cart.status == "active")
+        .where(Cart.anonymous_id == anonymous_id)
+        .where(Cart.session_code == session_code)
+        .order_by(Cart.id.desc())
+    )
+    return session.scalar(statement)
+
+
+def create_cart(session: Session, cart: Cart) -> Cart:
+    session.add(cart)
+    session.flush()
+    return cart
+
+
+def _cart_lines_query(cart_id: int) -> Select[tuple[CartLine, Product, ProductSku]]:
+    return (
+        select(CartLine, Product, ProductSku)
+        .join(Product, Product.id == CartLine.product_id)
+        .join(ProductSku, ProductSku.id == CartLine.sku_id)
+        .where(CartLine.cart_id == cart_id)
+        .order_by(CartLine.id)
+    )
+
+
+def list_cart_line_rows(
+    session: Session,
+    cart_id: int,
+) -> list[tuple[CartLine, Product, ProductSku]]:
+    return list(session.execute(_cart_lines_query(cart_id)).all())
+
+
+def get_product_sku_for_cart(
+    session: Session,
+    product_code: str,
+    sku_code: str,
+) -> tuple[Product, ProductSku] | None:
+    statement = (
+        select(Product, ProductSku)
+        .join(ProductSku, ProductSku.product_id == Product.id)
+        .where(Product.product_code == product_code)
+        .where(ProductSku.sku_code == sku_code)
+        .where(Product.is_active.is_(True))
+        .where(Product.status == "active")
+        .where(ProductSku.is_active.is_(True))
+    )
+    return session.execute(statement).first()
+
+
+def get_cart_line_by_sku(
+    session: Session,
+    cart_id: int,
+    sku_id: int,
+) -> CartLine | None:
+    statement = (
+        select(CartLine)
+        .where(CartLine.cart_id == cart_id)
+        .where(CartLine.sku_id == sku_id)
+    )
+    return session.scalar(statement)
+
+
+def create_cart_line(session: Session, cart_line: CartLine) -> CartLine:
+    session.add(cart_line)
+    session.flush()
+    return cart_line
+
+
+def delete_cart_line(session: Session, cart_line: CartLine) -> None:
+    session.delete(cart_line)
+    session.flush()
+
+
+def clear_cart_lines(session: Session, cart_id: int) -> None:
+    session.execute(delete(CartLine).where(CartLine.cart_id == cart_id))
+    session.flush()

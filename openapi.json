@@ -115,6 +115,168 @@
         }
       }
     },
+    "/cart/health": {
+      "get": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "Cart Health",
+        "operationId": "cart_health_cart_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Cart Health Cart Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cart": {
+      "get": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "Cart Detail",
+        "operationId": "cart_detail_cart_get",
+        "parameters": [
+          {
+            "name": "anonymous_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 96,
+              "title": "Anonymous Id"
+            }
+          },
+          {
+            "name": "session_code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 8,
+              "maxLength": 96,
+              "title": "Session Code"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cart/items": {
+      "post": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "Cart Items Upsert",
+        "operationId": "cart_items_upsert_cart_items_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CartItemUpsertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cart/clear": {
+      "post": {
+        "tags": [
+          "cart"
+        ],
+        "summary": "Cart Clear",
+        "operationId": "cart_clear_cart_clear_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CartIdentityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/health": {
       "get": {
         "tags": [
@@ -522,6 +684,179 @@
           "occurred_at"
         ],
         "title": "BehaviorEventResponse"
+      },
+      "CartIdentityRequest": {
+        "properties": {
+          "anonymous_id": {
+            "type": "string",
+            "maxLength": 96,
+            "minLength": 8,
+            "title": "Anonymous Id"
+          },
+          "session_code": {
+            "type": "string",
+            "maxLength": 96,
+            "minLength": 8,
+            "title": "Session Code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "anonymous_id",
+          "session_code"
+        ],
+        "title": "CartIdentityRequest"
+      },
+      "CartItemUpsertRequest": {
+        "properties": {
+          "anonymous_id": {
+            "type": "string",
+            "maxLength": 96,
+            "minLength": 8,
+            "title": "Anonymous Id"
+          },
+          "session_code": {
+            "type": "string",
+            "maxLength": 96,
+            "minLength": 8,
+            "title": "Session Code"
+          },
+          "product_id": {
+            "type": "string",
+            "maxLength": 96,
+            "minLength": 1,
+            "title": "Product Id"
+          },
+          "sku": {
+            "type": "string",
+            "maxLength": 96,
+            "minLength": 1,
+            "title": "Sku"
+          },
+          "quantity": {
+            "type": "integer",
+            "maximum": 999.0,
+            "minimum": 0.0,
+            "title": "Quantity"
+          }
+        },
+        "type": "object",
+        "required": [
+          "anonymous_id",
+          "session_code",
+          "product_id",
+          "sku",
+          "quantity"
+        ],
+        "title": "CartItemUpsertRequest"
+      },
+      "CartLineResponse": {
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "title": "Product Id"
+          },
+          "sku": {
+            "type": "string",
+            "title": "Sku"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity"
+          },
+          "unit_price_cents": {
+            "type": "integer",
+            "title": "Unit Price Cents"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "line_subtotal_cents": {
+            "type": "integer",
+            "title": "Line Subtotal Cents"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "sku",
+          "name",
+          "quantity",
+          "unit_price_cents",
+          "currency",
+          "line_subtotal_cents"
+        ],
+        "title": "CartLineResponse"
+      },
+      "CartResponse": {
+        "properties": {
+          "cart_code": {
+            "type": "string",
+            "title": "Cart Code"
+          },
+          "anonymous_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anonymous Id"
+          },
+          "session_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Code"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "line_count": {
+            "type": "integer",
+            "title": "Line Count"
+          },
+          "item_count": {
+            "type": "integer",
+            "title": "Item Count"
+          },
+          "subtotal_cents": {
+            "type": "integer",
+            "title": "Subtotal Cents"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/CartLineResponse"
+            },
+            "type": "array",
+            "title": "Lines"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cart_code",
+          "anonymous_id",
+          "session_code",
+          "currency",
+          "line_count",
+          "item_count",
+          "subtotal_cents",
+          "lines"
+        ],
+        "title": "CartResponse"
       },
       "CatalogCategoriesResponse": {
         "properties": {
