@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -45,3 +47,20 @@ def create_customer_session(
     session.add(customer_session)
     session.flush()
     return customer_session
+
+
+def get_active_customer_by_session_token_hash(
+    session: Session,
+    session_token_hash: str,
+    now: datetime,
+) -> Customer | None:
+    statement = (
+        select(Customer)
+        .join(CustomerSession, CustomerSession.customer_id == Customer.id)
+        .where(CustomerSession.session_token_hash == session_token_hash)
+        .where(CustomerSession.revoked_at.is_(None))
+        .where(CustomerSession.expires_at > now)
+        .where(Customer.status == "active")
+        .order_by(CustomerSession.id.desc())
+    )
+    return session.scalar(statement)

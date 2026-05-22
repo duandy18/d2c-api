@@ -1,16 +1,18 @@
-"""SQLAlchemy models for D2C order owner tables."""
+"""SQLAlchemy models for D2C order and payment owner tables."""
 
 from __future__ import annotations
 
 from datetime import datetime
 
 from sqlalchemy import (
+    BigInteger,
     CheckConstraint,
     DateTime,
     ForeignKey,
     Index,
     Integer,
     String,
+    Text,
     UniqueConstraint,
     text,
 )
@@ -22,20 +24,23 @@ from app.models.base import Base
 class D2COrder(Base):
     """D2C order transaction fact.
 
-    Order rows are bound to a customer and keep recipient / shipping data
-    captured at checkout time.
+    Order rows are converted from a cart at checkout time.
     """
 
     __tablename__ = "d2c_orders"
     __table_args__ = (
         UniqueConstraint("order_no", name="uq_d2c_orders_order_no"),
         UniqueConstraint("cart_id", name="uq_d2c_orders_cart_id"),
-        CheckConstraint("item_count >= 0", name="ck_d2c_orders_item_count_non_negative"),
+        CheckConstraint(
+            "item_count >= 0",
+            name="ck_d2c_orders_item_count_non_negative",
+        ),
         CheckConstraint(
             "subtotal_cents >= 0",
             name="ck_d2c_orders_subtotal_cents_non_negative",
         ),
         Index("ix_d2c_orders_customer_id", "customer_id"),
+        Index("ix_d2c_orders_cart_code", "cart_code"),
         Index("ix_d2c_orders_status", "status"),
         Index("ix_d2c_orders_created_at", "created_at"),
     )
@@ -52,6 +57,7 @@ class D2COrder(Base):
         ForeignKey("d2c_carts.id"),
         nullable=False,
     )
+    cart_code: Mapped[str] = mapped_column(String(96), nullable=False)
     status: Mapped[str] = mapped_column(String(32), nullable=False)
     currency: Mapped[str] = mapped_column(String(3), nullable=False)
     item_count: Mapped[int] = mapped_column(Integer, nullable=False)
@@ -67,6 +73,10 @@ class D2COrder(Base):
     shipping_address_line2: Mapped[str | None] = mapped_column(String(255), nullable=True)
     shipping_postal_code: Mapped[str | None] = mapped_column(String(32), nullable=True)
 
+    paid_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=text("now()"),
@@ -79,6 +89,10 @@ class D2COrder(Base):
     )
 
     lines: Mapped[list[D2COrderLine]] = relationship(
+        back_populates="order",
+        cascade="all, delete-orphan",
+    )
+    payments: Mapped[list[D2CPayment]] = relationship(
         back_populates="order",
         cascade="all, delete-orphan",
     )
@@ -133,3 +147,80 @@ class D2COrderLine(Base):
     )
 
     order: Mapped[D2COrder] = relationship(back_populates="lines")
+
+
+class D2CPayment(Base):
+    """D2C payment record prepared for multi-provider payment flows."""
+
+    __tablename__ = "d2c_payments"
+    __table_args__ = (
+        UniqueConstraint("payment_no", name="uq_d2c_payments_payment_no"),
+        CheckConstraint(
+            "amount_cents >= 0",
+            name="ck_d2c_payments_amount_cents_non_negative",
+        ),
+        Index("ix_d2c_payments_customer_id", "customer_id"),
+        Index("ix_d2c_payments_order_id", "order_id"),
+        Index("ix_d2c_payments_order_no", "order_no"),
+        Index("ix_d2c_payments_payment_no", "payment_no"),
+        Index("ix_d2c_payments_provider", "provider"),
+        Index("ix_d2c_payments_status", "status"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    payment_no: Mapped[str] = mapped_column(String(64), nullable=False)
+    order_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("d2c_orders.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    order_no: Mapped[str] = mapped_column(String(32), nullable=False)
+    customer_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("d2c_customers.id"),
+        nullable=False,
+    )
+    amount_cents: Mapped[int] = mapped_column(Integer, nullable=False)
+    currency: Mapped[str] = mapped_column(String(3), nullable=False)
+    provider: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        default="mock",
+        server_default="mock",
+    )
+    payment_method: Mapped[str] = mapped_column(
+        String(64),
+        nullable=False,
+        default="mock",
+        server_default="mock",
+    )
+    status: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        default="pending",
+        server_default="pending",
+    )
+    provider_payment_id: Mapped[str | None] = mapped_column(
+        String(128),
+        nullable=True,
+    )
+    provider_trade_no: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    payment_reference: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    notify_payload: Mapped[str | None] = mapped_column(Text, nullable=True)
+    failure_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    paid_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=text("now()"),
+        nullable=False,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=text("now()"),
+        nullable=False,
+    )
+
+    order: Mapped[D2COrder] = relationship(back_populates="payments")
