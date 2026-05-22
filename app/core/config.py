@@ -28,6 +28,7 @@ class D2CSettings:
     web_path: str = "/d2c"
     api_port: int = 8025
     database_url: str = "postgresql+psycopg://d2c:d2c@127.0.0.1:5433/d2c"
+    test_database_url: str = "postgresql+psycopg://d2c:d2c@127.0.0.1:5433/d2c_test"
     cors_allow_origins: tuple[str, ...] = (
         "http://127.0.0.1:5177",
         "http://localhost:5177",
@@ -47,6 +48,7 @@ def load_settings() -> D2CSettings:
         web_path=getenv("D2C_WEB_PATH", D2CSettings.web_path),
         api_port=int(getenv("D2C_API_PORT", str(D2CSettings.api_port))),
         database_url=getenv("D2C_DATABASE_URL", D2CSettings.database_url),
+        test_database_url=getenv("D2C_TEST_DATABASE_URL", D2CSettings.test_database_url),
         cors_allow_origins=_read_csv_env(
             "D2C_CORS_ALLOW_ORIGINS",
             D2CSettings.cors_allow_origins,

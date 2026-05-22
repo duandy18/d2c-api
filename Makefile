@@ -1,12 +1,22 @@
 PYTHON ?= .venv/bin/python3
+ALEMBIC ?= $(PYTHON) -m alembic
 TESTS ?= tests
+
+DEV_DB_DSN ?= postgresql+psycopg://d2c:d2c@127.0.0.1:5433/d2c
+DEV_TEST_DB_DSN ?= postgresql+psycopg://d2c:d2c@127.0.0.1:5433/d2c_test
+D2C_ENV ?= local
+
 HOST ?= 0.0.0.0
 PORT ?= 8025
 PID_FILE ?= /tmp/d2c_api_8025.pid
 LOG_FILE ?= /tmp/d2c_api_8025.log
 HEALTH_URL ?= http://127.0.0.1:$(PORT)/health
 
+DEV_ENV := D2C_ENVIRONMENT="$(D2C_ENV)" D2C_DATABASE_URL="$(DEV_DB_DSN)" D2C_TEST_DATABASE_URL="$(DEV_DB_DSN)" PYTHONPATH=.
+TEST_ENV := D2C_ENVIRONMENT=test D2C_DATABASE_URL="$(DEV_TEST_DB_DSN)" D2C_TEST_DATABASE_URL="$(DEV_TEST_DB_DSN)" PYTHONPATH=.
+
 .PHONY: clean-pyc install lint test routes openapi check
+.PHONY: upgrade-dev alembic-check alembic-current alembic-history revision
 .PHONY: uvicorn uvicorn-up uvicorn-down uvicorn-restart uvicorn-status uvicorn-logs
 .PHONY: up down restart status logs
 
@@ -32,6 +42,29 @@ openapi:
 	$(PYTHON) scripts/export_openapi.py
 
 check: lint test routes openapi
+
+upgrade-dev:
+	@echo ">>> Alembic upgrade head on DEV_DB_DSN ($(DEV_DB_DSN))"
+	$(DEV_ENV) $(ALEMBIC) upgrade head
+
+alembic-check:
+	@echo ">>> Alembic check on DEV_DB_DSN ($(DEV_DB_DSN))"
+	$(DEV_ENV) $(ALEMBIC) check
+
+alembic-current:
+	@echo ">>> Alembic current on DEV_DB_DSN ($(DEV_DB_DSN))"
+	$(DEV_ENV) $(ALEMBIC) current
+
+alembic-history:
+	@echo ">>> Alembic history on DEV_DB_DSN ($(DEV_DB_DSN))"
+	$(DEV_ENV) $(ALEMBIC) history | tail -n 30
+
+revision:
+	@if [ -z "$(MESSAGE)" ]; then \
+		echo "usage: make revision MESSAGE=\"describe change\""; \
+	else \
+		$(DEV_ENV) $(ALEMBIC) revision --autogenerate -m "$(MESSAGE)"; \
+	fi
 
 uvicorn:
 	$(PYTHON) -m uvicorn app.main:app --host $(HOST) --port $(PORT) --reload
