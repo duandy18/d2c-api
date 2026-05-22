@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.models.cart import Cart
 from app.models.customer import Customer
 from app.models.order import D2COrder, D2COrderLine, D2CPayment
+from app.models.promotion import Promotion
 from app.repos.customer_repo import get_active_customer_by_session_token_hash
 from app.repos.order_repo import (
     create_order,
@@ -19,6 +20,7 @@ from app.repos.order_repo import (
     list_cart_line_rows_for_checkout,
     list_order_lines,
 )
+from app.repos.promotion_repo import get_best_active_all_store_percentage_promotion
 from app.schemas.order import (
     OrderCheckoutRequest,
     OrderLineResponse,
@@ -87,6 +89,21 @@ def _sync_cart_summary(
     cart.subtotal_cents = sum(cart_line.line_subtotal_cents for cart_line, _, _ in rows)
 
 
+def _calculate_percentage_discount_cents(
+    subtotal_cents: int,
+    promotion: Promotion | None,
+) -> int:
+    if promotion is None:
+        return 0
+
+    discount_cents = subtotal_cents * promotion.discount_value // 100
+
+    if promotion.max_discount_cents is not None:
+        discount_cents = min(discount_cents, promotion.max_discount_cents)
+
+    return min(discount_cents, subtotal_cents)
+
+
 def _build_line_response(line: D2COrderLine) -> OrderLineResponse:
     return OrderLineResponse(
         product_code=line.product_code,
@@ -129,6 +146,9 @@ def build_order_response(
         currency=order.currency,
         item_count=order.item_count,
         subtotal_cents=order.subtotal_cents,
+        discount_cents=order.discount_cents,
+        payable_cents=order.payable_cents,
+        promotion_code=order.promotion_code,
         recipient_name=order.recipient_name,
         recipient_phone=order.recipient_phone,
         shipping_country=order.shipping_country,
@@ -165,6 +185,19 @@ def checkout_order(
     if cart.line_count <= 0 or cart.item_count <= 0:
         raise CheckoutCartEmptyError("checkout_cart_empty")
 
+    now = datetime.now(UTC)
+    promotion = get_best_active_all_store_percentage_promotion(
+        session,
+        currency=cart.currency,
+        subtotal_cents=cart.subtotal_cents,
+        now=now,
+    )
+    discount_cents = _calculate_percentage_discount_cents(
+        cart.subtotal_cents,
+        promotion,
+    )
+    payable_cents = cart.subtotal_cents - discount_cents
+
     cart.customer_id = customer.id
 
     order = create_order(
@@ -178,6 +211,10 @@ def checkout_order(
             currency=cart.currency,
             item_count=cart.item_count,
             subtotal_cents=cart.subtotal_cents,
+            discount_cents=discount_cents,
+            payable_cents=payable_cents,
+            promotion_id=promotion.id if promotion is not None else None,
+            promotion_code=promotion.promotion_code if promotion is not None else None,
             recipient_name=payload.recipient_name,
             recipient_phone=payload.recipient_phone,
             shipping_country=payload.shipping_country,
@@ -214,7 +251,7 @@ def checkout_order(
             order_id=order.id,
             order_no=order.order_no,
             customer_id=customer.id,
-            amount_cents=order.subtotal_cents,
+            amount_cents=order.payable_cents,
             currency=order.currency,
             provider=payload.payment_provider,
             payment_method=payload.payment_method,

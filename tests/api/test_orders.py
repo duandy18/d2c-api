@@ -1,10 +1,40 @@
 from uuid import uuid4
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 
 from app.core.config import load_settings
 from app.main import app
+
+
+@pytest.fixture(autouse=True)
+def reset_active_promotions() -> None:
+    engine = create_engine(load_settings().database_url)
+    try:
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    """
+                    UPDATE d2c_promotions
+                    SET status = 'draft',
+                        is_active = FALSE
+                    """
+                )
+            )
+        yield
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    """
+                    UPDATE d2c_promotions
+                    SET status = 'draft',
+                        is_active = FALSE
+                    """
+                )
+            )
+    finally:
+        engine.dispose()
 
 
 def unique_code(prefix: str) -> str:
@@ -64,6 +94,69 @@ def create_empty_cart(client: TestClient) -> str:
     response = client.get("/cart", params=identity)
     assert response.status_code == 200
     return response.json()["cart_code"]
+
+
+def create_active_all_store_percentage_promotion(
+    *,
+    discount_value: int,
+    max_discount_cents: int | None = None,
+    min_order_amount_cents: int | None = None,
+) -> str:
+    promotion_code = f"PROMO-{uuid4().hex[:16].upper()}"
+
+    engine = create_engine(load_settings().database_url)
+    try:
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    """
+                    INSERT INTO d2c_promotions (
+                      promotion_code,
+                      name,
+                      description,
+                      promotion_type,
+                      discount_type,
+                      discount_value,
+                      scope_type,
+                      min_order_amount_cents,
+                      max_discount_cents,
+                      currency,
+                      status,
+                      priority,
+                      stackable,
+                      is_active
+                    )
+                    VALUES (
+                      :promotion_code,
+                      :name,
+                      :description,
+                      'store_campaign',
+                      'percentage',
+                      :discount_value,
+                      'all_store',
+                      :min_order_amount_cents,
+                      :max_discount_cents,
+                      'USD',
+                      'active',
+                      10,
+                      FALSE,
+                      TRUE
+                    )
+                    """
+                ),
+                {
+                    "promotion_code": promotion_code,
+                    "name": "测试全店折扣",
+                    "description": "测试 checkout 自动全店百分比促销",
+                    "discount_value": discount_value,
+                    "min_order_amount_cents": min_order_amount_cents,
+                    "max_discount_cents": max_discount_cents,
+                },
+            )
+    finally:
+        engine.dispose()
+
+    return promotion_code
 
 
 def checkout_payload(cart_code: str) -> dict[str, str]:
@@ -142,6 +235,9 @@ def test_checkout_converts_cart_to_pending_payment_order() -> None:
     assert payload["currency"] == "USD"
     assert payload["item_count"] == 2
     assert payload["subtotal_cents"] == 3798
+    assert payload["discount_cents"] == 0
+    assert payload["payable_cents"] == 3798
+    assert payload["promotion_code"] is None
     assert payload["recipient_name"] == "Andy"
     assert payload["payment"]["payment_no"].startswith("PAY-")
     assert payload["payment"]["provider"] == "mock"
@@ -184,6 +280,70 @@ def test_checkout_converts_cart_to_pending_payment_order() -> None:
     assert row["customer_id"] is not None
 
 
+def test_checkout_applies_active_all_store_percentage_promotion() -> None:
+    client = TestClient(app)
+    token = register_customer(client)
+    cart_code = create_cart_with_item(client)
+    promotion_code = create_active_all_store_percentage_promotion(
+        discount_value=10,
+    )
+
+    response = client.post(
+        "/orders/checkout",
+        json=checkout_payload(cart_code),
+        headers=auth_headers(token),
+    )
+
+    assert response.status_code == 201
+
+    payload = response.json()
+    assert payload["subtotal_cents"] == 3798
+    assert payload["discount_cents"] == 379
+    assert payload["payable_cents"] == 3419
+    assert payload["promotion_code"] == promotion_code
+    assert payload["payment"]["amount_cents"] == 3419
+    assert payload["payment"]["status"] == "pending"
+    assert payload["lines"][0]["line_subtotal_cents"] == 3798
+
+    engine = create_engine(load_settings().database_url)
+    try:
+        with engine.connect() as connection:
+            order_row = (
+                connection.execute(
+                    text(
+                        """
+                        SELECT
+                          discount_cents,
+                          payable_cents,
+                          promotion_code
+                        FROM d2c_orders
+                        WHERE order_no = :order_no
+                        """
+                    ),
+                    {"order_no": payload["order_no"]},
+                )
+                .mappings()
+                .one()
+            )
+            payment_amount = connection.execute(
+                text(
+                    """
+                    SELECT amount_cents
+                    FROM d2c_payments
+                    WHERE order_no = :order_no
+                    """
+                ),
+                {"order_no": payload["order_no"]},
+            ).scalar_one()
+    finally:
+        engine.dispose()
+
+    assert order_row["discount_cents"] == 379
+    assert order_row["payable_cents"] == 3419
+    assert order_row["promotion_code"] == promotion_code
+    assert payment_amount == 3419
+
+
 def test_checkout_rejects_duplicate_cart_conversion() -> None:
     client = TestClient(app)
     token = register_customer(client)
@@ -221,6 +381,8 @@ def test_get_order_returns_customer_order() -> None:
 
     assert response.status_code == 200
     assert response.json()["order_no"] == order_no
+    assert response.json()["discount_cents"] == 0
+    assert response.json()["payable_cents"] == 3798
     assert response.json()["payment"]["status"] == "pending"
 
 
@@ -247,6 +409,8 @@ def test_mock_payment_marks_order_paid() -> None:
     assert payload["order_no"] == order_no
     assert payload["status"] == "paid"
     assert payload["paid_at"] is not None
+    assert payload["payable_cents"] == 3798
+    assert payload["payment"]["amount_cents"] == 3798
     assert payload["payment"]["status"] == "succeeded"
     assert payload["payment"]["paid_at"] is not None
     assert payload["payment"]["provider_payment_id"].startswith("MOCK-")

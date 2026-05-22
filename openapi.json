@@ -2531,6 +2531,25 @@
             "type": "integer",
             "title": "Subtotal Cents"
           },
+          "discount_cents": {
+            "type": "integer",
+            "title": "Discount Cents"
+          },
+          "payable_cents": {
+            "type": "integer",
+            "title": "Payable Cents"
+          },
+          "promotion_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Promotion Code"
+          },
           "recipient_name": {
             "type": "string",
             "title": "Recipient Name"
@@ -2631,6 +2650,9 @@
           "currency",
           "item_count",
           "subtotal_cents",
+          "discount_cents",
+          "payable_cents",
+          "promotion_code",
           "recipient_name",
           "recipient_phone",
           "shipping_country",

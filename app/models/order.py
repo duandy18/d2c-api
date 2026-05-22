@@ -39,10 +39,28 @@ class D2COrder(Base):
             "subtotal_cents >= 0",
             name="ck_d2c_orders_subtotal_cents_non_negative",
         ),
+        CheckConstraint(
+            "discount_cents >= 0",
+            name="ck_d2c_orders_discount_cents_non_negative",
+        ),
+        CheckConstraint(
+            "payable_cents >= 0",
+            name="ck_d2c_orders_payable_cents_non_negative",
+        ),
+        CheckConstraint(
+            "discount_cents <= subtotal_cents",
+            name="ck_d2c_orders_discount_not_exceed_subtotal",
+        ),
+        CheckConstraint(
+            "payable_cents = subtotal_cents - discount_cents",
+            name="ck_d2c_orders_payable_matches_discount",
+        ),
         Index("ix_d2c_orders_customer_id", "customer_id"),
         Index("ix_d2c_orders_cart_code", "cart_code"),
         Index("ix_d2c_orders_status", "status"),
         Index("ix_d2c_orders_created_at", "created_at"),
+        Index("ix_d2c_orders_promotion_id", "promotion_id"),
+        Index("ix_d2c_orders_promotion_code", "promotion_code"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -62,6 +80,19 @@ class D2COrder(Base):
     currency: Mapped[str] = mapped_column(String(3), nullable=False)
     item_count: Mapped[int] = mapped_column(Integer, nullable=False)
     subtotal_cents: Mapped[int] = mapped_column(Integer, nullable=False)
+    discount_cents: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
+    payable_cents: Mapped[int] = mapped_column(Integer, nullable=False)
+    promotion_id: Mapped[int | None] = mapped_column(
+        BigInteger,
+        ForeignKey("d2c_promotions.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    promotion_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
     recipient_name: Mapped[str] = mapped_column(String(128), nullable=False)
     recipient_phone: Mapped[str] = mapped_column(String(32), nullable=False)
