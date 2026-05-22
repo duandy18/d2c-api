@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from app.models.catalog import Product, ProductCategory, ProductSku
+from app.models.catalog import Product, ProductCategory, ProductSku, SkuPrice
 from app.repos.catalog_repo import (
     get_active_catalog_row_by_product_code,
     list_active_catalog_rows,
@@ -18,6 +18,7 @@ def _build_product_schema(
     product: Product,
     category: ProductCategory,
     sku: ProductSku,
+    sku_price: SkuPrice,
 ) -> CatalogProduct:
     return CatalogProduct(
         product_id=product.product_code,
@@ -25,8 +26,8 @@ def _build_product_schema(
         name=product.name,
         category=category.name,
         description=product.description,
-        price_cents=sku.price_cents,
-        currency=sku.currency,
+        price_cents=sku_price.price_cents,
+        currency=sku_price.currency,
         tags=[category.name],
         status="active",
         stock_status=sku.stock_status,  # type: ignore[arg-type]
@@ -48,8 +49,8 @@ def list_catalog_categories(session: Session) -> CatalogCategoriesResponse:
 
 def list_catalog_products(session: Session) -> CatalogProductsResponse:
     products = [
-        _build_product_schema(product, category, sku)
-        for product, category, sku in list_active_catalog_rows(session)
+        _build_product_schema(product, category, sku, sku_price)
+        for product, category, sku, sku_price in list_active_catalog_rows(session)
     ]
     return CatalogProductsResponse(count=len(products), products=products)
 
@@ -60,5 +61,5 @@ def get_catalog_product(session: Session, product_id: str) -> CatalogProduct | N
     if row is None:
         return None
 
-    product, category, sku = row
-    return _build_product_schema(product, category, sku)
+    product, category, sku, sku_price = row
+    return _build_product_schema(product, category, sku, sku_price)

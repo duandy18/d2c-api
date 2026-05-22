@@ -86,3 +86,74 @@ def test_catalog_product_detail_returns_404_for_unknown_product() -> None:
 
     assert response.status_code == 404
     assert response.json() == {"detail": "catalog_product_not_found"}
+
+
+def test_catalog_product_price_uses_default_sku_price() -> None:
+    from sqlalchemy import create_engine, text
+
+    from app.core.config import load_settings
+
+    client = TestClient(app)
+    engine = create_engine(load_settings().database_url)
+    sku_code = "CAT-FOOD-SALMON-1KG"
+    test_price_cents = 1777
+
+    with engine.begin() as connection:
+        original_price = connection.execute(
+            text(
+                """
+                SELECT sp.price_cents
+                FROM d2c_sku_prices sp
+                JOIN d2c_product_skus s ON s.id = sp.sku_id
+                JOIN d2c_price_lists pl ON pl.id = sp.price_list_id
+                WHERE s.sku_code = :sku_code
+                  AND pl.price_list_code = 'default_usd_storefront'
+                """
+            ),
+            {"sku_code": sku_code},
+        ).scalar_one()
+
+    try:
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    """
+                    UPDATE d2c_sku_prices sp
+                    SET price_cents = :price_cents
+                    FROM d2c_product_skus s, d2c_price_lists pl
+                    WHERE sp.sku_id = s.id
+                      AND sp.price_list_id = pl.id
+                      AND s.sku_code = :sku_code
+                      AND pl.price_list_code = 'default_usd_storefront'
+                    """
+                ),
+                {
+                    "sku_code": sku_code,
+                    "price_cents": test_price_cents,
+                },
+            )
+
+        response = client.get("/catalog/products/pet-cat-food-salmon-001")
+
+        assert response.status_code == 200
+        assert response.json()["price_cents"] == test_price_cents
+    finally:
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    """
+                    UPDATE d2c_sku_prices sp
+                    SET price_cents = :price_cents
+                    FROM d2c_product_skus s, d2c_price_lists pl
+                    WHERE sp.sku_id = s.id
+                      AND sp.price_list_id = pl.id
+                      AND s.sku_code = :sku_code
+                      AND pl.price_list_code = 'default_usd_storefront'
+                    """
+                ),
+                {
+                    "sku_code": sku_code,
+                    "price_cents": original_price,
+                },
+            )
+        engine.dispose()
