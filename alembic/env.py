@@ -6,13 +6,13 @@ from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 from app.core.config import load_settings
-from app.models import analytics as analytics_models  # noqa: F401
-from app.models import cart as cart_models  # noqa: F401
-from app.models import catalog as catalog_models  # noqa: F401
-from app.models import customer as customer_models  # noqa: F401
-from app.models import order as order_models  # noqa: F401
-from app.models import promotion as promotion_models  # noqa: F401
-from app.models.base import Base
+from app.core.orm import Base
+from app.domains.analytics.models import analytics as analytics_models  # noqa: F401
+from app.domains.cart.models import cart as cart_models  # noqa: F401
+from app.domains.catalog.models import catalog as catalog_models  # noqa: F401
+from app.domains.customers.models import customer as customer_models  # noqa: F401
+from app.domains.orders.models import order as order_models  # noqa: F401
+from app.domains.promotions.models import promotion as promotion_models  # noqa: F401
 
 config = context.config
 

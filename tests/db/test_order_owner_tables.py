@@ -4,7 +4,7 @@ import os
 
 from sqlalchemy import create_engine, inspect, text
 
-from app.models.order import D2COrder, D2COrderLine
+from app.domains.orders.models.order import D2COrder, D2COrderLine
 
 
 def _database_url() -> str:
