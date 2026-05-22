@@ -300,6 +300,424 @@
         }
       }
     },
+    "/admin/promotions/health": {
+      "get": {
+        "tags": [
+          "admin-promotions"
+        ],
+        "summary": "Admin Promotions Health",
+        "operationId": "admin_promotions_health_admin_promotions_health_get",
+        "parameters": [
+          {
+            "name": "X-Admin-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminPromotionHealthResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/promotions": {
+      "get": {
+        "tags": [
+          "admin-promotions"
+        ],
+        "summary": "Admin Promotions List",
+        "operationId": "admin_promotions_list_admin_promotions_get",
+        "parameters": [
+          {
+            "name": "X-Admin-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminPromotionsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "admin-promotions"
+        ],
+        "summary": "Admin Promotions Create",
+        "operationId": "admin_promotions_create_admin_promotions_post",
+        "parameters": [
+          {
+            "name": "X-Admin-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Client"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminPromotionCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminPromotion"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/promotions/{promotion_code}/activate": {
+      "post": {
+        "tags": [
+          "admin-promotions"
+        ],
+        "summary": "Admin Promotions Activate",
+        "operationId": "admin_promotions_activate_admin_promotions__promotion_code__activate_post",
+        "parameters": [
+          {
+            "name": "promotion_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Promotion Code"
+            }
+          },
+          {
+            "name": "X-Admin-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminPromotion"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/promotions/{promotion_code}/deactivate": {
+      "post": {
+        "tags": [
+          "admin-promotions"
+        ],
+        "summary": "Admin Promotions Deactivate",
+        "operationId": "admin_promotions_deactivate_admin_promotions__promotion_code__deactivate_post",
+        "parameters": [
+          {
+            "name": "promotion_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Promotion Code"
+            }
+          },
+          {
+            "name": "X-Admin-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminPromotion"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/promotions/targets": {
+      "get": {
+        "tags": [
+          "admin-promotions"
+        ],
+        "summary": "Admin Promotion Targets List",
+        "operationId": "admin_promotion_targets_list_admin_promotions_targets_get",
+        "parameters": [
+          {
+            "name": "X-Admin-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminPromotionTargetsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/promotions/coupons": {
+      "get": {
+        "tags": [
+          "admin-promotions"
+        ],
+        "summary": "Admin Coupons List",
+        "operationId": "admin_coupons_list_admin_promotions_coupons_get",
+        "parameters": [
+          {
+            "name": "X-Admin-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminCouponsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/promotions/customer-coupons": {
+      "get": {
+        "tags": [
+          "admin-promotions"
+        ],
+        "summary": "Admin Customer Coupons List",
+        "operationId": "admin_customer_coupons_list_admin_promotions_customer_coupons_get",
+        "parameters": [
+          {
+            "name": "X-Admin-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminCustomerCouponsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/analytics/health": {
       "get": {
         "tags": [
@@ -1013,6 +1431,258 @@
         ],
         "title": "AdminCatalogHealthResponse"
       },
+      "AdminCoupon": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "coupon_code": {
+            "type": "string",
+            "title": "Coupon Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "promotion_id": {
+            "type": "integer",
+            "title": "Promotion Id"
+          },
+          "promotion_code": {
+            "type": "string",
+            "title": "Promotion Code"
+          },
+          "coupon_type": {
+            "type": "string",
+            "title": "Coupon Type"
+          },
+          "total_limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Limit"
+          },
+          "per_customer_limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Per Customer Limit"
+          },
+          "starts_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starts At"
+          },
+          "ends_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends At"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "coupon_code",
+          "name",
+          "promotion_id",
+          "promotion_code",
+          "coupon_type",
+          "total_limit",
+          "per_customer_limit",
+          "starts_at",
+          "ends_at",
+          "status",
+          "is_active",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "AdminCoupon"
+      },
+      "AdminCouponsResponse": {
+        "properties": {
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count"
+          },
+          "coupons": {
+            "items": {
+              "$ref": "#/components/schemas/AdminCoupon"
+            },
+            "type": "array",
+            "title": "Coupons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count",
+          "coupons"
+        ],
+        "title": "AdminCouponsResponse"
+      },
+      "AdminCustomerCoupon": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "customer_coupon_code": {
+            "type": "string",
+            "title": "Customer Coupon Code"
+          },
+          "coupon_id": {
+            "type": "integer",
+            "title": "Coupon Id"
+          },
+          "coupon_code": {
+            "type": "string",
+            "title": "Coupon Code"
+          },
+          "promotion_id": {
+            "type": "integer",
+            "title": "Promotion Id"
+          },
+          "promotion_code": {
+            "type": "string",
+            "title": "Promotion Code"
+          },
+          "customer_id": {
+            "type": "integer",
+            "title": "Customer Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "claimed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Claimed At"
+          },
+          "used_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Used At"
+          },
+          "order_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "customer_coupon_code",
+          "coupon_id",
+          "coupon_code",
+          "promotion_id",
+          "promotion_code",
+          "customer_id",
+          "status",
+          "claimed_at",
+          "used_at",
+          "order_id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "AdminCustomerCoupon"
+      },
+      "AdminCustomerCouponsResponse": {
+        "properties": {
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count"
+          },
+          "customer_coupons": {
+            "items": {
+              "$ref": "#/components/schemas/AdminCustomerCoupon"
+            },
+            "type": "array",
+            "title": "Customer Coupons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count",
+          "customer_coupons"
+        ],
+        "title": "AdminCustomerCouponsResponse"
+      },
       "AdminPriceList": {
         "properties": {
           "id": {
@@ -1229,6 +1899,397 @@
           "products"
         ],
         "title": "AdminProductsResponse"
+      },
+      "AdminPromotion": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "promotion_code": {
+            "type": "string",
+            "title": "Promotion Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "promotion_type": {
+            "type": "string",
+            "title": "Promotion Type"
+          },
+          "discount_type": {
+            "type": "string",
+            "title": "Discount Type"
+          },
+          "discount_value": {
+            "type": "integer",
+            "title": "Discount Value"
+          },
+          "scope_type": {
+            "type": "string",
+            "title": "Scope Type"
+          },
+          "min_order_amount_cents": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Order Amount Cents"
+          },
+          "max_discount_cents": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Discount Cents"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "starts_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starts At"
+          },
+          "ends_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends At"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "priority": {
+            "type": "integer",
+            "title": "Priority"
+          },
+          "stackable": {
+            "type": "boolean",
+            "title": "Stackable"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "promotion_code",
+          "name",
+          "description",
+          "promotion_type",
+          "discount_type",
+          "discount_value",
+          "scope_type",
+          "min_order_amount_cents",
+          "max_discount_cents",
+          "currency",
+          "starts_at",
+          "ends_at",
+          "status",
+          "priority",
+          "stackable",
+          "is_active",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "AdminPromotion"
+      },
+      "AdminPromotionCreateRequest": {
+        "properties": {
+          "promotion_code": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Promotion Code"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "promotion_type": {
+            "type": "string",
+            "const": "store_campaign",
+            "title": "Promotion Type",
+            "default": "store_campaign"
+          },
+          "discount_type": {
+            "type": "string",
+            "const": "percentage",
+            "title": "Discount Type",
+            "default": "percentage"
+          },
+          "discount_value": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Discount Value"
+          },
+          "scope_type": {
+            "type": "string",
+            "const": "all_store",
+            "title": "Scope Type",
+            "default": "all_store"
+          },
+          "min_order_amount_cents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Order Amount Cents"
+          },
+          "max_discount_cents": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Discount Cents"
+          },
+          "currency": {
+            "type": "string",
+            "maxLength": 3,
+            "minLength": 3,
+            "title": "Currency",
+            "default": "USD"
+          },
+          "starts_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starts At"
+          },
+          "ends_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends At"
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Priority",
+            "default": 100
+          },
+          "stackable": {
+            "type": "boolean",
+            "title": "Stackable",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "promotion_code",
+          "name",
+          "discount_value"
+        ],
+        "title": "AdminPromotionCreateRequest"
+      },
+      "AdminPromotionHealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "module": {
+            "type": "string",
+            "title": "Module"
+          },
+          "surface": {
+            "type": "string",
+            "title": "Surface"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "module",
+          "surface"
+        ],
+        "title": "AdminPromotionHealthResponse"
+      },
+      "AdminPromotionTarget": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "promotion_id": {
+            "type": "integer",
+            "title": "Promotion Id"
+          },
+          "promotion_code": {
+            "type": "string",
+            "title": "Promotion Code"
+          },
+          "target_type": {
+            "type": "string",
+            "title": "Target Type"
+          },
+          "target_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Id"
+          },
+          "target_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Code"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "promotion_id",
+          "promotion_code",
+          "target_type",
+          "target_id",
+          "target_code",
+          "created_at"
+        ],
+        "title": "AdminPromotionTarget"
+      },
+      "AdminPromotionTargetsResponse": {
+        "properties": {
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count"
+          },
+          "promotion_targets": {
+            "items": {
+              "$ref": "#/components/schemas/AdminPromotionTarget"
+            },
+            "type": "array",
+            "title": "Promotion Targets"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count",
+          "promotion_targets"
+        ],
+        "title": "AdminPromotionTargetsResponse"
+      },
+      "AdminPromotionsResponse": {
+        "properties": {
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count"
+          },
+          "promotions": {
+            "items": {
+              "$ref": "#/components/schemas/AdminPromotion"
+            },
+            "type": "array",
+            "title": "Promotions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count",
+          "promotions"
+        ],
+        "title": "AdminPromotionsResponse"
       },
       "AdminSku": {
         "properties": {
