@@ -4,6 +4,20 @@ from dataclasses import dataclass
 from os import getenv
 
 
+def _read_csv_env(key: str, fallback: tuple[str, ...]) -> tuple[str, ...]:
+    raw_value = getenv(key)
+
+    if raw_value is None:
+        return fallback
+
+    values = tuple(value.strip() for value in raw_value.split(",") if value.strip())
+
+    if not values:
+        return fallback
+
+    return values
+
+
 @dataclass(frozen=True)
 class D2CSettings:
     environment: str = "local"
@@ -14,6 +28,10 @@ class D2CSettings:
     web_path: str = "/d2c"
     api_port: int = 8025
     database_url: str = "postgresql+psycopg://d2c:d2c@127.0.0.1:5433/d2c"
+    cors_allow_origins: tuple[str, ...] = (
+        "http://127.0.0.1:5177",
+        "http://localhost:5177",
+    )
 
 
 def load_settings() -> D2CSettings:
@@ -29,4 +47,8 @@ def load_settings() -> D2CSettings:
         web_path=getenv("D2C_WEB_PATH", D2CSettings.web_path),
         api_port=int(getenv("D2C_API_PORT", str(D2CSettings.api_port))),
         database_url=getenv("D2C_DATABASE_URL", D2CSettings.database_url),
+        cors_allow_origins=_read_csv_env(
+            "D2C_CORS_ALLOW_ORIGINS",
+            D2CSettings.cors_allow_origins,
+        ),
     )
