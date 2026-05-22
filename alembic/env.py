@@ -8,7 +8,6 @@ from alembic import context
 from app.core.config import load_settings
 from app.core.orm import Base
 from app.domains.analytics.models import analytics as analytics_models  # noqa: F401
-from app.domains.backoffice_pages.models.backoffice_page import BackofficePage  # noqa: F401
 from app.domains.cart.models import cart as cart_models  # noqa: F401
 from app.domains.catalog.models import catalog as catalog_models  # noqa: F401
 from app.domains.customers.models import customer as customer_models  # noqa: F401
