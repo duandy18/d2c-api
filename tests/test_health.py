@@ -11,6 +11,7 @@ def test_health() -> None:
     assert response.status_code == 200
     assert response.json() == {
         "status": "ok",
+        "environment": "local",
         "app_code": "d2c",
         "service": "d2c-api",
         "api_path": "/api/d2c",
