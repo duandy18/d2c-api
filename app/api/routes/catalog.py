@@ -1,9 +1,22 @@
-from fastapi import APIRouter, HTTPException, status
+from typing import Annotated
 
-from app.schemas.catalog import CatalogProduct, CatalogProductsResponse
-from app.services.catalog_service import get_catalog_product, list_catalog_products
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.core.database import get_session
+from app.schemas.catalog import (
+    CatalogCategoriesResponse,
+    CatalogProduct,
+    CatalogProductsResponse,
+)
+from app.services.catalog_service import (
+    get_catalog_product,
+    list_catalog_categories,
+    list_catalog_products,
+)
 
 router = APIRouter(prefix="/catalog", tags=["catalog"])
+SessionDep = Annotated[Session, Depends(get_session)]
 
 
 @router.get("/health")
@@ -11,19 +24,26 @@ def catalog_health() -> dict[str, str]:
     return {
         "status": "ok",
         "module": "catalog",
-        "data_source": "placeholder_static_catalog",
-        "future_source": "pms_projection",
+        "data_source": "d2c_database_catalog",
     }
 
 
+@router.get("/categories", response_model=CatalogCategoriesResponse)
+def catalog_categories(session: SessionDep) -> CatalogCategoriesResponse:
+    return list_catalog_categories(session)
+
+
 @router.get("/products", response_model=CatalogProductsResponse)
-def catalog_products() -> CatalogProductsResponse:
-    return list_catalog_products()
+def catalog_products(session: SessionDep) -> CatalogProductsResponse:
+    return list_catalog_products(session)
 
 
 @router.get("/products/{product_id}", response_model=CatalogProduct)
-def catalog_product_detail(product_id: str) -> CatalogProduct:
-    product = get_catalog_product(product_id)
+def catalog_product_detail(
+    product_id: str,
+    session: SessionDep,
+) -> CatalogProduct:
+    product = get_catalog_product(session, product_id)
 
     if product is None:
         raise HTTPException(
