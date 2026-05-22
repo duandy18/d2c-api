@@ -492,6 +492,206 @@
           }
         }
       }
+    },
+    "/orders/health": {
+      "get": {
+        "tags": [
+          "orders"
+        ],
+        "summary": "Orders Health",
+        "operationId": "orders_health_orders_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Orders Health Orders Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/checkout": {
+      "post": {
+        "tags": [
+          "orders"
+        ],
+        "summary": "Orders Checkout",
+        "operationId": "orders_checkout_orders_checkout_post",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderCheckoutRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{order_no}": {
+      "get": {
+        "tags": [
+          "orders"
+        ],
+        "summary": "Orders Detail",
+        "operationId": "orders_detail_orders__order_no__get",
+        "parameters": [
+          {
+            "name": "order_no",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Order No"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{order_no}/pay/mock": {
+      "post": {
+        "tags": [
+          "orders"
+        ],
+        "summary": "Orders Mock Pay",
+        "operationId": "orders_mock_pay_orders__order_no__pay_mock_post",
+        "parameters": [
+          {
+            "name": "order_no",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Order No"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1202,6 +1402,391 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "OrderCheckoutRequest": {
+        "properties": {
+          "cart_code": {
+            "type": "string",
+            "maxLength": 96,
+            "minLength": 1,
+            "title": "Cart Code"
+          },
+          "recipient_name": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Recipient Name"
+          },
+          "recipient_phone": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Recipient Phone"
+          },
+          "shipping_country": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Shipping Country",
+            "default": "US"
+          },
+          "shipping_province": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Shipping Province"
+          },
+          "shipping_city": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Shipping City"
+          },
+          "shipping_district": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shipping District"
+          },
+          "shipping_address_line1": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Shipping Address Line1"
+          },
+          "shipping_address_line2": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shipping Address Line2"
+          },
+          "shipping_postal_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shipping Postal Code"
+          },
+          "payment_provider": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Payment Provider",
+            "default": "mock"
+          },
+          "payment_method": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Payment Method",
+            "default": "mock"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cart_code",
+          "recipient_name",
+          "recipient_phone",
+          "shipping_province",
+          "shipping_city",
+          "shipping_address_line1"
+        ],
+        "title": "OrderCheckoutRequest"
+      },
+      "OrderLineResponse": {
+        "properties": {
+          "product_code": {
+            "type": "string",
+            "title": "Product Code"
+          },
+          "sku_code": {
+            "type": "string",
+            "title": "Sku Code"
+          },
+          "product_name": {
+            "type": "string",
+            "title": "Product Name"
+          },
+          "sku_name": {
+            "type": "string",
+            "title": "Sku Name"
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity"
+          },
+          "unit_price_cents": {
+            "type": "integer",
+            "title": "Unit Price Cents"
+          },
+          "line_subtotal_cents": {
+            "type": "integer",
+            "title": "Line Subtotal Cents"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_code",
+          "sku_code",
+          "product_name",
+          "sku_name",
+          "quantity",
+          "unit_price_cents",
+          "line_subtotal_cents"
+        ],
+        "title": "OrderLineResponse"
+      },
+      "OrderResponse": {
+        "properties": {
+          "order_no": {
+            "type": "string",
+            "title": "Order No"
+          },
+          "cart_code": {
+            "type": "string",
+            "title": "Cart Code"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "item_count": {
+            "type": "integer",
+            "title": "Item Count"
+          },
+          "subtotal_cents": {
+            "type": "integer",
+            "title": "Subtotal Cents"
+          },
+          "recipient_name": {
+            "type": "string",
+            "title": "Recipient Name"
+          },
+          "recipient_phone": {
+            "type": "string",
+            "title": "Recipient Phone"
+          },
+          "shipping_country": {
+            "type": "string",
+            "title": "Shipping Country"
+          },
+          "shipping_province": {
+            "type": "string",
+            "title": "Shipping Province"
+          },
+          "shipping_city": {
+            "type": "string",
+            "title": "Shipping City"
+          },
+          "shipping_district": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shipping District"
+          },
+          "shipping_address_line1": {
+            "type": "string",
+            "title": "Shipping Address Line1"
+          },
+          "shipping_address_line2": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shipping Address Line2"
+          },
+          "shipping_postal_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shipping Postal Code"
+          },
+          "paid_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paid At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/OrderLineResponse"
+            },
+            "type": "array",
+            "title": "Lines"
+          },
+          "payment": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PaymentResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_no",
+          "cart_code",
+          "status",
+          "currency",
+          "item_count",
+          "subtotal_cents",
+          "recipient_name",
+          "recipient_phone",
+          "shipping_country",
+          "shipping_province",
+          "shipping_city",
+          "shipping_district",
+          "shipping_address_line1",
+          "shipping_address_line2",
+          "shipping_postal_code",
+          "paid_at",
+          "created_at",
+          "lines",
+          "payment"
+        ],
+        "title": "OrderResponse"
+      },
+      "PaymentResponse": {
+        "properties": {
+          "payment_no": {
+            "type": "string",
+            "title": "Payment No"
+          },
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "payment_method": {
+            "type": "string",
+            "title": "Payment Method"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "amount_cents": {
+            "type": "integer",
+            "title": "Amount Cents"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "provider_payment_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Payment Id"
+          },
+          "provider_trade_no": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Trade No"
+          },
+          "payment_reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payment Reference"
+          },
+          "paid_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paid At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "payment_no",
+          "provider",
+          "payment_method",
+          "status",
+          "amount_cents",
+          "currency",
+          "provider_payment_id",
+          "provider_trade_no",
+          "payment_reference",
+          "paid_at",
+          "created_at"
+        ],
+        "title": "PaymentResponse"
       },
       "ValidationError": {
         "properties": {
