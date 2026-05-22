@@ -27,8 +27,9 @@ from app.domains.orders.repos.order_repo import (
     list_cart_line_rows_for_checkout,
     list_order_lines,
 )
-from app.domains.promotions.models.promotion import Promotion
+from app.domains.promotions.models.promotion import Coupon, Promotion
 from app.domains.promotions.repos.checkout_promotion_repo import (
+    get_active_public_coupon_promotion_by_code,
     get_best_active_all_store_percentage_promotion,
 )
 from app.security.passwords import hash_session_token
@@ -47,6 +48,10 @@ class CheckoutCartAlreadyConvertedError(Exception):
 
 
 class CheckoutCartEmptyError(Exception):
+    pass
+
+
+class CheckoutCouponNotAvailableError(Exception):
     pass
 
 
@@ -91,6 +96,14 @@ def _sync_cart_summary(
     cart.line_count = len(rows)
     cart.item_count = sum(cart_line.quantity for cart_line, _, _ in rows)
     cart.subtotal_cents = sum(cart_line.line_subtotal_cents for cart_line, _, _ in rows)
+
+
+def _normalize_coupon_code(coupon_code: str | None) -> str | None:
+    if coupon_code is None:
+        return None
+
+    normalized = coupon_code.strip()
+    return normalized or None
 
 
 def _calculate_percentage_discount_cents(
@@ -153,6 +166,7 @@ def build_order_response(
         discount_cents=order.discount_cents,
         payable_cents=order.payable_cents,
         promotion_code=order.promotion_code,
+        coupon_code=order.coupon_code,
         recipient_name=order.recipient_name,
         recipient_phone=order.recipient_phone,
         shipping_country=order.shipping_country,
@@ -190,12 +204,28 @@ def checkout_order(
         raise CheckoutCartEmptyError("checkout_cart_empty")
 
     now = datetime.now(UTC)
-    promotion = get_best_active_all_store_percentage_promotion(
-        session,
-        currency=cart.currency,
-        subtotal_cents=cart.subtotal_cents,
-        now=now,
-    )
+    coupon: Coupon | None = None
+    coupon_code = _normalize_coupon_code(payload.coupon_code)
+
+    if coupon_code is not None:
+        coupon_row = get_active_public_coupon_promotion_by_code(
+            session,
+            coupon_code=coupon_code,
+            currency=cart.currency,
+            subtotal_cents=cart.subtotal_cents,
+            now=now,
+        )
+        if coupon_row is None:
+            raise CheckoutCouponNotAvailableError("checkout_coupon_not_available")
+        coupon, promotion = coupon_row
+    else:
+        promotion = get_best_active_all_store_percentage_promotion(
+            session,
+            currency=cart.currency,
+            subtotal_cents=cart.subtotal_cents,
+            now=now,
+        )
+
     discount_cents = _calculate_percentage_discount_cents(
         cart.subtotal_cents,
         promotion,
@@ -219,6 +249,8 @@ def checkout_order(
             payable_cents=payable_cents,
             promotion_id=promotion.id if promotion is not None else None,
             promotion_code=promotion.promotion_code if promotion is not None else None,
+            coupon_id=coupon.id if coupon is not None else None,
+            coupon_code=coupon.coupon_code if coupon is not None else None,
             recipient_name=payload.recipient_name,
             recipient_phone=payload.recipient_phone,
             shipping_country=payload.shipping_country,

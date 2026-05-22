@@ -14,6 +14,7 @@ from app.domains.orders.services.storefront_order_service import (
     CheckoutCartAlreadyConvertedError,
     CheckoutCartEmptyError,
     CheckoutCartNotFoundError,
+    CheckoutCouponNotAvailableError,
     OrderAuthError,
     OrderNotFoundError,
     PaymentInvalidStateError,
@@ -76,7 +77,11 @@ def orders_checkout(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(exc),
         ) from exc
-    except (CheckoutCartAlreadyConvertedError, CheckoutCartEmptyError) as exc:
+    except (
+        CheckoutCartAlreadyConvertedError,
+        CheckoutCartEmptyError,
+        CheckoutCouponNotAvailableError,
+    ) as exc:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=str(exc),
