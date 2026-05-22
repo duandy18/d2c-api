@@ -1,10 +1,38 @@
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine, text
 
+from app.core.config import load_settings
 from app.main import app
 
 BACKOFFICE_HEADERS = {"X-Backoffice-Client": "d2c-backoffice"}
+
+
+def reset_promotions_for_checkout_flow() -> None:
+    engine = create_engine(load_settings().database_url)
+    try:
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    """
+                    UPDATE d2c_coupons
+                    SET status = 'draft',
+                        is_active = FALSE
+                    """
+                )
+            )
+            connection.execute(
+                text(
+                    """
+                    UPDATE d2c_promotions
+                    SET status = 'draft',
+                        is_active = FALSE
+                    """
+                )
+            )
+    finally:
+        engine.dispose()
 
 
 def unique_code(prefix: str) -> str:
@@ -103,6 +131,7 @@ def create_backoffice_promotion(client: TestClient) -> str:
 
 
 def test_backoffice_created_active_promotion_is_applied_then_deactivated() -> None:
+    reset_promotions_for_checkout_flow()
     client = TestClient(app)
     promotion_code = create_backoffice_promotion(client)
 

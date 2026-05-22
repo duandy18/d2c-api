@@ -902,6 +902,153 @@
         }
       }
     },
+    "/backoffice/pages/health": {
+      "get": {
+        "tags": [
+          "backoffice-pages"
+        ],
+        "summary": "Backoffice Pages Health",
+        "operationId": "backoffice_pages_health_backoffice_pages_health_get",
+        "parameters": [
+          {
+            "name": "X-Backoffice-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Backoffice-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackofficePageHealthResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/backoffice/pages/registry": {
+      "get": {
+        "tags": [
+          "backoffice-pages"
+        ],
+        "summary": "Backoffice Pages Registry",
+        "operationId": "backoffice_pages_registry_backoffice_pages_registry_get",
+        "parameters": [
+          {
+            "name": "X-Backoffice-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Backoffice-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackofficePageRegistryResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/backoffice/pages/navigation": {
+      "get": {
+        "tags": [
+          "backoffice-pages"
+        ],
+        "summary": "Backoffice Pages Navigation",
+        "operationId": "backoffice_pages_navigation_backoffice_pages_navigation_get",
+        "parameters": [
+          {
+            "name": "X-Backoffice-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Backoffice-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackofficePageNavigationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/analytics/health": {
       "get": {
         "tags": [
@@ -1942,6 +2089,299 @@
           "customer_coupons"
         ],
         "title": "BackofficeCustomerCouponsResponse"
+      },
+      "BackofficePageContract": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "page_code": {
+            "type": "string",
+            "title": "Page Code"
+          },
+          "parent_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Code"
+          },
+          "level": {
+            "type": "integer",
+            "title": "Level"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "route_path": {
+            "type": "string",
+            "title": "Route Path"
+          },
+          "component_key": {
+            "type": "string",
+            "title": "Component Key"
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Icon"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
+          },
+          "is_enabled": {
+            "type": "boolean",
+            "title": "Is Enabled"
+          },
+          "is_visible": {
+            "type": "boolean",
+            "title": "Is Visible"
+          },
+          "implementation_status": {
+            "type": "string",
+            "enum": [
+              "ready",
+              "planned",
+              "hidden"
+            ],
+            "title": "Implementation Status"
+          },
+          "data_status": {
+            "type": "string",
+            "enum": [
+              "connected",
+              "placeholder",
+              "disabled"
+            ],
+            "title": "Data Status"
+          },
+          "required_permission": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Required Permission"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "page_code",
+          "parent_code",
+          "level",
+          "title",
+          "route_path",
+          "component_key",
+          "icon",
+          "sort_order",
+          "is_enabled",
+          "is_visible",
+          "implementation_status",
+          "data_status",
+          "required_permission",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "BackofficePageContract"
+      },
+      "BackofficePageHealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "module": {
+            "type": "string",
+            "title": "Module"
+          },
+          "surface": {
+            "type": "string",
+            "title": "Surface"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "module",
+          "surface"
+        ],
+        "title": "BackofficePageHealthResponse"
+      },
+      "BackofficePageNavigationResponse": {
+        "properties": {
+          "surface": {
+            "type": "string",
+            "title": "Surface"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "pages": {
+            "items": {
+              "$ref": "#/components/schemas/BackofficePageNode"
+            },
+            "type": "array",
+            "title": "Pages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "surface",
+          "version",
+          "pages"
+        ],
+        "title": "BackofficePageNavigationResponse"
+      },
+      "BackofficePageNode": {
+        "properties": {
+          "page_code": {
+            "type": "string",
+            "title": "Page Code"
+          },
+          "parent_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Code"
+          },
+          "level": {
+            "type": "integer",
+            "title": "Level"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "route_path": {
+            "type": "string",
+            "title": "Route Path"
+          },
+          "component_key": {
+            "type": "string",
+            "title": "Component Key"
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Icon"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
+          },
+          "implementation_status": {
+            "type": "string",
+            "enum": [
+              "ready",
+              "planned",
+              "hidden"
+            ],
+            "title": "Implementation Status"
+          },
+          "data_status": {
+            "type": "string",
+            "enum": [
+              "connected",
+              "placeholder",
+              "disabled"
+            ],
+            "title": "Data Status"
+          },
+          "required_permission": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Required Permission"
+          },
+          "children": {
+            "items": {
+              "$ref": "#/components/schemas/BackofficePageNode"
+            },
+            "type": "array",
+            "title": "Children"
+          }
+        },
+        "type": "object",
+        "required": [
+          "page_code",
+          "parent_code",
+          "level",
+          "title",
+          "route_path",
+          "component_key",
+          "icon",
+          "sort_order",
+          "implementation_status",
+          "data_status",
+          "required_permission",
+          "children"
+        ],
+        "title": "BackofficePageNode"
+      },
+      "BackofficePageRegistryResponse": {
+        "properties": {
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          },
+          "pages": {
+            "items": {
+              "$ref": "#/components/schemas/BackofficePageContract"
+            },
+            "type": "array",
+            "title": "Pages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count",
+          "pages"
+        ],
+        "title": "BackofficePageRegistryResponse"
       },
       "BackofficePriceList": {
         "properties": {
