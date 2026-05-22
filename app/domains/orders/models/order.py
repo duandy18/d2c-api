@@ -61,6 +61,8 @@ class D2COrder(Base):
         Index("ix_d2c_orders_created_at", "created_at"),
         Index("ix_d2c_orders_promotion_id", "promotion_id"),
         Index("ix_d2c_orders_promotion_code", "promotion_code"),
+        Index("ix_d2c_orders_coupon_id", "coupon_id"),
+        Index("ix_d2c_orders_coupon_code", "coupon_code"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -93,6 +95,12 @@ class D2COrder(Base):
         nullable=True,
     )
     promotion_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    coupon_id: Mapped[int | None] = mapped_column(
+        BigInteger,
+        ForeignKey("d2c_coupons.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    coupon_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
     recipient_name: Mapped[str] = mapped_column(String(128), nullable=False)
     recipient_phone: Mapped[str] = mapped_column(String(32), nullable=False)

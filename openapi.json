@@ -3770,6 +3770,18 @@
             "minLength": 1,
             "title": "Payment Method",
             "default": "mock"
+          },
+          "coupon_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coupon Code"
           }
         },
         "type": "object",
@@ -3870,6 +3882,17 @@
               }
             ],
             "title": "Promotion Code"
+          },
+          "coupon_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coupon Code"
           },
           "recipient_name": {
             "type": "string",
@@ -3974,6 +3997,7 @@
           "discount_cents",
           "payable_cents",
           "promotion_code",
+          "coupon_code",
           "recipient_name",
           "recipient_phone",
           "shipping_country",

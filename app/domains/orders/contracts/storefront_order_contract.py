@@ -18,6 +18,7 @@ class OrderCheckoutRequest(BaseModel):
     shipping_postal_code: str | None = Field(default=None, max_length=32)
     payment_provider: str = Field(default="mock", min_length=1, max_length=32)
     payment_method: str = Field(default="mock", min_length=1, max_length=64)
+    coupon_code: str | None = Field(default=None, max_length=64)
 
 
 class OrderLineResponse(BaseModel):
@@ -54,6 +55,7 @@ class OrderResponse(BaseModel):
     discount_cents: int
     payable_cents: int
     promotion_code: str | None
+    coupon_code: str | None
     recipient_name: str
     recipient_phone: str
     shipping_country: str
