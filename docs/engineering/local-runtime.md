@@ -34,9 +34,37 @@ make check
 
 ## 四、本地启动 API
 
-在 d2c-api 仓库执行：
+前台开发启动：
 
 make uvicorn
+
+后台启动：
+
+make uvicorn-up
+
+停止后台进程：
+
+make uvicorn-down
+
+重启后台进程：
+
+make uvicorn-restart
+
+查看当前状态：
+
+make uvicorn-status
+
+查看日志：
+
+make uvicorn-logs
+
+同时保留短别名：
+
+make up
+make down
+make restart
+make status
+make logs
 
 默认监听：
 
@@ -46,15 +74,14 @@ http://127.0.0.1:8025
 
 http://127.0.0.1:8025/health
 
-## 五、后台启动示例
+## 五、后台运行约定
 
-如需后台运行，可执行：
+后台运行固定使用：
 
-nohup .venv/bin/python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8025 --reload >/tmp/d2c_api_8025.log 2>&1 &
+PID 文件：/tmp/d2c_api_8025.pid
+日志文件：/tmp/d2c_api_8025.log
 
-建议记录 PID：
-
-echo $! >/tmp/d2c_api_8025.pid
+不要使用时间戳日志名，避免 /tmp 堆积。
 
 ## 六、日志文件建议
 
