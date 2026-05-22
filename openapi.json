@@ -6,6 +6,300 @@
     "version": "0.1.0"
   },
   "paths": {
+    "/admin/catalog/health": {
+      "get": {
+        "tags": [
+          "admin-catalog"
+        ],
+        "summary": "Admin Catalog Health",
+        "operationId": "admin_catalog_health_admin_catalog_health_get",
+        "parameters": [
+          {
+            "name": "X-Admin-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminCatalogHealthResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/catalog/units": {
+      "get": {
+        "tags": [
+          "admin-catalog"
+        ],
+        "summary": "Admin Catalog Units",
+        "operationId": "admin_catalog_units_admin_catalog_units_get",
+        "parameters": [
+          {
+            "name": "X-Admin-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUnitsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/catalog/price-lists": {
+      "get": {
+        "tags": [
+          "admin-catalog"
+        ],
+        "summary": "Admin Catalog Price Lists",
+        "operationId": "admin_catalog_price_lists_admin_catalog_price_lists_get",
+        "parameters": [
+          {
+            "name": "X-Admin-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminPriceListsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/catalog/products": {
+      "get": {
+        "tags": [
+          "admin-catalog"
+        ],
+        "summary": "Admin Catalog Products",
+        "operationId": "admin_catalog_products_admin_catalog_products_get",
+        "parameters": [
+          {
+            "name": "X-Admin-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminProductsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/catalog/skus": {
+      "get": {
+        "tags": [
+          "admin-catalog"
+        ],
+        "summary": "Admin Catalog Skus",
+        "operationId": "admin_catalog_skus_admin_catalog_skus_get",
+        "parameters": [
+          {
+            "name": "X-Admin-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSkusResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/catalog/sku-prices": {
+      "get": {
+        "tags": [
+          "admin-catalog"
+        ],
+        "summary": "Admin Catalog Sku Prices",
+        "operationId": "admin_catalog_sku_prices_admin_catalog_sku_prices_get",
+        "parameters": [
+          {
+            "name": "X-Admin-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Admin-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSkuPricesResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/analytics/health": {
       "get": {
         "tags": [
@@ -696,6 +990,664 @@
   },
   "components": {
     "schemas": {
+      "AdminCatalogHealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "module": {
+            "type": "string",
+            "title": "Module"
+          },
+          "surface": {
+            "type": "string",
+            "title": "Surface"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "module",
+          "surface"
+        ],
+        "title": "AdminCatalogHealthResponse"
+      },
+      "AdminPriceList": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "price_list_code": {
+            "type": "string",
+            "title": "Price List Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "region_code": {
+            "type": "string",
+            "title": "Region Code"
+          },
+          "channel": {
+            "type": "string",
+            "title": "Channel"
+          },
+          "customer_segment": {
+            "type": "string",
+            "title": "Customer Segment"
+          },
+          "priority": {
+            "type": "integer",
+            "title": "Priority"
+          },
+          "is_default": {
+            "type": "boolean",
+            "title": "Is Default"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "effective_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective From"
+          },
+          "effective_to": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective To"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "price_list_code",
+          "name",
+          "currency",
+          "region_code",
+          "channel",
+          "customer_segment",
+          "priority",
+          "is_default",
+          "is_active",
+          "effective_from",
+          "effective_to",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "AdminPriceList"
+      },
+      "AdminPriceListsResponse": {
+        "properties": {
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count"
+          },
+          "price_lists": {
+            "items": {
+              "$ref": "#/components/schemas/AdminPriceList"
+            },
+            "type": "array",
+            "title": "Price Lists"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count",
+          "price_lists"
+        ],
+        "title": "AdminPriceListsResponse"
+      },
+      "AdminProduct": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "product_code": {
+            "type": "string",
+            "title": "Product Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subtitle"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "category_id": {
+            "type": "integer",
+            "title": "Category Id"
+          },
+          "category_code": {
+            "type": "string",
+            "title": "Category Code"
+          },
+          "category_name": {
+            "type": "string",
+            "title": "Category Name"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "product_code",
+          "name",
+          "subtitle",
+          "description",
+          "category_id",
+          "category_code",
+          "category_name",
+          "status",
+          "is_active",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "AdminProduct"
+      },
+      "AdminProductsResponse": {
+        "properties": {
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count"
+          },
+          "products": {
+            "items": {
+              "$ref": "#/components/schemas/AdminProduct"
+            },
+            "type": "array",
+            "title": "Products"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count",
+          "products"
+        ],
+        "title": "AdminProductsResponse"
+      },
+      "AdminSku": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "product_code": {
+            "type": "string",
+            "title": "Product Code"
+          },
+          "sku_code": {
+            "type": "string",
+            "title": "Sku Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "legacy_price_cents": {
+            "type": "integer",
+            "title": "Legacy Price Cents"
+          },
+          "legacy_currency": {
+            "type": "string",
+            "title": "Legacy Currency"
+          },
+          "storefront_price_cents": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storefront Price Cents"
+          },
+          "storefront_currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Storefront Currency"
+          },
+          "stock_status": {
+            "type": "string",
+            "title": "Stock Status"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "sales_unit_id": {
+            "type": "integer",
+            "title": "Sales Unit Id"
+          },
+          "sales_unit_code": {
+            "type": "string",
+            "title": "Sales Unit Code"
+          },
+          "sales_unit_name": {
+            "type": "string",
+            "title": "Sales Unit Name"
+          },
+          "package_quantity": {
+            "type": "string",
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Package Quantity"
+          },
+          "package_unit_text": {
+            "type": "string",
+            "title": "Package Unit Text"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "product_id",
+          "product_code",
+          "sku_code",
+          "name",
+          "legacy_price_cents",
+          "legacy_currency",
+          "storefront_price_cents",
+          "storefront_currency",
+          "stock_status",
+          "image_url",
+          "sales_unit_id",
+          "sales_unit_code",
+          "sales_unit_name",
+          "package_quantity",
+          "package_unit_text",
+          "is_active",
+          "sort_order",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "AdminSku"
+      },
+      "AdminSkuPrice": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "price_list_id": {
+            "type": "integer",
+            "title": "Price List Id"
+          },
+          "price_list_code": {
+            "type": "string",
+            "title": "Price List Code"
+          },
+          "price_list_name": {
+            "type": "string",
+            "title": "Price List Name"
+          },
+          "channel": {
+            "type": "string",
+            "title": "Channel"
+          },
+          "customer_segment": {
+            "type": "string",
+            "title": "Customer Segment"
+          },
+          "sku_id": {
+            "type": "integer",
+            "title": "Sku Id"
+          },
+          "sku_code": {
+            "type": "string",
+            "title": "Sku Code"
+          },
+          "product_id": {
+            "type": "integer",
+            "title": "Product Id"
+          },
+          "product_code": {
+            "type": "string",
+            "title": "Product Code"
+          },
+          "price_cents": {
+            "type": "integer",
+            "title": "Price Cents"
+          },
+          "compare_at_price_cents": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compare At Price Cents"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "effective_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective From"
+          },
+          "effective_to": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective To"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "price_list_id",
+          "price_list_code",
+          "price_list_name",
+          "channel",
+          "customer_segment",
+          "sku_id",
+          "sku_code",
+          "product_id",
+          "product_code",
+          "price_cents",
+          "compare_at_price_cents",
+          "currency",
+          "effective_from",
+          "effective_to",
+          "is_active",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "AdminSkuPrice"
+      },
+      "AdminSkuPricesResponse": {
+        "properties": {
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count"
+          },
+          "sku_prices": {
+            "items": {
+              "$ref": "#/components/schemas/AdminSkuPrice"
+            },
+            "type": "array",
+            "title": "Sku Prices"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count",
+          "sku_prices"
+        ],
+        "title": "AdminSkuPricesResponse"
+      },
+      "AdminSkusResponse": {
+        "properties": {
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count"
+          },
+          "skus": {
+            "items": {
+              "$ref": "#/components/schemas/AdminSku"
+            },
+            "type": "array",
+            "title": "Skus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count",
+          "skus"
+        ],
+        "title": "AdminSkusResponse"
+      },
+      "AdminUnit": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "unit_code": {
+            "type": "string",
+            "title": "Unit Code"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "unit_type": {
+            "type": "string",
+            "title": "Unit Type"
+          },
+          "symbol": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Symbol"
+          },
+          "precision": {
+            "type": "integer",
+            "title": "Precision"
+          },
+          "is_base_unit": {
+            "type": "boolean",
+            "title": "Is Base Unit"
+          },
+          "base_unit_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Unit Code"
+          },
+          "conversion_factor": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversion Factor"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "unit_code",
+          "name",
+          "unit_type",
+          "symbol",
+          "precision",
+          "is_base_unit",
+          "base_unit_code",
+          "conversion_factor",
+          "is_active",
+          "sort_order",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "AdminUnit"
+      },
+      "AdminUnitsResponse": {
+        "properties": {
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count"
+          },
+          "units": {
+            "items": {
+              "$ref": "#/components/schemas/AdminUnit"
+            },
+            "type": "array",
+            "title": "Units"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count",
+          "units"
+        ],
+        "title": "AdminUnitsResponse"
+      },
       "BehaviorEventRequest": {
         "properties": {
           "anonymous_id": {
