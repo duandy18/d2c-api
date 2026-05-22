@@ -7,6 +7,7 @@ from sqlalchemy import engine_from_config, pool
 from alembic import context
 from app.core.config import load_settings
 from app.models import analytics as analytics_models  # noqa: F401
+from app.models import cart as cart_models  # noqa: F401
 from app.models import catalog as catalog_models  # noqa: F401
 from app.models import customer as customer_models  # noqa: F401
 from app.models.base import Base
