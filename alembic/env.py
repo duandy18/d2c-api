@@ -11,6 +11,7 @@ from app.models import cart as cart_models  # noqa: F401
 from app.models import catalog as catalog_models  # noqa: F401
 from app.models import customer as customer_models  # noqa: F401
 from app.models import order as order_models  # noqa: F401
+from app.models import promotion as promotion_models  # noqa: F401
 from app.models.base import Base
 
 config = context.config
