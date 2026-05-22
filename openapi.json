@@ -6,16 +6,16 @@
     "version": "0.1.0"
   },
   "paths": {
-    "/admin/catalog/health": {
+    "/backoffice/catalog/health": {
       "get": {
         "tags": [
-          "admin-catalog"
+          "backoffice-catalog"
         ],
-        "summary": "Admin Catalog Health",
-        "operationId": "admin_catalog_health_admin_catalog_health_get",
+        "summary": "Backoffice Catalog Health",
+        "operationId": "backoffice_catalog_health_backoffice_catalog_health_get",
         "parameters": [
           {
-            "name": "X-Admin-Client",
+            "name": "X-Backoffice-Client",
             "in": "header",
             "required": false,
             "schema": {
@@ -27,7 +27,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Admin-Client"
+              "title": "X-Backoffice-Client"
             }
           }
         ],
@@ -37,7 +37,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminCatalogHealthResponse"
+                  "$ref": "#/components/schemas/BackofficeCatalogHealthResponse"
                 }
               }
             }
@@ -55,16 +55,16 @@
         }
       }
     },
-    "/admin/catalog/units": {
+    "/backoffice/catalog/units": {
       "get": {
         "tags": [
-          "admin-catalog"
+          "backoffice-catalog"
         ],
-        "summary": "Admin Catalog Units",
-        "operationId": "admin_catalog_units_admin_catalog_units_get",
+        "summary": "Backoffice Catalog Units",
+        "operationId": "backoffice_catalog_units_backoffice_catalog_units_get",
         "parameters": [
           {
-            "name": "X-Admin-Client",
+            "name": "X-Backoffice-Client",
             "in": "header",
             "required": false,
             "schema": {
@@ -76,7 +76,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Admin-Client"
+              "title": "X-Backoffice-Client"
             }
           }
         ],
@@ -86,7 +86,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminUnitsResponse"
+                  "$ref": "#/components/schemas/BackofficeUnitsResponse"
                 }
               }
             }
@@ -104,16 +104,16 @@
         }
       }
     },
-    "/admin/catalog/price-lists": {
+    "/backoffice/catalog/price-lists": {
       "get": {
         "tags": [
-          "admin-catalog"
+          "backoffice-catalog"
         ],
-        "summary": "Admin Catalog Price Lists",
-        "operationId": "admin_catalog_price_lists_admin_catalog_price_lists_get",
+        "summary": "Backoffice Catalog Price Lists",
+        "operationId": "backoffice_catalog_price_lists_backoffice_catalog_price_lists_get",
         "parameters": [
           {
-            "name": "X-Admin-Client",
+            "name": "X-Backoffice-Client",
             "in": "header",
             "required": false,
             "schema": {
@@ -125,7 +125,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Admin-Client"
+              "title": "X-Backoffice-Client"
             }
           }
         ],
@@ -135,7 +135,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminPriceListsResponse"
+                  "$ref": "#/components/schemas/BackofficePriceListsResponse"
                 }
               }
             }
@@ -153,16 +153,16 @@
         }
       }
     },
-    "/admin/catalog/products": {
+    "/backoffice/catalog/products": {
       "get": {
         "tags": [
-          "admin-catalog"
+          "backoffice-catalog"
         ],
-        "summary": "Admin Catalog Products",
-        "operationId": "admin_catalog_products_admin_catalog_products_get",
+        "summary": "Backoffice Catalog Products",
+        "operationId": "backoffice_catalog_products_backoffice_catalog_products_get",
         "parameters": [
           {
-            "name": "X-Admin-Client",
+            "name": "X-Backoffice-Client",
             "in": "header",
             "required": false,
             "schema": {
@@ -174,7 +174,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Admin-Client"
+              "title": "X-Backoffice-Client"
             }
           }
         ],
@@ -184,7 +184,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminProductsResponse"
+                  "$ref": "#/components/schemas/BackofficeProductsResponse"
                 }
               }
             }
@@ -202,16 +202,16 @@
         }
       }
     },
-    "/admin/catalog/skus": {
+    "/backoffice/catalog/skus": {
       "get": {
         "tags": [
-          "admin-catalog"
+          "backoffice-catalog"
         ],
-        "summary": "Admin Catalog Skus",
-        "operationId": "admin_catalog_skus_admin_catalog_skus_get",
+        "summary": "Backoffice Catalog Skus",
+        "operationId": "backoffice_catalog_skus_backoffice_catalog_skus_get",
         "parameters": [
           {
-            "name": "X-Admin-Client",
+            "name": "X-Backoffice-Client",
             "in": "header",
             "required": false,
             "schema": {
@@ -223,7 +223,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Admin-Client"
+              "title": "X-Backoffice-Client"
             }
           }
         ],
@@ -233,7 +233,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminSkusResponse"
+                  "$ref": "#/components/schemas/BackofficeSkusResponse"
                 }
               }
             }
@@ -251,16 +251,16 @@
         }
       }
     },
-    "/admin/catalog/sku-prices": {
+    "/backoffice/catalog/sku-prices": {
       "get": {
         "tags": [
-          "admin-catalog"
+          "backoffice-catalog"
         ],
-        "summary": "Admin Catalog Sku Prices",
-        "operationId": "admin_catalog_sku_prices_admin_catalog_sku_prices_get",
+        "summary": "Backoffice Catalog Sku Prices",
+        "operationId": "backoffice_catalog_sku_prices_backoffice_catalog_sku_prices_get",
         "parameters": [
           {
-            "name": "X-Admin-Client",
+            "name": "X-Backoffice-Client",
             "in": "header",
             "required": false,
             "schema": {
@@ -272,7 +272,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Admin-Client"
+              "title": "X-Backoffice-Client"
             }
           }
         ],
@@ -282,7 +282,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminSkuPricesResponse"
+                  "$ref": "#/components/schemas/BackofficeSkuPricesResponse"
                 }
               }
             }
@@ -300,16 +300,16 @@
         }
       }
     },
-    "/admin/promotions/health": {
+    "/backoffice/promotions/health": {
       "get": {
         "tags": [
-          "admin-promotions"
+          "backoffice-promotions"
         ],
-        "summary": "Admin Promotions Health",
-        "operationId": "admin_promotions_health_admin_promotions_health_get",
+        "summary": "Backoffice Promotions Health",
+        "operationId": "backoffice_promotions_health_backoffice_promotions_health_get",
         "parameters": [
           {
-            "name": "X-Admin-Client",
+            "name": "X-Backoffice-Client",
             "in": "header",
             "required": false,
             "schema": {
@@ -321,7 +321,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Admin-Client"
+              "title": "X-Backoffice-Client"
             }
           }
         ],
@@ -331,7 +331,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminPromotionHealthResponse"
+                  "$ref": "#/components/schemas/BackofficePromotionHealthResponse"
                 }
               }
             }
@@ -349,16 +349,16 @@
         }
       }
     },
-    "/admin/promotions": {
+    "/backoffice/promotions": {
       "get": {
         "tags": [
-          "admin-promotions"
+          "backoffice-promotions"
         ],
-        "summary": "Admin Promotions List",
-        "operationId": "admin_promotions_list_admin_promotions_get",
+        "summary": "Backoffice Promotions List",
+        "operationId": "backoffice_promotions_list_backoffice_promotions_get",
         "parameters": [
           {
-            "name": "X-Admin-Client",
+            "name": "X-Backoffice-Client",
             "in": "header",
             "required": false,
             "schema": {
@@ -370,7 +370,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Admin-Client"
+              "title": "X-Backoffice-Client"
             }
           }
         ],
@@ -380,7 +380,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminPromotionsResponse"
+                  "$ref": "#/components/schemas/BackofficePromotionsResponse"
                 }
               }
             }
@@ -399,13 +399,13 @@
       },
       "post": {
         "tags": [
-          "admin-promotions"
+          "backoffice-promotions"
         ],
-        "summary": "Admin Promotions Create",
-        "operationId": "admin_promotions_create_admin_promotions_post",
+        "summary": "Backoffice Promotions Create",
+        "operationId": "backoffice_promotions_create_backoffice_promotions_post",
         "parameters": [
           {
-            "name": "X-Admin-Client",
+            "name": "X-Backoffice-Client",
             "in": "header",
             "required": false,
             "schema": {
@@ -417,7 +417,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Admin-Client"
+              "title": "X-Backoffice-Client"
             }
           }
         ],
@@ -426,7 +426,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AdminPromotionCreateRequest"
+                "$ref": "#/components/schemas/BackofficePromotionCreateRequest"
               }
             }
           }
@@ -437,7 +437,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminPromotion"
+                  "$ref": "#/components/schemas/BackofficePromotion"
                 }
               }
             }
@@ -455,13 +455,13 @@
         }
       }
     },
-    "/admin/promotions/{promotion_code}/activate": {
+    "/backoffice/promotions/{promotion_code}/activate": {
       "post": {
         "tags": [
-          "admin-promotions"
+          "backoffice-promotions"
         ],
-        "summary": "Admin Promotions Activate",
-        "operationId": "admin_promotions_activate_admin_promotions__promotion_code__activate_post",
+        "summary": "Backoffice Promotions Activate",
+        "operationId": "backoffice_promotions_activate_backoffice_promotions__promotion_code__activate_post",
         "parameters": [
           {
             "name": "promotion_code",
@@ -473,7 +473,7 @@
             }
           },
           {
-            "name": "X-Admin-Client",
+            "name": "X-Backoffice-Client",
             "in": "header",
             "required": false,
             "schema": {
@@ -485,7 +485,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Admin-Client"
+              "title": "X-Backoffice-Client"
             }
           }
         ],
@@ -495,7 +495,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminPromotion"
+                  "$ref": "#/components/schemas/BackofficePromotion"
                 }
               }
             }
@@ -513,13 +513,13 @@
         }
       }
     },
-    "/admin/promotions/{promotion_code}/deactivate": {
+    "/backoffice/promotions/{promotion_code}/deactivate": {
       "post": {
         "tags": [
-          "admin-promotions"
+          "backoffice-promotions"
         ],
-        "summary": "Admin Promotions Deactivate",
-        "operationId": "admin_promotions_deactivate_admin_promotions__promotion_code__deactivate_post",
+        "summary": "Backoffice Promotions Deactivate",
+        "operationId": "backoffice_promotions_deactivate_backoffice_promotions__promotion_code__deactivate_post",
         "parameters": [
           {
             "name": "promotion_code",
@@ -531,7 +531,7 @@
             }
           },
           {
-            "name": "X-Admin-Client",
+            "name": "X-Backoffice-Client",
             "in": "header",
             "required": false,
             "schema": {
@@ -543,7 +543,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Admin-Client"
+              "title": "X-Backoffice-Client"
             }
           }
         ],
@@ -553,7 +553,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminPromotion"
+                  "$ref": "#/components/schemas/BackofficePromotion"
                 }
               }
             }
@@ -571,16 +571,16 @@
         }
       }
     },
-    "/admin/promotions/targets": {
+    "/backoffice/promotions/targets": {
       "get": {
         "tags": [
-          "admin-promotions"
+          "backoffice-promotions"
         ],
-        "summary": "Admin Promotion Targets List",
-        "operationId": "admin_promotion_targets_list_admin_promotions_targets_get",
+        "summary": "Backoffice Promotion Targets List",
+        "operationId": "backoffice_promotion_targets_list_backoffice_promotions_targets_get",
         "parameters": [
           {
-            "name": "X-Admin-Client",
+            "name": "X-Backoffice-Client",
             "in": "header",
             "required": false,
             "schema": {
@@ -592,7 +592,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Admin-Client"
+              "title": "X-Backoffice-Client"
             }
           }
         ],
@@ -602,7 +602,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminPromotionTargetsResponse"
+                  "$ref": "#/components/schemas/BackofficePromotionTargetsResponse"
                 }
               }
             }
@@ -620,16 +620,16 @@
         }
       }
     },
-    "/admin/promotions/coupons": {
+    "/backoffice/promotions/coupons": {
       "get": {
         "tags": [
-          "admin-promotions"
+          "backoffice-promotions"
         ],
-        "summary": "Admin Coupons List",
-        "operationId": "admin_coupons_list_admin_promotions_coupons_get",
+        "summary": "Backoffice Coupons List",
+        "operationId": "backoffice_coupons_list_backoffice_promotions_coupons_get",
         "parameters": [
           {
-            "name": "X-Admin-Client",
+            "name": "X-Backoffice-Client",
             "in": "header",
             "required": false,
             "schema": {
@@ -641,7 +641,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Admin-Client"
+              "title": "X-Backoffice-Client"
             }
           }
         ],
@@ -651,7 +651,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminCouponsResponse"
+                  "$ref": "#/components/schemas/BackofficeCouponsResponse"
                 }
               }
             }
@@ -669,16 +669,16 @@
         }
       }
     },
-    "/admin/promotions/customer-coupons": {
+    "/backoffice/promotions/customer-coupons": {
       "get": {
         "tags": [
-          "admin-promotions"
+          "backoffice-promotions"
         ],
-        "summary": "Admin Customer Coupons List",
-        "operationId": "admin_customer_coupons_list_admin_promotions_customer_coupons_get",
+        "summary": "Backoffice Customer Coupons List",
+        "operationId": "backoffice_customer_coupons_list_backoffice_promotions_customer_coupons_get",
         "parameters": [
           {
-            "name": "X-Admin-Client",
+            "name": "X-Backoffice-Client",
             "in": "header",
             "required": false,
             "schema": {
@@ -690,7 +690,7 @@
                   "type": "null"
                 }
               ],
-              "title": "X-Admin-Client"
+              "title": "X-Backoffice-Client"
             }
           }
         ],
@@ -700,7 +700,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdminCustomerCouponsResponse"
+                  "$ref": "#/components/schemas/BackofficeCustomerCouponsResponse"
                 }
               }
             }
@@ -1408,7 +1408,7 @@
   },
   "components": {
     "schemas": {
-      "AdminCatalogHealthResponse": {
+      "BackofficeCatalogHealthResponse": {
         "properties": {
           "status": {
             "type": "string",
@@ -1429,9 +1429,9 @@
           "module",
           "surface"
         ],
-        "title": "AdminCatalogHealthResponse"
+        "title": "BackofficeCatalogHealthResponse"
       },
-      "AdminCoupon": {
+      "BackofficeCoupon": {
         "properties": {
           "id": {
             "type": "integer",
@@ -1539,9 +1539,9 @@
           "created_at",
           "updated_at"
         ],
-        "title": "AdminCoupon"
+        "title": "BackofficeCoupon"
       },
-      "AdminCouponsResponse": {
+      "BackofficeCouponsResponse": {
         "properties": {
           "count": {
             "type": "integer",
@@ -1550,7 +1550,7 @@
           },
           "coupons": {
             "items": {
-              "$ref": "#/components/schemas/AdminCoupon"
+              "$ref": "#/components/schemas/BackofficeCoupon"
             },
             "type": "array",
             "title": "Coupons"
@@ -1561,9 +1561,9 @@
           "count",
           "coupons"
         ],
-        "title": "AdminCouponsResponse"
+        "title": "BackofficeCouponsResponse"
       },
-      "AdminCustomerCoupon": {
+      "BackofficeCustomerCoupon": {
         "properties": {
           "id": {
             "type": "integer",
@@ -1659,9 +1659,9 @@
           "created_at",
           "updated_at"
         ],
-        "title": "AdminCustomerCoupon"
+        "title": "BackofficeCustomerCoupon"
       },
-      "AdminCustomerCouponsResponse": {
+      "BackofficeCustomerCouponsResponse": {
         "properties": {
           "count": {
             "type": "integer",
@@ -1670,7 +1670,7 @@
           },
           "customer_coupons": {
             "items": {
-              "$ref": "#/components/schemas/AdminCustomerCoupon"
+              "$ref": "#/components/schemas/BackofficeCustomerCoupon"
             },
             "type": "array",
             "title": "Customer Coupons"
@@ -1681,9 +1681,9 @@
           "count",
           "customer_coupons"
         ],
-        "title": "AdminCustomerCouponsResponse"
+        "title": "BackofficeCustomerCouponsResponse"
       },
-      "AdminPriceList": {
+      "BackofficePriceList": {
         "properties": {
           "id": {
             "type": "integer",
@@ -1777,9 +1777,9 @@
           "created_at",
           "updated_at"
         ],
-        "title": "AdminPriceList"
+        "title": "BackofficePriceList"
       },
-      "AdminPriceListsResponse": {
+      "BackofficePriceListsResponse": {
         "properties": {
           "count": {
             "type": "integer",
@@ -1788,7 +1788,7 @@
           },
           "price_lists": {
             "items": {
-              "$ref": "#/components/schemas/AdminPriceList"
+              "$ref": "#/components/schemas/BackofficePriceList"
             },
             "type": "array",
             "title": "Price Lists"
@@ -1799,9 +1799,9 @@
           "count",
           "price_lists"
         ],
-        "title": "AdminPriceListsResponse"
+        "title": "BackofficePriceListsResponse"
       },
-      "AdminProduct": {
+      "BackofficeProduct": {
         "properties": {
           "id": {
             "type": "integer",
@@ -1876,9 +1876,9 @@
           "created_at",
           "updated_at"
         ],
-        "title": "AdminProduct"
+        "title": "BackofficeProduct"
       },
-      "AdminProductsResponse": {
+      "BackofficeProductsResponse": {
         "properties": {
           "count": {
             "type": "integer",
@@ -1887,7 +1887,7 @@
           },
           "products": {
             "items": {
-              "$ref": "#/components/schemas/AdminProduct"
+              "$ref": "#/components/schemas/BackofficeProduct"
             },
             "type": "array",
             "title": "Products"
@@ -1898,9 +1898,9 @@
           "count",
           "products"
         ],
-        "title": "AdminProductsResponse"
+        "title": "BackofficeProductsResponse"
       },
-      "AdminPromotion": {
+      "BackofficePromotion": {
         "properties": {
           "id": {
             "type": "integer",
@@ -2040,9 +2040,9 @@
           "created_at",
           "updated_at"
         ],
-        "title": "AdminPromotion"
+        "title": "BackofficePromotion"
       },
-      "AdminPromotionCreateRequest": {
+      "BackofficePromotionCreateRequest": {
         "properties": {
           "promotion_code": {
             "type": "string",
@@ -2164,9 +2164,9 @@
           "name",
           "discount_value"
         ],
-        "title": "AdminPromotionCreateRequest"
+        "title": "BackofficePromotionCreateRequest"
       },
-      "AdminPromotionHealthResponse": {
+      "BackofficePromotionHealthResponse": {
         "properties": {
           "status": {
             "type": "string",
@@ -2187,9 +2187,9 @@
           "module",
           "surface"
         ],
-        "title": "AdminPromotionHealthResponse"
+        "title": "BackofficePromotionHealthResponse"
       },
-      "AdminPromotionTarget": {
+      "BackofficePromotionTarget": {
         "properties": {
           "id": {
             "type": "integer",
@@ -2245,9 +2245,9 @@
           "target_code",
           "created_at"
         ],
-        "title": "AdminPromotionTarget"
+        "title": "BackofficePromotionTarget"
       },
-      "AdminPromotionTargetsResponse": {
+      "BackofficePromotionTargetsResponse": {
         "properties": {
           "count": {
             "type": "integer",
@@ -2256,7 +2256,7 @@
           },
           "promotion_targets": {
             "items": {
-              "$ref": "#/components/schemas/AdminPromotionTarget"
+              "$ref": "#/components/schemas/BackofficePromotionTarget"
             },
             "type": "array",
             "title": "Promotion Targets"
@@ -2267,9 +2267,9 @@
           "count",
           "promotion_targets"
         ],
-        "title": "AdminPromotionTargetsResponse"
+        "title": "BackofficePromotionTargetsResponse"
       },
-      "AdminPromotionsResponse": {
+      "BackofficePromotionsResponse": {
         "properties": {
           "count": {
             "type": "integer",
@@ -2278,7 +2278,7 @@
           },
           "promotions": {
             "items": {
-              "$ref": "#/components/schemas/AdminPromotion"
+              "$ref": "#/components/schemas/BackofficePromotion"
             },
             "type": "array",
             "title": "Promotions"
@@ -2289,9 +2289,9 @@
           "count",
           "promotions"
         ],
-        "title": "AdminPromotionsResponse"
+        "title": "BackofficePromotionsResponse"
       },
-      "AdminSku": {
+      "BackofficeSku": {
         "properties": {
           "id": {
             "type": "integer",
@@ -2421,9 +2421,9 @@
           "created_at",
           "updated_at"
         ],
-        "title": "AdminSku"
+        "title": "BackofficeSku"
       },
-      "AdminSkuPrice": {
+      "BackofficeSkuPrice": {
         "properties": {
           "id": {
             "type": "integer",
@@ -2544,9 +2544,9 @@
           "created_at",
           "updated_at"
         ],
-        "title": "AdminSkuPrice"
+        "title": "BackofficeSkuPrice"
       },
-      "AdminSkuPricesResponse": {
+      "BackofficeSkuPricesResponse": {
         "properties": {
           "count": {
             "type": "integer",
@@ -2555,7 +2555,7 @@
           },
           "sku_prices": {
             "items": {
-              "$ref": "#/components/schemas/AdminSkuPrice"
+              "$ref": "#/components/schemas/BackofficeSkuPrice"
             },
             "type": "array",
             "title": "Sku Prices"
@@ -2566,9 +2566,9 @@
           "count",
           "sku_prices"
         ],
-        "title": "AdminSkuPricesResponse"
+        "title": "BackofficeSkuPricesResponse"
       },
-      "AdminSkusResponse": {
+      "BackofficeSkusResponse": {
         "properties": {
           "count": {
             "type": "integer",
@@ -2577,7 +2577,7 @@
           },
           "skus": {
             "items": {
-              "$ref": "#/components/schemas/AdminSku"
+              "$ref": "#/components/schemas/BackofficeSku"
             },
             "type": "array",
             "title": "Skus"
@@ -2588,9 +2588,9 @@
           "count",
           "skus"
         ],
-        "title": "AdminSkusResponse"
+        "title": "BackofficeSkusResponse"
       },
-      "AdminUnit": {
+      "BackofficeUnit": {
         "properties": {
           "id": {
             "type": "integer",
@@ -2685,9 +2685,9 @@
           "created_at",
           "updated_at"
         ],
-        "title": "AdminUnit"
+        "title": "BackofficeUnit"
       },
-      "AdminUnitsResponse": {
+      "BackofficeUnitsResponse": {
         "properties": {
           "count": {
             "type": "integer",
@@ -2696,7 +2696,7 @@
           },
           "units": {
             "items": {
-              "$ref": "#/components/schemas/AdminUnit"
+              "$ref": "#/components/schemas/BackofficeUnit"
             },
             "type": "array",
             "title": "Units"
@@ -2707,7 +2707,7 @@
           "count",
           "units"
         ],
-        "title": "AdminUnitsResponse"
+        "title": "BackofficeUnitsResponse"
       },
       "BehaviorEventRequest": {
         "properties": {
