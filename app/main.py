@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 
+from app.api.router import api_router
 from app.core.config import D2CSettings, load_settings
 
 
@@ -12,16 +13,7 @@ def create_app(settings: D2CSettings | None = None) -> FastAPI:
         description="D2C owned storefront API service.",
     )
     app.state.settings = resolved_settings
-
-    @app.get("/health", tags=["health"])
-    def health() -> dict[str, str]:
-        return {
-            "status": "ok",
-            "environment": resolved_settings.environment,
-            "app_code": resolved_settings.app_code,
-            "service": resolved_settings.service_name,
-            "api_path": resolved_settings.api_path,
-        }
+    app.include_router(api_router)
 
     return app
 
