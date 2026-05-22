@@ -45,3 +45,26 @@ def test_catalog_products_returns_pet_multi_sku_placeholder_products() -> None:
     assert all(product["sku"] for product in products)
     assert all(product["price_cents"] >= 0 for product in products)
     assert all("未来来自 PMS projection" in product["description"] for product in products)
+
+
+def test_catalog_product_detail_returns_placeholder_product() -> None:
+    client = TestClient(app)
+
+    response = client.get("/catalog/products/pet-cat-food-salmon-001")
+
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert payload["product_id"] == "pet-cat-food-salmon-001"
+    assert payload["sku"] == "CAT-FOOD-SALMON-1KG"
+    assert payload["category"] == "猫粮"
+    assert "未来来自 PMS projection" in payload["description"]
+
+
+def test_catalog_product_detail_returns_404_for_unknown_product() -> None:
+    client = TestClient(app)
+
+    response = client.get("/catalog/products/unknown-product")
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "catalog_product_not_found"}

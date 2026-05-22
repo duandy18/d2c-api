@@ -67,3 +67,11 @@ PLACEHOLDER_PRODUCTS: tuple[CatalogProduct, ...] = (
 def list_catalog_products() -> CatalogProductsResponse:
     products = list(PLACEHOLDER_PRODUCTS)
     return CatalogProductsResponse(count=len(products), products=products)
+
+
+def get_catalog_product(product_id: str) -> CatalogProduct | None:
+    for product in PLACEHOLDER_PRODUCTS:
+        if product.product_id == product_id:
+            return product
+
+    return None
