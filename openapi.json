@@ -56,6 +56,27 @@
         }
       }
     },
+    "/catalog/categories": {
+      "get": {
+        "tags": [
+          "catalog"
+        ],
+        "summary": "Catalog Categories",
+        "operationId": "catalog_categories_catalog_categories_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogCategoriesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/catalog/products": {
       "get": {
         "tags": [
@@ -122,6 +143,60 @@
   },
   "components": {
     "schemas": {
+      "CatalogCategoriesResponse": {
+        "properties": {
+          "data_source": {
+            "type": "string",
+            "const": "d2c_database_catalog",
+            "title": "Data Source",
+            "default": "d2c_database_catalog"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count"
+          },
+          "categories": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogCategory"
+            },
+            "type": "array",
+            "title": "Categories"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count",
+          "categories"
+        ],
+        "title": "CatalogCategoriesResponse"
+      },
+      "CatalogCategory": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "Storefront category code."
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Storefront category name."
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order",
+            "description": "Display sort order."
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "name",
+          "sort_order"
+        ],
+        "title": "CatalogCategory"
+      },
       "CatalogProduct": {
         "properties": {
           "product_id": {
@@ -132,7 +207,7 @@
           "sku": {
             "type": "string",
             "title": "Sku",
-            "description": "Display SKU for the placeholder product."
+            "description": "Display SKU."
           },
           "name": {
             "type": "string",
@@ -217,10 +292,10 @@
         "properties": {
           "data_source": {
             "type": "string",
-            "const": "placeholder_static_catalog",
+            "const": "d2c_database_catalog",
             "title": "Data Source",
-            "description": "Current data source. Future target is PMS projection.",
-            "default": "placeholder_static_catalog"
+            "description": "Current data source.",
+            "default": "d2c_database_catalog"
           },
           "count": {
             "type": "integer",
