@@ -11,7 +11,7 @@ service_client_code = d2c-service
 api_path = /api/d2c
 web_path = /d2c
 local_api_port = 8025
-local_web_port = 5177
+local_web_port = 5277
 
 ## 二、本地安装
 

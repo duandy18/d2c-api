@@ -98,7 +98,7 @@ service_client_code = d2c-service
 api_path = /api/d2c
 web_path = /d2c
 local_api_port = 8025
-local_web_port = 5177
+local_web_port = 5277
 
 未来 ERP 接入逻辑应放在 integrations/erp 或 contracts/erp 相关文件中，禁止写进商城业务 service。
 

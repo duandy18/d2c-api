@@ -15,7 +15,7 @@ D2C 自有商城后端服务。
 - api_path: `/api/d2c`
 - web_path: `/d2c`
 - local api port: `8025`
-- local web port: `5177`
+- local web port: `5277`
 - local database: `postgresql+psycopg://d2c:d2c@127.0.0.1:5433/d2c`
 
 ## 当前阶段

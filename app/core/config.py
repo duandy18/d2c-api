@@ -30,10 +30,10 @@ class D2CSettings:
     database_url: str = "postgresql+psycopg://d2c:d2c@127.0.0.1:5433/d2c"
     test_database_url: str = "postgresql+psycopg://d2c:d2c@127.0.0.1:5433/d2c_test"
     cors_allow_origins: tuple[str, ...] = (
-        "http://127.0.0.1:5177",
-        "http://localhost:5177",
-        "http://127.0.0.1:5178",
-        "http://localhost:5178",
+        "http://127.0.0.1:5277",
+        "http://localhost:5277",
+        "http://127.0.0.1:5288",
+        "http://localhost:5288",
     )
 
 
