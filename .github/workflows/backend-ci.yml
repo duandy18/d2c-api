@@ -9,6 +9,28 @@ jobs:
   backend-ci:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: d2c
+          POSTGRES_PASSWORD: d2c
+          POSTGRES_DB: d2c
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U d2c -d d2c"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      DEV_DB_DSN: postgresql+psycopg://d2c:d2c@127.0.0.1:5432/d2c
+      DEV_TEST_DB_DSN: postgresql+psycopg://d2c:d2c@127.0.0.1:5432/d2c
+      D2C_DATABASE_URL: postgresql+psycopg://d2c:d2c@127.0.0.1:5432/d2c
+      D2C_TEST_DATABASE_URL: postgresql+psycopg://d2c:d2c@127.0.0.1:5432/d2c
+      PYTHONPATH: .
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -20,6 +42,12 @@ jobs:
 
       - name: Install dependencies
         run: make install
+
+      - name: Run database migrations
+        run: make upgrade-dev
+
+      - name: Check Alembic state
+        run: make alembic-check
 
       - name: Run checks
         run: make check
