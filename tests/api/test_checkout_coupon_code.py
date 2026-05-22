@@ -100,7 +100,12 @@ def checkout_payload(cart_code: str, coupon_code: str | None = None) -> dict[str
     return payload
 
 
-def create_active_backoffice_coupon(client: TestClient) -> tuple[str, str]:
+def create_active_backoffice_coupon(
+    client: TestClient,
+    *,
+    total_limit: int | None = 100,
+    per_customer_limit: int | None = 1,
+) -> tuple[str, str]:
     promotion_code = unique_code("CHECKOUTPROMO")
     coupon_code = unique_code("CHECKOUTCOUPON")
 
@@ -133,8 +138,8 @@ def create_active_backoffice_coupon(client: TestClient) -> tuple[str, str]:
             "coupon_code": coupon_code,
             "name": "Checkout Coupon",
             "coupon_type": "public_code",
-            "total_limit": 100,
-            "per_customer_limit": 1,
+            "total_limit": total_limit,
+            "per_customer_limit": per_customer_limit,
         },
         headers=BACKOFFICE_HEADERS,
     )
@@ -180,6 +185,7 @@ def test_checkout_applies_active_public_coupon_code() -> None:
                     text(
                         """
                         SELECT
+                          id,
                           coupon_code,
                           coupon_id,
                           promotion_code,
@@ -194,6 +200,27 @@ def test_checkout_applies_active_public_coupon_code() -> None:
                 .mappings()
                 .one()
             )
+            customer_coupon_row = (
+                connection.execute(
+                    text(
+                        """
+                        SELECT
+                          customer_coupon_code,
+                          coupon_id,
+                          customer_id,
+                          status,
+                          claimed_at,
+                          used_at,
+                          order_id
+                        FROM d2c_customer_coupons
+                        WHERE order_id = :order_id
+                        """
+                    ),
+                    {"order_id": order_row["id"]},
+                )
+                .mappings()
+                .one()
+            )
     finally:
         engine.dispose()
 
@@ -202,6 +229,12 @@ def test_checkout_applies_active_public_coupon_code() -> None:
     assert order_row["promotion_code"] == promotion_code
     assert order_row["discount_cents"] == 379
     assert order_row["payable_cents"] == 3419
+    assert customer_coupon_row["customer_coupon_code"].startswith("CCPN-")
+    assert customer_coupon_row["coupon_id"] == order_row["coupon_id"]
+    assert customer_coupon_row["status"] == "used"
+    assert customer_coupon_row["claimed_at"] is not None
+    assert customer_coupon_row["used_at"] is not None
+    assert customer_coupon_row["order_id"] == order_row["id"]
 
 
 def test_checkout_rejects_unknown_coupon_code() -> None:
@@ -241,3 +274,62 @@ def test_checkout_does_not_use_inactive_coupon_code() -> None:
 
     assert response.status_code == 409
     assert response.json() == {"detail": "checkout_coupon_not_available"}
+
+
+def test_checkout_enforces_coupon_per_customer_limit() -> None:
+    reset_promotions_and_coupons()
+    client = TestClient(app)
+    token = register_customer(client)
+    _, coupon_code = create_active_backoffice_coupon(
+        client,
+        total_limit=100,
+        per_customer_limit=1,
+    )
+
+    first_cart_code = create_cart_with_item(client)
+    first_response = client.post(
+        "/orders/checkout",
+        json=checkout_payload(first_cart_code, coupon_code),
+        headers=auth_headers(token),
+    )
+    assert first_response.status_code == 201
+
+    second_cart_code = create_cart_with_item(client)
+    second_response = client.post(
+        "/orders/checkout",
+        json=checkout_payload(second_cart_code, coupon_code),
+        headers=auth_headers(token),
+    )
+
+    assert second_response.status_code == 409
+    assert second_response.json() == {"detail": "checkout_coupon_usage_limit_exceeded"}
+
+
+def test_checkout_enforces_coupon_total_limit() -> None:
+    reset_promotions_and_coupons()
+    client = TestClient(app)
+    first_token = register_customer(client)
+    second_token = register_customer(client)
+    _, coupon_code = create_active_backoffice_coupon(
+        client,
+        total_limit=1,
+        per_customer_limit=10,
+    )
+
+    first_cart_code = create_cart_with_item(client)
+    first_response = client.post(
+        "/orders/checkout",
+        json=checkout_payload(first_cart_code, coupon_code),
+        headers=auth_headers(first_token),
+    )
+    assert first_response.status_code == 201
+
+    second_cart_code = create_cart_with_item(client)
+    second_response = client.post(
+        "/orders/checkout",
+        json=checkout_payload(second_cart_code, coupon_code),
+        headers=auth_headers(second_token),
+    )
+
+    assert second_response.status_code == 409
+    assert second_response.json() == {"detail": "checkout_coupon_usage_limit_exceeded"}

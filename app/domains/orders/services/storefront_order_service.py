@@ -27,8 +27,11 @@ from app.domains.orders.repos.order_repo import (
     list_cart_line_rows_for_checkout,
     list_order_lines,
 )
-from app.domains.promotions.models.promotion import Coupon, Promotion
+from app.domains.promotions.models.promotion import Coupon, CustomerCoupon, Promotion
 from app.domains.promotions.repos.checkout_promotion_repo import (
+    count_coupon_used,
+    count_customer_coupon_used,
+    create_customer_coupon_usage,
     get_active_public_coupon_promotion_by_code,
     get_best_active_all_store_percentage_promotion,
 )
@@ -55,6 +58,10 @@ class CheckoutCouponNotAvailableError(Exception):
     pass
 
 
+class CheckoutCouponUsageLimitExceededError(Exception):
+    pass
+
+
 class OrderNotFoundError(Exception):
     pass
 
@@ -71,6 +78,11 @@ def _new_order_no() -> str:
 def _new_payment_no() -> str:
     date_part = datetime.now(UTC).strftime("%Y%m%d")
     return f"PAY-{date_part}-{uuid4().hex[:12].upper()}"
+
+
+def _new_customer_coupon_code() -> str:
+    date_part = datetime.now(UTC).strftime("%Y%m%d")
+    return f"CCPN-{date_part}-{uuid4().hex[:12].upper()}"
 
 
 def authenticate_customer(
@@ -104,6 +116,30 @@ def _normalize_coupon_code(coupon_code: str | None) -> str | None:
 
     normalized = coupon_code.strip()
     return normalized or None
+
+
+def _ensure_coupon_usage_allowed(
+    session: Session,
+    *,
+    coupon: Coupon,
+    customer_id: int,
+) -> None:
+    if (
+        coupon.total_limit is not None
+        and count_coupon_used(session, coupon.id) >= coupon.total_limit
+    ):
+        raise CheckoutCouponUsageLimitExceededError("checkout_coupon_usage_limit_exceeded")
+
+    if (
+        coupon.per_customer_limit is not None
+        and count_customer_coupon_used(
+            session,
+            coupon_id=coupon.id,
+            customer_id=customer_id,
+        )
+        >= coupon.per_customer_limit
+    ):
+        raise CheckoutCouponUsageLimitExceededError("checkout_coupon_usage_limit_exceeded")
 
 
 def _calculate_percentage_discount_cents(
@@ -218,6 +254,11 @@ def checkout_order(
         if coupon_row is None:
             raise CheckoutCouponNotAvailableError("checkout_coupon_not_available")
         coupon, promotion = coupon_row
+        _ensure_coupon_usage_allowed(
+            session,
+            coupon=coupon,
+            customer_id=customer.id,
+        )
     else:
         promotion = get_best_active_all_store_percentage_promotion(
             session,
@@ -262,6 +303,20 @@ def checkout_order(
             shipping_postal_code=payload.shipping_postal_code,
         ),
     )
+
+    if coupon is not None:
+        create_customer_coupon_usage(
+            session,
+            CustomerCoupon(
+                customer_coupon_code=_new_customer_coupon_code(),
+                coupon_id=coupon.id,
+                customer_id=customer.id,
+                status="used",
+                claimed_at=now,
+                used_at=now,
+                order_id=order.id,
+            ),
+        )
 
     for cart_line, product, sku in rows:
         create_order_line(
