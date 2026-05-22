@@ -25,6 +25,15 @@ make install
 
 make check
 
+也可以单独运行测试：
+
+make test
+
+或指定测试文件 / 测试目录：
+
+make test TESTS=tests/test_health.py
+make test TESTS=tests
+
 该命令包含：
 
 - ruff check

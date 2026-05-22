@@ -1,4 +1,5 @@
 PYTHON ?= .venv/bin/python3
+TESTS ?= tests
 HOST ?= 0.0.0.0
 PORT ?= 8025
 PID_FILE ?= /tmp/d2c_api_8025.pid
@@ -22,7 +23,7 @@ lint: clean-pyc
 	$(PYTHON) -m ruff check .
 
 test: clean-pyc
-	$(PYTHON) -m pytest
+	$(PYTHON) -m pytest $(TESTS)
 
 routes:
 	$(PYTHON) scripts/list_routes.py
