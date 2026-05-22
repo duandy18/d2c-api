@@ -112,12 +112,16 @@ def upsert_cart_item(
     payload: CartItemUpsertRequest,
 ) -> CartResponse:
     cart = get_or_create_cart(session, payload.anonymous_id, payload.session_code)
-    product_sku = get_product_sku_for_cart(session, payload.product_id, payload.sku)
+    product_sku_price = get_product_sku_for_cart(
+        session,
+        payload.product_id,
+        payload.sku,
+    )
 
-    if product_sku is None:
+    if product_sku_price is None:
         raise CartProductNotFoundError("cart_product_not_found")
 
-    product, sku = product_sku
+    product, sku, sku_price = product_sku_price
     existing_line = get_cart_line_by_sku(session, cart.id, sku.id)
 
     if payload.quantity == 0:
@@ -127,7 +131,7 @@ def upsert_cart_item(
         session.commit()
         return response
 
-    line_subtotal_cents = sku.price_cents * payload.quantity
+    line_subtotal_cents = sku_price.price_cents * payload.quantity
 
     if existing_line is None:
         create_cart_line(
@@ -137,15 +141,15 @@ def upsert_cart_item(
                 product_id=product.id,
                 sku_id=sku.id,
                 quantity=payload.quantity,
-                unit_price_cents=sku.price_cents,
-                currency=sku.currency,
+                unit_price_cents=sku_price.price_cents,
+                currency=sku_price.currency,
                 line_subtotal_cents=line_subtotal_cents,
             ),
         )
     else:
         existing_line.quantity = payload.quantity
-        existing_line.unit_price_cents = sku.price_cents
-        existing_line.currency = sku.currency
+        existing_line.unit_price_cents = sku_price.price_cents
+        existing_line.currency = sku_price.currency
         existing_line.line_subtotal_cents = line_subtotal_cents
 
     response = build_cart_response(session, cart)

@@ -1,8 +1,8 @@
-from sqlalchemy import Select, delete, select
+from sqlalchemy import Select, delete, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.models.cart import Cart, CartLine
-from app.models.catalog import Product, ProductSku
+from app.models.catalog import PriceList, Product, ProductSku, SkuPrice
 
 
 def get_active_cart(
@@ -47,15 +47,24 @@ def get_product_sku_for_cart(
     session: Session,
     product_code: str,
     sku_code: str,
-) -> tuple[Product, ProductSku] | None:
+) -> tuple[Product, ProductSku, SkuPrice] | None:
     statement = (
-        select(Product, ProductSku)
+        select(Product, ProductSku, SkuPrice)
         .join(ProductSku, ProductSku.product_id == Product.id)
+        .join(SkuPrice, SkuPrice.sku_id == ProductSku.id)
+        .join(PriceList, PriceList.id == SkuPrice.price_list_id)
         .where(Product.product_code == product_code)
         .where(ProductSku.sku_code == sku_code)
         .where(Product.is_active.is_(True))
         .where(Product.status == "active")
         .where(ProductSku.is_active.is_(True))
+        .where(PriceList.price_list_code == "default_usd_storefront")
+        .where(PriceList.channel == "storefront")
+        .where(PriceList.customer_segment == "default")
+        .where(PriceList.is_active.is_(True))
+        .where(SkuPrice.is_active.is_(True))
+        .where(or_(SkuPrice.effective_from.is_(None), SkuPrice.effective_from <= func.now()))
+        .where(or_(SkuPrice.effective_to.is_(None), SkuPrice.effective_to > func.now()))
     )
     return session.execute(statement).first()
 
@@ -65,11 +74,7 @@ def get_cart_line_by_sku(
     cart_id: int,
     sku_id: int,
 ) -> CartLine | None:
-    statement = (
-        select(CartLine)
-        .where(CartLine.cart_id == cart_id)
-        .where(CartLine.sku_id == sku_id)
-    )
+    statement = select(CartLine).where(CartLine.cart_id == cart_id).where(CartLine.sku_id == sku_id)
     return session.scalar(statement)
 
 

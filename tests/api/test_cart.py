@@ -206,3 +206,85 @@ def test_cart_summary_fields_are_persisted() -> None:
     assert row["line_count"] == 1
     assert row["item_count"] == 2
     assert row["subtotal_cents"] == 3798
+
+
+def test_cart_item_price_uses_default_sku_price() -> None:
+    client = TestClient(app)
+    identity = cart_identity()
+    sku_code = "CAT-FOOD-SALMON-1KG"
+    test_price_cents = 1777
+
+    engine = create_engine(load_settings().database_url)
+    with engine.begin() as connection:
+        original_price = connection.execute(
+            text(
+                """
+                SELECT sp.price_cents
+                FROM d2c_sku_prices sp
+                JOIN d2c_product_skus s ON s.id = sp.sku_id
+                JOIN d2c_price_lists pl ON pl.id = sp.price_list_id
+                WHERE s.sku_code = :sku_code
+                  AND pl.price_list_code = 'default_usd_storefront'
+                """
+            ),
+            {"sku_code": sku_code},
+        ).scalar_one()
+
+    try:
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    """
+                    UPDATE d2c_sku_prices sp
+                    SET price_cents = :price_cents
+                    FROM d2c_product_skus s, d2c_price_lists pl
+                    WHERE sp.sku_id = s.id
+                      AND sp.price_list_id = pl.id
+                      AND s.sku_code = :sku_code
+                      AND pl.price_list_code = 'default_usd_storefront'
+                    """
+                ),
+                {
+                    "sku_code": sku_code,
+                    "price_cents": test_price_cents,
+                },
+            )
+
+        response = client.post(
+            "/cart/items",
+            json={
+                **identity,
+                "product_id": "pet-cat-food-salmon-001",
+                "sku": sku_code,
+                "quantity": 2,
+            },
+        )
+
+        assert response.status_code == 200
+
+        payload = response.json()
+        assert payload["line_count"] == 1
+        assert payload["item_count"] == 2
+        assert payload["subtotal_cents"] == test_price_cents * 2
+        assert payload["lines"][0]["unit_price_cents"] == test_price_cents
+        assert payload["lines"][0]["line_subtotal_cents"] == test_price_cents * 2
+    finally:
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    """
+                    UPDATE d2c_sku_prices sp
+                    SET price_cents = :price_cents
+                    FROM d2c_product_skus s, d2c_price_lists pl
+                    WHERE sp.sku_id = s.id
+                      AND sp.price_list_id = pl.id
+                      AND s.sku_code = :sku_code
+                      AND pl.price_list_code = 'default_usd_storefront'
+                    """
+                ),
+                {
+                    "sku_code": sku_code,
+                    "price_cents": original_price,
+                },
+            )
+        engine.dispose()
