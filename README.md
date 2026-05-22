@@ -27,3 +27,18 @@ Step 1:
 - 初始化 git
 - 写入 `.gitignore`
 - 写入 `README.md`
+
+## Local startup
+
+D2C API local standard:
+
+    make dev
+
+Default API port: 8025.
+
+Background helpers are also available:
+
+    make up
+    make down
+    make status
+    make logs
