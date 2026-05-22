@@ -47,6 +47,35 @@ def create_promotion_target(
     return target
 
 
+def get_coupon_by_code(
+    session: Session,
+    coupon_code: str,
+) -> Coupon | None:
+    statement = select(Coupon).where(Coupon.coupon_code == coupon_code)
+    return session.scalar(statement)
+
+
+def create_coupon(
+    session: Session,
+    coupon: Coupon,
+) -> Coupon:
+    session.add(coupon)
+    session.flush()
+    return coupon
+
+
+def get_coupon_row_by_code(
+    session: Session,
+    coupon_code: str,
+) -> tuple[Coupon, Promotion] | None:
+    statement = (
+        select(Coupon, Promotion)
+        .join(Promotion, Promotion.id == Coupon.promotion_id)
+        .where(Coupon.coupon_code == coupon_code)
+    )
+    return session.execute(statement).first()
+
+
 def list_promotion_target_rows(
     session: Session,
 ) -> list[tuple[PromotionTarget, Promotion]]:
