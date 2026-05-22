@@ -30,6 +30,177 @@
           }
         }
       }
+    },
+    "/catalog/health": {
+      "get": {
+        "tags": [
+          "catalog"
+        ],
+        "summary": "Catalog Health",
+        "operationId": "catalog_health_catalog_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Catalog Health Catalog Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalog/products": {
+      "get": {
+        "tags": [
+          "catalog"
+        ],
+        "summary": "Catalog Products",
+        "operationId": "catalog_products_catalog_products_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogProductsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CatalogProduct": {
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "title": "Product Id",
+            "description": "Stable D2C catalog product identifier."
+          },
+          "sku": {
+            "type": "string",
+            "title": "Sku",
+            "description": "Display SKU for the placeholder product."
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Product display name."
+          },
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "description": "First-level storefront category."
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Short storefront description."
+          },
+          "price_cents": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Price Cents",
+            "description": "Display price in cents."
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency",
+            "description": "Display currency.",
+            "default": "USD"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags",
+            "description": "Storefront tags."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive"
+            ],
+            "title": "Status",
+            "description": "Catalog status.",
+            "default": "active"
+          },
+          "stock_status": {
+            "type": "string",
+            "enum": [
+              "in_stock",
+              "low_stock",
+              "out_of_stock"
+            ],
+            "title": "Stock Status",
+            "default": "in_stock"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url",
+            "description": "Optional product image URL."
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "sku",
+          "name",
+          "category",
+          "description",
+          "price_cents"
+        ],
+        "title": "CatalogProduct"
+      },
+      "CatalogProductsResponse": {
+        "properties": {
+          "data_source": {
+            "type": "string",
+            "const": "placeholder_static_catalog",
+            "title": "Data Source",
+            "description": "Current data source. Future target is PMS projection.",
+            "default": "placeholder_static_catalog"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count",
+            "description": "Number of returned products."
+          },
+          "products": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogProduct"
+            },
+            "type": "array",
+            "title": "Products"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count",
+          "products"
+        ],
+        "title": "CatalogProductsResponse"
+      }
     }
   }
 }
