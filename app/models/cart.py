@@ -4,6 +4,7 @@ from datetime import datetime
 
 from sqlalchemy import (
     BigInteger,
+    CheckConstraint,
     DateTime,
     ForeignKey,
     Index,
@@ -21,6 +22,18 @@ class Cart(Base):
     __tablename__ = "d2c_carts"
     __table_args__ = (
         UniqueConstraint("cart_code", name="uq_d2c_carts_cart_code"),
+        CheckConstraint(
+            "line_count >= 0",
+            name="ck_d2c_carts_line_count_non_negative",
+        ),
+        CheckConstraint(
+            "item_count >= 0",
+            name="ck_d2c_carts_item_count_non_negative",
+        ),
+        CheckConstraint(
+            "subtotal_cents >= 0",
+            name="ck_d2c_carts_subtotal_cents_non_negative",
+        ),
         Index("ix_d2c_carts_anonymous_id", "anonymous_id"),
         Index("ix_d2c_carts_cart_code", "cart_code"),
         Index("ix_d2c_carts_customer_id", "customer_id"),
@@ -48,6 +61,24 @@ class Cart(Base):
         nullable=False,
         default="USD",
         server_default="USD",
+    )
+    line_count: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
+    item_count: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
+    subtotal_cents: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

@@ -1,7 +1,9 @@
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine, text
 
+from app.core.config import load_settings
 from app.main import app
 
 
@@ -158,3 +160,49 @@ def test_upsert_cart_item_rejects_unknown_product() -> None:
 
     assert response.status_code == 404
     assert response.json() == {"detail": "cart_product_not_found"}
+
+
+def test_cart_summary_fields_are_persisted() -> None:
+    client = TestClient(app)
+    identity = cart_identity()
+
+    response = client.post(
+        "/cart/items",
+        json={
+            **identity,
+            "product_id": "pet-cat-food-salmon-001",
+            "sku": "CAT-FOOD-SALMON-1KG",
+            "quantity": 2,
+        },
+    )
+
+    assert response.status_code == 200
+
+    cart_payload = response.json()
+    assert cart_payload["line_count"] == 1
+    assert cart_payload["item_count"] == 2
+    assert cart_payload["subtotal_cents"] == 3798
+
+    engine = create_engine(load_settings().database_url)
+    try:
+        with engine.connect() as connection:
+            row = (
+                connection.execute(
+                    text(
+                        """
+                        SELECT line_count, item_count, subtotal_cents
+                        FROM d2c_carts
+                        WHERE cart_code = :cart_code
+                        """
+                    ),
+                    {"cart_code": cart_payload["cart_code"]},
+                )
+                .mappings()
+                .one()
+            )
+    finally:
+        engine.dispose()
+
+    assert row["line_count"] == 1
+    assert row["item_count"] == 2
+    assert row["subtotal_cents"] == 3798
