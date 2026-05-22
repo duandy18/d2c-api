@@ -1,5 +1,5 @@
 PYTHON ?= .venv/bin/python3
-ALEMBIC ?= $(PYTHON) -m alembic
+ALEMBIC ?= .venv/bin/alembic
 TESTS ?= tests
 
 DEV_DB_DSN ?= postgresql+psycopg://d2c:d2c@127.0.0.1:5433/d2c
