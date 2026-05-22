@@ -49,6 +49,9 @@ class OrderResponse(BaseModel):
     currency: str
     item_count: int
     subtotal_cents: int
+    discount_cents: int
+    payable_cents: int
+    promotion_code: str | None
     recipient_name: str
     recipient_phone: str
     shipping_country: str
