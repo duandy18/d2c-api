@@ -48,6 +48,9 @@ def get_or_create_cart(
             session_code=session_code,
             status="active",
             currency="USD",
+            line_count=0,
+            item_count=0,
+            subtotal_cents=0,
         ),
     )
     session.commit()
@@ -70,23 +73,28 @@ def _build_line_response(
     )
 
 
+def _sync_cart_summary(
+    cart: Cart,
+    rows: list[tuple[CartLine, Product, ProductSku]],
+) -> None:
+    cart.line_count = len(rows)
+    cart.item_count = sum(cart_line.quantity for cart_line, _, _ in rows)
+    cart.subtotal_cents = sum(cart_line.line_subtotal_cents for cart_line, _, _ in rows)
+
+
 def build_cart_response(session: Session, cart: Cart) -> CartResponse:
     rows = list_cart_line_rows(session, cart.id)
-    lines = [
-        _build_line_response(cart_line, product, sku)
-        for cart_line, product, sku in rows
-    ]
-    item_count = sum(line.quantity for line in lines)
-    subtotal_cents = sum(line.line_subtotal_cents for line in lines)
+    _sync_cart_summary(cart, rows)
+    lines = [_build_line_response(cart_line, product, sku) for cart_line, product, sku in rows]
 
     return CartResponse(
         cart_code=cart.cart_code,
         anonymous_id=cart.anonymous_id,
         session_code=cart.session_code,
         currency=cart.currency,
-        line_count=len(lines),
-        item_count=item_count,
-        subtotal_cents=subtotal_cents,
+        line_count=cart.line_count,
+        item_count=cart.item_count,
+        subtotal_cents=cart.subtotal_cents,
         lines=lines,
     )
 
@@ -115,8 +123,9 @@ def upsert_cart_item(
     if payload.quantity == 0:
         if existing_line is not None:
             delete_cart_line(session, existing_line)
-            session.commit()
-        return build_cart_response(session, cart)
+        response = build_cart_response(session, cart)
+        session.commit()
+        return response
 
     line_subtotal_cents = sku.price_cents * payload.quantity
 
@@ -139,8 +148,9 @@ def upsert_cart_item(
         existing_line.currency = sku.currency
         existing_line.line_subtotal_cents = line_subtotal_cents
 
+    response = build_cart_response(session, cart)
     session.commit()
-    return build_cart_response(session, cart)
+    return response
 
 
 def clear_cart(
@@ -149,5 +159,6 @@ def clear_cart(
 ) -> CartResponse:
     cart = get_or_create_cart(session, payload.anonymous_id, payload.session_code)
     clear_cart_lines(session, cart.id)
+    response = build_cart_response(session, cart)
     session.commit()
-    return build_cart_response(session, cart)
+    return response
