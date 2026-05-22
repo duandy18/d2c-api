@@ -15,6 +15,7 @@ from app.domains.orders.services.storefront_order_service import (
     CheckoutCartEmptyError,
     CheckoutCartNotFoundError,
     CheckoutCouponNotAvailableError,
+    CheckoutCouponUsageLimitExceededError,
     OrderAuthError,
     OrderNotFoundError,
     PaymentInvalidStateError,
@@ -81,6 +82,7 @@ def orders_checkout(
         CheckoutCartAlreadyConvertedError,
         CheckoutCartEmptyError,
         CheckoutCouponNotAvailableError,
+        CheckoutCouponUsageLimitExceededError,
     ) as exc:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,

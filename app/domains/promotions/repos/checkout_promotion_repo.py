@@ -2,10 +2,10 @@
 
 from datetime import datetime
 
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
-from app.domains.promotions.models.promotion import Coupon, Promotion
+from app.domains.promotions.models.promotion import Coupon, CustomerCoupon, Promotion
 
 
 def get_best_active_all_store_percentage_promotion(
@@ -98,3 +98,43 @@ def get_active_public_coupon_promotion_by_code(
         .order_by(Promotion.priority, Promotion.id)
     )
     return session.execute(statement).first()
+
+
+def count_coupon_used(
+    session: Session,
+    coupon_id: int,
+) -> int:
+    statement = (
+        select(func.count())
+        .select_from(CustomerCoupon)
+        .where(CustomerCoupon.coupon_id == coupon_id)
+        .where(CustomerCoupon.status == "used")
+        .where(CustomerCoupon.used_at.is_not(None))
+    )
+    return int(session.scalar(statement) or 0)
+
+
+def count_customer_coupon_used(
+    session: Session,
+    *,
+    coupon_id: int,
+    customer_id: int,
+) -> int:
+    statement = (
+        select(func.count())
+        .select_from(CustomerCoupon)
+        .where(CustomerCoupon.coupon_id == coupon_id)
+        .where(CustomerCoupon.customer_id == customer_id)
+        .where(CustomerCoupon.status == "used")
+        .where(CustomerCoupon.used_at.is_not(None))
+    )
+    return int(session.scalar(statement) or 0)
+
+
+def create_customer_coupon_usage(
+    session: Session,
+    customer_coupon: CustomerCoupon,
+) -> CustomerCoupon:
+    session.add(customer_coupon)
+    session.flush()
+    return customer_coupon
