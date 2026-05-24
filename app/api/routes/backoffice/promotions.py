@@ -1,4 +1,8 @@
-"""Backoffice promotion routes; HTTP paths are /backoffice/promotions/*."""
+"""Backoffice promotion usage routes retained in d2c-api.
+
+Promotion/coupon configuration owner APIs moved to d2c-backoffice-api.
+d2c-api keeps customer coupon usage facts because checkout runtime still writes them.
+"""
 
 from typing import Annotated
 
@@ -7,36 +11,13 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_session
 from app.domains.promotions.contracts.backoffice_promotion_contract import (
-    BackofficeCoupon,
-    BackofficeCouponCreateRequest,
-    BackofficeCouponsResponse,
     BackofficeCustomerCouponsResponse,
-    BackofficePromotion,
-    BackofficePromotionCreateRequest,
-    BackofficePromotionHealthResponse,
-    BackofficePromotionsResponse,
-    BackofficePromotionTargetsResponse,
 )
 from app.domains.promotions.services.backoffice_promotion_service import (
-    BackofficeCouponDuplicateCodeError,
-    BackofficeCouponInvalidRangeError,
-    BackofficeCouponNotFoundError,
-    BackofficePromotionDuplicateCodeError,
-    BackofficePromotionInvalidRangeError,
-    BackofficePromotionNotFoundError,
-    activate_backoffice_coupon,
-    activate_backoffice_promotion,
-    create_backoffice_coupon,
-    create_backoffice_promotion,
-    deactivate_backoffice_coupon,
-    deactivate_backoffice_promotion,
-    get_backoffice_coupons,
     get_backoffice_customer_coupons,
-    get_backoffice_promotion_targets,
-    get_backoffice_promotions,
 )
 
-router = APIRouter(prefix="/backoffice/promotions", tags=["backoffice-promotions"])
+router = APIRouter(prefix="/backoffice/promotions", tags=["backoffice-promotions-usage"])
 SessionDep = Annotated[Session, Depends(get_session)]
 
 
@@ -51,153 +32,6 @@ def require_backoffice_client(
 
 
 BackofficeClientDep = Annotated[None, Depends(require_backoffice_client)]
-
-
-@router.get("/health", response_model=BackofficePromotionHealthResponse)
-def backoffice_promotions_health(_: BackofficeClientDep) -> BackofficePromotionHealthResponse:
-    return BackofficePromotionHealthResponse(
-        status="ok",
-        module="backoffice_promotions",
-        surface="merchant_management",
-    )
-
-
-@router.get("", response_model=BackofficePromotionsResponse)
-def backoffice_promotions_list(
-    _: BackofficeClientDep,
-    session: SessionDep,
-) -> BackofficePromotionsResponse:
-    return get_backoffice_promotions(session)
-
-
-@router.post(
-    "",
-    response_model=BackofficePromotion,
-    status_code=status.HTTP_201_CREATED,
-)
-def backoffice_promotions_create(
-    payload: BackofficePromotionCreateRequest,
-    _: BackofficeClientDep,
-    session: SessionDep,
-) -> BackofficePromotion:
-    try:
-        return create_backoffice_promotion(session, payload)
-    except BackofficePromotionDuplicateCodeError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=str(exc),
-        ) from exc
-    except BackofficePromotionInvalidRangeError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=str(exc),
-        ) from exc
-
-
-@router.post("/{promotion_code}/activate", response_model=BackofficePromotion)
-def backoffice_promotions_activate(
-    promotion_code: str,
-    _: BackofficeClientDep,
-    session: SessionDep,
-) -> BackofficePromotion:
-    try:
-        return activate_backoffice_promotion(session, promotion_code)
-    except BackofficePromotionNotFoundError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(exc),
-        ) from exc
-
-
-@router.post("/{promotion_code}/deactivate", response_model=BackofficePromotion)
-def backoffice_promotions_deactivate(
-    promotion_code: str,
-    _: BackofficeClientDep,
-    session: SessionDep,
-) -> BackofficePromotion:
-    try:
-        return deactivate_backoffice_promotion(session, promotion_code)
-    except BackofficePromotionNotFoundError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(exc),
-        ) from exc
-
-
-@router.post(
-    "/{promotion_code}/coupons",
-    response_model=BackofficeCoupon,
-    status_code=status.HTTP_201_CREATED,
-)
-def backoffice_promotions_coupon_create(
-    promotion_code: str,
-    payload: BackofficeCouponCreateRequest,
-    _: BackofficeClientDep,
-    session: SessionDep,
-) -> BackofficeCoupon:
-    try:
-        return create_backoffice_coupon(session, promotion_code, payload)
-    except BackofficePromotionNotFoundError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(exc),
-        ) from exc
-    except BackofficeCouponDuplicateCodeError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=str(exc),
-        ) from exc
-    except BackofficeCouponInvalidRangeError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=str(exc),
-        ) from exc
-
-
-@router.post("/coupons/{coupon_code}/activate", response_model=BackofficeCoupon)
-def backoffice_coupons_activate(
-    coupon_code: str,
-    _: BackofficeClientDep,
-    session: SessionDep,
-) -> BackofficeCoupon:
-    try:
-        return activate_backoffice_coupon(session, coupon_code)
-    except BackofficeCouponNotFoundError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(exc),
-        ) from exc
-
-
-@router.post("/coupons/{coupon_code}/deactivate", response_model=BackofficeCoupon)
-def backoffice_coupons_deactivate(
-    coupon_code: str,
-    _: BackofficeClientDep,
-    session: SessionDep,
-) -> BackofficeCoupon:
-    try:
-        return deactivate_backoffice_coupon(session, coupon_code)
-    except BackofficeCouponNotFoundError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(exc),
-        ) from exc
-
-
-@router.get("/targets", response_model=BackofficePromotionTargetsResponse)
-def backoffice_promotion_targets_list(
-    _: BackofficeClientDep,
-    session: SessionDep,
-) -> BackofficePromotionTargetsResponse:
-    return get_backoffice_promotion_targets(session)
-
-
-@router.get("/coupons", response_model=BackofficeCouponsResponse)
-def backoffice_coupons_list(
-    _: BackofficeClientDep,
-    session: SessionDep,
-) -> BackofficeCouponsResponse:
-    return get_backoffice_coupons(session)
 
 
 @router.get("/customer-coupons", response_model=BackofficeCustomerCouponsResponse)

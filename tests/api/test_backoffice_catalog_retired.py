@@ -22,14 +22,11 @@ def test_backoffice_catalog_routes_are_retired() -> None:
         assert response.status_code == 404
 
 
-def test_backoffice_promotions_routes_remain_available() -> None:
+def test_backoffice_customer_coupon_usage_route_remains_available() -> None:
     client = TestClient(app)
 
-    response = client.get("/backoffice/promotions/health", headers=BACKOFFICE_HEADERS)
+    response = client.get("/backoffice/promotions/customer-coupons", headers=BACKOFFICE_HEADERS)
 
     assert response.status_code == 200
-    assert response.json() == {
-        "status": "ok",
-        "module": "backoffice_promotions",
-        "surface": "merchant_management",
-    }
+    assert "count" in response.json()
+    assert "customer_coupons" in response.json()

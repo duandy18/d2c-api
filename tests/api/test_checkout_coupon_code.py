@@ -6,8 +6,6 @@ from sqlalchemy import create_engine, text
 from app.core.config import load_settings
 from app.main import app
 
-BACKOFFICE_HEADERS = {"X-Backoffice-Client": "d2c-backoffice"}
-
 
 def unique_code(prefix: str) -> str:
     return f"{prefix}-{uuid4().hex[:16].upper()}"
@@ -100,8 +98,7 @@ def checkout_payload(cart_code: str, coupon_code: str | None = None) -> dict[str
     return payload
 
 
-def create_active_backoffice_coupon(
-    client: TestClient,
+def create_active_runtime_coupon(
     *,
     total_limit: int | None = 100,
     per_customer_limit: int | None = 1,
@@ -109,56 +106,123 @@ def create_active_backoffice_coupon(
     promotion_code = unique_code("CHECKOUTPROMO")
     coupon_code = unique_code("CHECKOUTCOUPON")
 
-    promotion_response = client.post(
-        "/backoffice/promotions",
-        json={
-            "promotion_code": promotion_code,
-            "name": "Checkout Coupon Promotion",
-            "promotion_type": "store_campaign",
-            "discount_type": "percentage",
-            "discount_value": 10,
-            "scope_type": "all_store",
-            "currency": "USD",
-            "priority": 10,
-            "stackable": False,
-        },
-        headers=BACKOFFICE_HEADERS,
-    )
-    assert promotion_response.status_code == 201
+    engine = create_engine(load_settings().database_url)
+    try:
+        with engine.begin() as connection:
+            promotion_id = connection.execute(
+                text(
+                    """
+                    INSERT INTO d2c_promotions (
+                      promotion_code,
+                      name,
+                      promotion_type,
+                      discount_type,
+                      discount_value,
+                      scope_type,
+                      currency,
+                      status,
+                      priority,
+                      stackable,
+                      is_active
+                    )
+                    VALUES (
+                      :promotion_code,
+                      'Checkout Coupon Promotion',
+                      'store_campaign',
+                      'percentage',
+                      10,
+                      'all_store',
+                      'USD',
+                      'active',
+                      10,
+                      FALSE,
+                      TRUE
+                    )
+                    RETURNING id
+                    """
+                ),
+                {"promotion_code": promotion_code},
+            ).scalar_one()
 
-    activate_promotion_response = client.post(
-        f"/backoffice/promotions/{promotion_code}/activate",
-        headers=BACKOFFICE_HEADERS,
-    )
-    assert activate_promotion_response.status_code == 200
+            connection.execute(
+                text(
+                    """
+                    INSERT INTO d2c_promotion_targets (
+                      promotion_id,
+                      target_type,
+                      target_id,
+                      target_code
+                    )
+                    VALUES (:promotion_id, 'all_store', NULL, NULL)
+                    """
+                ),
+                {"promotion_id": promotion_id},
+            )
 
-    coupon_response = client.post(
-        f"/backoffice/promotions/{promotion_code}/coupons",
-        json={
-            "coupon_code": coupon_code,
-            "name": "Checkout Coupon",
-            "coupon_type": "public_code",
-            "total_limit": total_limit,
-            "per_customer_limit": per_customer_limit,
-        },
-        headers=BACKOFFICE_HEADERS,
-    )
-    assert coupon_response.status_code == 201
-
-    activate_coupon_response = client.post(
-        f"/backoffice/promotions/coupons/{coupon_code}/activate",
-        headers=BACKOFFICE_HEADERS,
-    )
-    assert activate_coupon_response.status_code == 200
+            connection.execute(
+                text(
+                    """
+                    INSERT INTO d2c_coupons (
+                      coupon_code,
+                      name,
+                      promotion_id,
+                      coupon_type,
+                      total_limit,
+                      per_customer_limit,
+                      status,
+                      is_active
+                    )
+                    VALUES (
+                      :coupon_code,
+                      'Checkout Coupon',
+                      :promotion_id,
+                      'public_code',
+                      :total_limit,
+                      :per_customer_limit,
+                      'active',
+                      TRUE
+                    )
+                    """
+                ),
+                {
+                    "coupon_code": coupon_code,
+                    "promotion_id": promotion_id,
+                    "total_limit": total_limit,
+                    "per_customer_limit": per_customer_limit,
+                },
+            )
+    finally:
+        engine.dispose()
 
     return promotion_code, coupon_code
+
+
+def set_runtime_coupon_active(coupon_code: str, *, is_active: bool) -> None:
+    status = "active" if is_active else "paused"
+    engine = create_engine(load_settings().database_url)
+    try:
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    """
+                    UPDATE d2c_coupons
+                    SET status = :status,
+                        is_active = :is_active,
+                        updated_at = now()
+                    WHERE coupon_code = :coupon_code
+                    """
+                ),
+                {"coupon_code": coupon_code, "status": status, "is_active": is_active},
+            )
+    finally:
+        engine.dispose()
 
 
 def test_checkout_applies_active_public_coupon_code() -> None:
     reset_promotions_and_coupons()
     client = TestClient(app)
     token = register_customer(client)
-    promotion_code, coupon_code = create_active_backoffice_coupon(client)
+    promotion_code, coupon_code = create_active_runtime_coupon()
     cart_code = create_cart_with_item(client)
 
     response = client.post(
@@ -257,13 +321,9 @@ def test_checkout_does_not_use_inactive_coupon_code() -> None:
     reset_promotions_and_coupons()
     client = TestClient(app)
     token = register_customer(client)
-    _, coupon_code = create_active_backoffice_coupon(client)
+    _, coupon_code = create_active_runtime_coupon()
 
-    deactivate_coupon_response = client.post(
-        f"/backoffice/promotions/coupons/{coupon_code}/deactivate",
-        headers=BACKOFFICE_HEADERS,
-    )
-    assert deactivate_coupon_response.status_code == 200
+    set_runtime_coupon_active(coupon_code, is_active=False)
 
     cart_code = create_cart_with_item(client)
     response = client.post(
@@ -280,8 +340,7 @@ def test_checkout_enforces_coupon_per_customer_limit() -> None:
     reset_promotions_and_coupons()
     client = TestClient(app)
     token = register_customer(client)
-    _, coupon_code = create_active_backoffice_coupon(
-        client,
+    _, coupon_code = create_active_runtime_coupon(
         total_limit=100,
         per_customer_limit=1,
     )
@@ -310,8 +369,7 @@ def test_checkout_enforces_coupon_total_limit() -> None:
     client = TestClient(app)
     first_token = register_customer(client)
     second_token = register_customer(client)
-    _, coupon_code = create_active_backoffice_coupon(
-        client,
+    _, coupon_code = create_active_runtime_coupon(
         total_limit=1,
         per_customer_limit=10,
     )
