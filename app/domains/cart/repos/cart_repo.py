@@ -1,10 +1,12 @@
 """Cart domain repositories."""
 
-from sqlalchemy import Select, delete, func, or_, select
+from sqlalchemy import Select, and_, delete, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.domains.cart.models.cart import Cart, CartLine
-from app.domains.catalog.models.catalog import PriceList, Product, ProductSku, SkuPrice
+from app.domains.published.models.published import PublishedPrice, PublishedProduct, PublishedSku
+
+PublishedCartItem = tuple[PublishedProduct, PublishedSku, PublishedPrice]
 
 
 def get_active_cart(
@@ -28,55 +30,87 @@ def create_cart(session: Session, cart: Cart) -> Cart:
     return cart
 
 
-def _cart_lines_query(cart_id: int) -> Select[tuple[CartLine, Product, ProductSku]]:
+def _published_product_filters() -> tuple[object, ...]:
     return (
-        select(CartLine, Product, ProductSku)
-        .join(Product, Product.id == CartLine.product_id)
-        .join(ProductSku, ProductSku.id == CartLine.sku_id)
-        .where(CartLine.cart_id == cart_id)
-        .order_by(CartLine.id)
+        PublishedProduct.display_status == "visible",
+        PublishedProduct.sell_status == "sellable",
+        or_(PublishedProduct.visible_from.is_(None), PublishedProduct.visible_from <= func.now()),
+        or_(PublishedProduct.visible_until.is_(None), PublishedProduct.visible_until > func.now()),
     )
 
 
-def list_cart_line_rows(
+def _published_price_filters() -> tuple[object, ...]:
+    return (
+        PublishedPrice.channel == "storefront",
+        PublishedPrice.is_active.is_(True),
+        or_(PublishedPrice.effective_from.is_(None), PublishedPrice.effective_from <= func.now()),
+        or_(PublishedPrice.effective_until.is_(None), PublishedPrice.effective_until > func.now()),
+    )
+
+
+def _published_cart_item_query(
+    product_code: str,
+    sku_code: str,
+) -> Select[tuple[PublishedProduct, PublishedSku, PublishedPrice]]:
+    return (
+        select(PublishedProduct, PublishedSku, PublishedPrice)
+        .join(
+            PublishedSku,
+            and_(
+                PublishedSku.publish_version == PublishedProduct.publish_version,
+                PublishedSku.product_code == PublishedProduct.product_code,
+            ),
+        )
+        .join(
+            PublishedPrice,
+            and_(
+                PublishedPrice.publish_version == PublishedSku.publish_version,
+                PublishedPrice.sku_code == PublishedSku.sku_code,
+            ),
+        )
+        .where(PublishedProduct.product_code == product_code)
+        .where(PublishedSku.sku_code == sku_code)
+        .where(*_published_product_filters())
+        .where(PublishedSku.is_sellable.is_(True))
+        .where(*_published_price_filters())
+        .order_by(
+            PublishedProduct.published_at.desc(),
+            PublishedProduct.id.desc(),
+            PublishedPrice.priority,
+            PublishedPrice.id,
+        )
+        .limit(1)
+    )
+
+
+def list_cart_lines(
     session: Session,
     cart_id: int,
-) -> list[tuple[CartLine, Product, ProductSku]]:
-    return list(session.execute(_cart_lines_query(cart_id)).all())
+) -> list[CartLine]:
+    statement = select(CartLine).where(CartLine.cart_id == cart_id).order_by(CartLine.id)
+    return list(session.scalars(statement).all())
 
 
-def get_product_sku_for_cart(
+def get_published_item_for_cart(
     session: Session,
     product_code: str,
     sku_code: str,
-) -> tuple[Product, ProductSku, SkuPrice] | None:
-    statement = (
-        select(Product, ProductSku, SkuPrice)
-        .join(ProductSku, ProductSku.product_id == Product.id)
-        .join(SkuPrice, SkuPrice.sku_id == ProductSku.id)
-        .join(PriceList, PriceList.id == SkuPrice.price_list_id)
-        .where(Product.product_code == product_code)
-        .where(ProductSku.sku_code == sku_code)
-        .where(Product.is_active.is_(True))
-        .where(Product.status == "active")
-        .where(ProductSku.is_active.is_(True))
-        .where(PriceList.price_list_code == "default_usd_storefront")
-        .where(PriceList.channel == "storefront")
-        .where(PriceList.customer_segment == "default")
-        .where(PriceList.is_active.is_(True))
-        .where(SkuPrice.is_active.is_(True))
-        .where(or_(SkuPrice.effective_from.is_(None), SkuPrice.effective_from <= func.now()))
-        .where(or_(SkuPrice.effective_to.is_(None), SkuPrice.effective_to > func.now()))
-    )
-    return session.execute(statement).first()
+) -> PublishedCartItem | None:
+    return session.execute(_published_cart_item_query(product_code, sku_code)).first()
 
 
-def get_cart_line_by_sku(
+def get_cart_line_by_published_sku(
     session: Session,
     cart_id: int,
-    sku_id: int,
+    publish_version: str,
+    sku_code: str,
 ) -> CartLine | None:
-    statement = select(CartLine).where(CartLine.cart_id == cart_id).where(CartLine.sku_id == sku_id)
+    statement = (
+        select(CartLine)
+        .where(CartLine.cart_id == cart_id)
+        .where(CartLine.publish_version == publish_version)
+        .where(CartLine.sku_code == sku_code)
+    )
     return session.scalar(statement)
 
 

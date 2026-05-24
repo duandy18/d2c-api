@@ -43,6 +43,11 @@ def test_cart_table_columns() -> None:
             "cart_id",
             "product_id",
             "sku_id",
+            "publish_version",
+            "product_code",
+            "sku_code",
+            "product_name",
+            "sku_name",
             "quantity",
             "unit_price_cents",
             "currency",
@@ -62,7 +67,20 @@ def test_cart_line_unique_constraint() -> None:
         unique_constraints = inspector.get_unique_constraints("d2c_cart_lines")
         unique_names = {constraint["name"] for constraint in unique_constraints}
 
-        assert "uq_d2c_cart_lines_cart_id_sku_id" in unique_names
+        assert "uq_d2c_cart_lines_cart_id_publish_version_sku_code" in unique_names
+        assert "uq_d2c_cart_lines_cart_id_sku_id" not in unique_names
+    finally:
+        engine.dispose()
+
+
+def test_cart_line_foreign_keys_are_decoupled_from_old_catalog_owner_tables() -> None:
+    engine = create_db_engine(load_settings())
+    try:
+        inspector = inspect(engine)
+
+        fk_targets = {fk["referred_table"] for fk in inspector.get_foreign_keys("d2c_cart_lines")}
+
+        assert fk_targets == {"d2c_carts"}
     finally:
         engine.dispose()
 

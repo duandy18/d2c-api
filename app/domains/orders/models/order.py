@@ -138,7 +138,7 @@ class D2COrder(Base):
 
 
 class D2COrderLine(Base):
-    """D2C order line with product and SKU snapshots."""
+    """D2C order line with published product and SKU snapshots."""
 
     __tablename__ = "d2c_order_lines"
     __table_args__ = (
@@ -152,8 +152,9 @@ class D2COrderLine(Base):
             name="ck_d2c_order_lines_line_subtotal_cents_non_negative",
         ),
         Index("ix_d2c_order_lines_order_id", "order_id"),
-        Index("ix_d2c_order_lines_product_id", "product_id"),
-        Index("ix_d2c_order_lines_sku_id", "sku_id"),
+        Index("ix_d2c_order_lines_publish_version", "publish_version"),
+        Index("ix_d2c_order_lines_product_code", "product_code"),
+        Index("ix_d2c_order_lines_sku_code", "sku_code"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -162,18 +163,11 @@ class D2COrderLine(Base):
         ForeignKey("d2c_orders.id", ondelete="CASCADE"),
         nullable=False,
     )
-    product_id: Mapped[int] = mapped_column(
-        Integer,
-        ForeignKey("d2c_products.id"),
-        nullable=False,
-    )
-    sku_id: Mapped[int] = mapped_column(
-        Integer,
-        ForeignKey("d2c_product_skus.id"),
-        nullable=False,
-    )
-    product_code: Mapped[str] = mapped_column(String(64), nullable=False)
-    sku_code: Mapped[str] = mapped_column(String(64), nullable=False)
+    product_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    sku_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    publish_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    product_code: Mapped[str] = mapped_column(String(96), nullable=False)
+    sku_code: Mapped[str] = mapped_column(String(128), nullable=False)
     product_name: Mapped[str] = mapped_column(String(255), nullable=False)
     sku_name: Mapped[str] = mapped_column(String(255), nullable=False)
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)

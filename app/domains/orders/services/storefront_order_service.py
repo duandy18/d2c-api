@@ -24,7 +24,7 @@ from app.domains.orders.repos.order_repo import (
     get_cart_by_code,
     get_latest_payment_by_order_id,
     get_order_by_no_for_customer,
-    list_cart_line_rows_for_checkout,
+    list_cart_lines_for_checkout,
     list_order_lines,
 )
 from app.domains.promotions.models.promotion import Coupon, CustomerCoupon, Promotion
@@ -103,11 +103,11 @@ def authenticate_customer(
 
 def _sync_cart_summary(
     cart: Cart,
-    rows: list[tuple[object, object, object]],
+    rows: list[object],
 ) -> None:
     cart.line_count = len(rows)
-    cart.item_count = sum(cart_line.quantity for cart_line, _, _ in rows)
-    cart.subtotal_cents = sum(cart_line.line_subtotal_cents for cart_line, _, _ in rows)
+    cart.item_count = sum(cart_line.quantity for cart_line in rows)
+    cart.subtotal_cents = sum(cart_line.line_subtotal_cents for cart_line in rows)
 
 
 def _normalize_coupon_code(coupon_code: str | None) -> str | None:
@@ -233,7 +233,7 @@ def checkout_order(
     if cart.status != "active":
         raise CheckoutCartAlreadyConvertedError("checkout_cart_already_converted")
 
-    rows = list_cart_line_rows_for_checkout(session, cart.id)
+    rows = list_cart_lines_for_checkout(session, cart.id)
     _sync_cart_summary(cart, rows)
 
     if cart.line_count <= 0 or cart.item_count <= 0:
@@ -318,17 +318,18 @@ def checkout_order(
             ),
         )
 
-    for cart_line, product, sku in rows:
+    for cart_line in rows:
         create_order_line(
             session,
             D2COrderLine(
                 order_id=order.id,
-                product_id=product.id,
-                sku_id=sku.id,
-                product_code=product.product_code,
-                sku_code=sku.sku_code,
-                product_name=product.name,
-                sku_name=sku.name,
+                product_id=None,
+                sku_id=None,
+                publish_version=cart_line.publish_version,
+                product_code=cart_line.product_code,
+                sku_code=cart_line.sku_code,
+                product_name=cart_line.product_name,
+                sku_name=cart_line.sku_name,
                 quantity=cart_line.quantity,
                 unit_price_cents=cart_line.unit_price_cents,
                 line_subtotal_cents=cart_line.line_subtotal_cents,

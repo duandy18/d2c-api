@@ -12,16 +12,16 @@ from app.domains.cart.contracts.storefront_cart_contract import (
 )
 from app.domains.cart.models.cart import Cart, CartLine
 from app.domains.cart.repos.cart_repo import (
+    PublishedCartItem,
     clear_cart_lines,
     create_cart,
     create_cart_line,
     delete_cart_line,
     get_active_cart,
-    get_cart_line_by_sku,
-    get_product_sku_for_cart,
-    list_cart_line_rows,
+    get_cart_line_by_published_sku,
+    get_published_item_for_cart,
+    list_cart_lines,
 )
-from app.domains.catalog.models.catalog import Product, ProductSku
 
 
 class CartProductNotFoundError(Exception):
@@ -59,15 +59,11 @@ def get_or_create_cart(
     return cart
 
 
-def _build_line_response(
-    cart_line: CartLine,
-    product: Product,
-    sku: ProductSku,
-) -> CartLineResponse:
+def _build_line_response(cart_line: CartLine) -> CartLineResponse:
     return CartLineResponse(
-        product_id=product.product_code,
-        sku=sku.sku_code,
-        name=product.name,
+        product_id=cart_line.product_code,
+        sku=cart_line.sku_code,
+        name=cart_line.product_name,
         quantity=cart_line.quantity,
         unit_price_cents=cart_line.unit_price_cents,
         currency=cart_line.currency,
@@ -77,17 +73,17 @@ def _build_line_response(
 
 def _sync_cart_summary(
     cart: Cart,
-    rows: list[tuple[CartLine, Product, ProductSku]],
+    rows: list[CartLine],
 ) -> None:
     cart.line_count = len(rows)
-    cart.item_count = sum(cart_line.quantity for cart_line, _, _ in rows)
-    cart.subtotal_cents = sum(cart_line.line_subtotal_cents for cart_line, _, _ in rows)
+    cart.item_count = sum(cart_line.quantity for cart_line in rows)
+    cart.subtotal_cents = sum(cart_line.line_subtotal_cents for cart_line in rows)
 
 
 def build_cart_response(session: Session, cart: Cart) -> CartResponse:
-    rows = list_cart_line_rows(session, cart.id)
+    rows = list_cart_lines(session, cart.id)
     _sync_cart_summary(cart, rows)
-    lines = [_build_line_response(cart_line, product, sku) for cart_line, product, sku in rows]
+    lines = [_build_line_response(cart_line) for cart_line in rows]
 
     return CartResponse(
         cart_code=cart.cart_code,
@@ -109,22 +105,34 @@ def get_cart(
     return build_cart_response(session, cart)
 
 
+def _line_names(published_item: PublishedCartItem) -> tuple[str, str]:
+    product, sku, _price = published_item
+    product_name = product.display_name or product.product_name
+    sku_name = sku.display_sku_name or sku.sku_name
+    return product_name, sku_name
+
+
 def upsert_cart_item(
     session: Session,
     payload: CartItemUpsertRequest,
 ) -> CartResponse:
     cart = get_or_create_cart(session, payload.anonymous_id, payload.session_code)
-    product_sku_price = get_product_sku_for_cart(
+    published_item = get_published_item_for_cart(
         session,
         payload.product_id,
         payload.sku,
     )
 
-    if product_sku_price is None:
+    if published_item is None:
         raise CartProductNotFoundError("cart_product_not_found")
 
-    product, sku, sku_price = product_sku_price
-    existing_line = get_cart_line_by_sku(session, cart.id, sku.id)
+    product, sku, price = published_item
+    existing_line = get_cart_line_by_published_sku(
+        session,
+        cart.id,
+        product.publish_version,
+        sku.sku_code,
+    )
 
     if payload.quantity == 0:
         if existing_line is not None:
@@ -133,25 +141,36 @@ def upsert_cart_item(
         session.commit()
         return response
 
-    line_subtotal_cents = sku_price.price_cents * payload.quantity
+    product_name, sku_name = _line_names(published_item)
+    line_subtotal_cents = price.price_cents * payload.quantity
 
     if existing_line is None:
         create_cart_line(
             session,
             CartLine(
                 cart_id=cart.id,
-                product_id=product.id,
-                sku_id=sku.id,
+                product_id=None,
+                sku_id=None,
+                publish_version=product.publish_version,
+                product_code=product.product_code,
+                sku_code=sku.sku_code,
+                product_name=product_name,
+                sku_name=sku_name,
                 quantity=payload.quantity,
-                unit_price_cents=sku_price.price_cents,
-                currency=sku_price.currency,
+                unit_price_cents=price.price_cents,
+                currency=price.currency,
                 line_subtotal_cents=line_subtotal_cents,
             ),
         )
     else:
+        existing_line.product_id = None
+        existing_line.sku_id = None
+        existing_line.product_code = product.product_code
+        existing_line.product_name = product_name
+        existing_line.sku_name = sku_name
         existing_line.quantity = payload.quantity
-        existing_line.unit_price_cents = sku_price.price_cents
-        existing_line.currency = sku_price.currency
+        existing_line.unit_price_cents = price.price_cents
+        existing_line.currency = price.currency
         existing_line.line_subtotal_cents = line_subtotal_cents
 
     response = build_cart_response(session, cart)

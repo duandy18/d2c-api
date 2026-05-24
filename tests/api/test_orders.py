@@ -6,6 +6,7 @@ from sqlalchemy import create_engine, text
 
 from app.core.config import load_settings
 from app.main import app
+from tests.helpers.published_catalog import seed_default_published_catalog
 
 
 @pytest.fixture(autouse=True)
@@ -75,6 +76,7 @@ def cart_identity() -> dict[str, str]:
 
 
 def create_cart_with_item(client: TestClient) -> str:
+    seed_default_published_catalog()
     identity = cart_identity()
     response = client.post(
         "/cart/items",

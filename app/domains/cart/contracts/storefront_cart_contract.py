@@ -10,7 +10,7 @@ class CartIdentityRequest(BaseModel):
 
 class CartItemUpsertRequest(CartIdentityRequest):
     product_id: str = Field(..., min_length=1, max_length=96)
-    sku: str = Field(..., min_length=1, max_length=96)
+    sku: str = Field(..., min_length=1, max_length=128)
     quantity: int = Field(..., ge=0, le=999)
 
 
