@@ -12,13 +12,21 @@ PID_FILE ?= /tmp/d2c_api_8025.pid
 LOG_FILE ?= /tmp/d2c_api_8025.log
 HEALTH_URL ?= http://127.0.0.1:$(PORT)/health
 
+D2C_BACKOFFICE_API_BASE_URL ?= http://127.0.0.1:8026
+D2C_SERVICE_CLIENT_CODE ?= d2c-service
+PUBLISH_VERSION ?=
+REQUESTED_BY ?= cli
+
 DEV_ENV := D2C_ENVIRONMENT="$(D2C_ENV)" D2C_DATABASE_URL="$(DEV_DB_DSN)" D2C_TEST_DATABASE_URL="$(DEV_DB_DSN)" PYTHONPATH=.
 TEST_ENV := D2C_ENVIRONMENT=test D2C_DATABASE_URL="$(DEV_TEST_DB_DSN)" D2C_TEST_DATABASE_URL="$(DEV_TEST_DB_DSN)" PYTHONPATH=.
+PUBLISHED_SYNC_ENV := $(DEV_ENV) D2C_BACKOFFICE_API_BASE_URL="$(D2C_BACKOFFICE_API_BASE_URL)" D2C_SERVICE_CLIENT_CODE="$(D2C_SERVICE_CLIENT_CODE)" D2C_PUBLISH_VERSION="$(PUBLISH_VERSION)" D2C_PUBLISH_SYNC_REQUESTED_BY="$(REQUESTED_BY)"
 
 .PHONY: clean-pyc install lint test routes openapi check
 .PHONY: upgrade-dev alembic-check alembic-current alembic-history revision
 .PHONY: uvicorn uvicorn-up uvicorn-down uvicorn-restart uvicorn-status uvicorn-logs
 .PHONY: up down restart status logs
+.PHONY: sync-published-catalog sync-published-prices sync-published-promotions
+.PHONY: sync-published-coupons sync-published-all
 
 clean-pyc:
 	find . -type d -name "__pycache__" -prune -exec rm -rf {} + 2>/dev/null || true
@@ -65,6 +73,22 @@ revision:
 	else \
 		$(DEV_ENV) $(ALEMBIC) revision --autogenerate -m "$(MESSAGE)"; \
 	fi
+
+sync-published-catalog: clean-pyc
+	$(PUBLISHED_SYNC_ENV) $(PYTHON) scripts/published/sync_published.py --scope catalog
+
+sync-published-prices: clean-pyc
+	$(PUBLISHED_SYNC_ENV) $(PYTHON) scripts/published/sync_published.py --scope prices
+
+sync-published-promotions: clean-pyc
+	$(PUBLISHED_SYNC_ENV) $(PYTHON) scripts/published/sync_published.py --scope promotions
+
+sync-published-coupons: clean-pyc
+	$(PUBLISHED_SYNC_ENV) $(PYTHON) scripts/published/sync_published.py --scope coupons
+
+sync-published-all: clean-pyc
+	$(PUBLISHED_SYNC_ENV) $(PYTHON) scripts/published/sync_published.py --scope all
+
 uvicorn:
 	$(PYTHON) -m uvicorn app.main:app --host $(HOST) --port $(PORT) --reload
 
