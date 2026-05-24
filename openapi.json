@@ -741,6 +741,349 @@
           }
         }
       }
+    },
+    "/published/health": {
+      "get": {
+        "tags": [
+          "published"
+        ],
+        "summary": "Published Health",
+        "operationId": "published_health_published_health_get",
+        "parameters": [
+          {
+            "name": "X-Service-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Service-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishedHealthResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/published/products": {
+      "get": {
+        "tags": [
+          "published"
+        ],
+        "summary": "Published Products",
+        "operationId": "published_products_published_products_get",
+        "parameters": [
+          {
+            "name": "X-Service-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Service-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishedProductsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/published/skus": {
+      "get": {
+        "tags": [
+          "published"
+        ],
+        "summary": "Published Skus",
+        "operationId": "published_skus_published_skus_get",
+        "parameters": [
+          {
+            "name": "X-Service-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Service-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishedSkusResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/published/prices": {
+      "get": {
+        "tags": [
+          "published"
+        ],
+        "summary": "Published Prices",
+        "operationId": "published_prices_published_prices_get",
+        "parameters": [
+          {
+            "name": "X-Service-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Service-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishedPricesResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/published/promotions": {
+      "get": {
+        "tags": [
+          "published"
+        ],
+        "summary": "Published Promotions",
+        "operationId": "published_promotions_published_promotions_get",
+        "parameters": [
+          {
+            "name": "X-Service-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Service-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishedPromotionsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/published/coupons": {
+      "get": {
+        "tags": [
+          "published"
+        ],
+        "summary": "Published Coupons",
+        "operationId": "published_coupons_published_coupons_get",
+        "parameters": [
+          {
+            "name": "X-Service-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Service-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishedCouponsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/published/sync-runs": {
+      "get": {
+        "tags": [
+          "published"
+        ],
+        "summary": "Published Sync Runs",
+        "operationId": "published_sync_runs_published_sync_runs_get",
+        "parameters": [
+          {
+            "name": "X-Service-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Service-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublishSyncRunsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2002,6 +2345,1096 @@
           "created_at"
         ],
         "title": "PaymentResponse"
+      },
+      "PublishSyncRunContract": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "sync_scope": {
+            "type": "string",
+            "title": "Sync Scope"
+          },
+          "source_service": {
+            "type": "string",
+            "title": "Source Service"
+          },
+          "source_base_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Base Url"
+          },
+          "source_endpoint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Endpoint"
+          },
+          "publish_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publish Version"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Started At"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "requested_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Requested By"
+          },
+          "rows_fetched": {
+            "type": "integer",
+            "title": "Rows Fetched"
+          },
+          "rows_upserted": {
+            "type": "integer",
+            "title": "Rows Upserted"
+          },
+          "rows_deleted": {
+            "type": "integer",
+            "title": "Rows Deleted"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message"
+          },
+          "raw_summary": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Raw Summary"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "sync_scope",
+          "source_service",
+          "source_base_url",
+          "source_endpoint",
+          "publish_version",
+          "status",
+          "started_at",
+          "finished_at",
+          "requested_by",
+          "rows_fetched",
+          "rows_upserted",
+          "rows_deleted",
+          "error_code",
+          "error_message",
+          "raw_summary"
+        ],
+        "title": "PublishSyncRunContract"
+      },
+      "PublishSyncRunsResponse": {
+        "properties": {
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count"
+          },
+          "sync_runs": {
+            "items": {
+              "$ref": "#/components/schemas/PublishSyncRunContract"
+            },
+            "type": "array",
+            "title": "Sync Runs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count",
+          "sync_runs"
+        ],
+        "title": "PublishSyncRunsResponse"
+      },
+      "PublishedCouponContract": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "publish_version": {
+            "type": "string",
+            "title": "Publish Version"
+          },
+          "coupon_code": {
+            "type": "string",
+            "title": "Coupon Code"
+          },
+          "coupon_name": {
+            "type": "string",
+            "title": "Coupon Name"
+          },
+          "promotion_code": {
+            "type": "string",
+            "title": "Promotion Code"
+          },
+          "coupon_type": {
+            "type": "string",
+            "title": "Coupon Type"
+          },
+          "total_limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Limit"
+          },
+          "per_customer_limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Per Customer Limit"
+          },
+          "starts_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starts At"
+          },
+          "ends_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends At"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Published At"
+          },
+          "source_coupon_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Coupon Id"
+          },
+          "source_updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Updated At"
+          },
+          "raw_payload": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Raw Payload"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "publish_version",
+          "coupon_code",
+          "coupon_name",
+          "promotion_code",
+          "coupon_type",
+          "total_limit",
+          "per_customer_limit",
+          "starts_at",
+          "ends_at",
+          "is_active",
+          "published_at",
+          "source_coupon_id",
+          "source_updated_at",
+          "raw_payload"
+        ],
+        "title": "PublishedCouponContract"
+      },
+      "PublishedCouponsResponse": {
+        "properties": {
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count"
+          },
+          "coupons": {
+            "items": {
+              "$ref": "#/components/schemas/PublishedCouponContract"
+            },
+            "type": "array",
+            "title": "Coupons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count",
+          "coupons"
+        ],
+        "title": "PublishedCouponsResponse"
+      },
+      "PublishedHealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "module": {
+            "type": "string",
+            "title": "Module"
+          },
+          "storage": {
+            "type": "string",
+            "title": "Storage"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "module",
+          "storage"
+        ],
+        "title": "PublishedHealthResponse"
+      },
+      "PublishedPriceContract": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "publish_version": {
+            "type": "string",
+            "title": "Publish Version"
+          },
+          "price_list_code": {
+            "type": "string",
+            "title": "Price List Code"
+          },
+          "channel": {
+            "type": "string",
+            "title": "Channel"
+          },
+          "sku_code": {
+            "type": "string",
+            "title": "Sku Code"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "price_cents": {
+            "type": "integer",
+            "title": "Price Cents"
+          },
+          "compare_at_price_cents": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compare At Price Cents"
+          },
+          "effective_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective From"
+          },
+          "effective_until": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective Until"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "priority": {
+            "type": "integer",
+            "title": "Priority"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Published At"
+          },
+          "source_price_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Price Id"
+          },
+          "source_updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Updated At"
+          },
+          "raw_payload": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Raw Payload"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "publish_version",
+          "price_list_code",
+          "channel",
+          "sku_code",
+          "currency",
+          "price_cents",
+          "compare_at_price_cents",
+          "effective_from",
+          "effective_until",
+          "is_active",
+          "priority",
+          "published_at",
+          "source_price_id",
+          "source_updated_at",
+          "raw_payload"
+        ],
+        "title": "PublishedPriceContract"
+      },
+      "PublishedPricesResponse": {
+        "properties": {
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count"
+          },
+          "prices": {
+            "items": {
+              "$ref": "#/components/schemas/PublishedPriceContract"
+            },
+            "type": "array",
+            "title": "Prices"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count",
+          "prices"
+        ],
+        "title": "PublishedPricesResponse"
+      },
+      "PublishedProductContract": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "publish_version": {
+            "type": "string",
+            "title": "Publish Version"
+          },
+          "pms_item_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pms Item Id"
+          },
+          "pms_sku": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pms Sku"
+          },
+          "product_code": {
+            "type": "string",
+            "title": "Product Code"
+          },
+          "product_name": {
+            "type": "string",
+            "title": "Product Name"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "category_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Code"
+          },
+          "category_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Name"
+          },
+          "brand_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brand Code"
+          },
+          "brand_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Brand Name"
+          },
+          "display_status": {
+            "type": "string",
+            "title": "Display Status"
+          },
+          "sell_status": {
+            "type": "string",
+            "title": "Sell Status"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
+          },
+          "visible_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visible From"
+          },
+          "visible_until": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visible Until"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Published At"
+          },
+          "source_product_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Product Id"
+          },
+          "source_updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Updated At"
+          },
+          "raw_payload": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Raw Payload"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "publish_version",
+          "pms_item_id",
+          "pms_sku",
+          "product_code",
+          "product_name",
+          "display_name",
+          "description",
+          "image_url",
+          "category_code",
+          "category_name",
+          "brand_code",
+          "brand_name",
+          "display_status",
+          "sell_status",
+          "sort_order",
+          "visible_from",
+          "visible_until",
+          "published_at",
+          "source_product_id",
+          "source_updated_at",
+          "raw_payload"
+        ],
+        "title": "PublishedProductContract"
+      },
+      "PublishedProductsResponse": {
+        "properties": {
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count"
+          },
+          "products": {
+            "items": {
+              "$ref": "#/components/schemas/PublishedProductContract"
+            },
+            "type": "array",
+            "title": "Products"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count",
+          "products"
+        ],
+        "title": "PublishedProductsResponse"
+      },
+      "PublishedPromotionContract": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "publish_version": {
+            "type": "string",
+            "title": "Publish Version"
+          },
+          "promotion_code": {
+            "type": "string",
+            "title": "Promotion Code"
+          },
+          "promotion_name": {
+            "type": "string",
+            "title": "Promotion Name"
+          },
+          "promotion_type": {
+            "type": "string",
+            "title": "Promotion Type"
+          },
+          "discount_type": {
+            "type": "string",
+            "title": "Discount Type"
+          },
+          "discount_value": {
+            "type": "integer",
+            "title": "Discount Value"
+          },
+          "scope_type": {
+            "type": "string",
+            "title": "Scope Type"
+          },
+          "min_order_amount_cents": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Order Amount Cents"
+          },
+          "max_discount_cents": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Discount Cents"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "starts_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starts At"
+          },
+          "ends_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends At"
+          },
+          "priority": {
+            "type": "integer",
+            "title": "Priority"
+          },
+          "stackable": {
+            "type": "boolean",
+            "title": "Stackable"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Published At"
+          },
+          "source_promotion_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Promotion Id"
+          },
+          "source_updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Updated At"
+          },
+          "raw_payload": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Raw Payload"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "publish_version",
+          "promotion_code",
+          "promotion_name",
+          "promotion_type",
+          "discount_type",
+          "discount_value",
+          "scope_type",
+          "min_order_amount_cents",
+          "max_discount_cents",
+          "currency",
+          "starts_at",
+          "ends_at",
+          "priority",
+          "stackable",
+          "is_active",
+          "published_at",
+          "source_promotion_id",
+          "source_updated_at",
+          "raw_payload"
+        ],
+        "title": "PublishedPromotionContract"
+      },
+      "PublishedPromotionsResponse": {
+        "properties": {
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count"
+          },
+          "promotions": {
+            "items": {
+              "$ref": "#/components/schemas/PublishedPromotionContract"
+            },
+            "type": "array",
+            "title": "Promotions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count",
+          "promotions"
+        ],
+        "title": "PublishedPromotionsResponse"
+      },
+      "PublishedSkuContract": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "publish_version": {
+            "type": "string",
+            "title": "Publish Version"
+          },
+          "product_code": {
+            "type": "string",
+            "title": "Product Code"
+          },
+          "sku_code": {
+            "type": "string",
+            "title": "Sku Code"
+          },
+          "sku_name": {
+            "type": "string",
+            "title": "Sku Name"
+          },
+          "display_sku_name": {
+            "type": "string",
+            "title": "Display Sku Name"
+          },
+          "sales_unit_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sales Unit Code"
+          },
+          "sales_unit_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sales Unit Name"
+          },
+          "barcode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Barcode"
+          },
+          "spec_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spec Text"
+          },
+          "is_sellable": {
+            "type": "boolean",
+            "title": "Is Sellable"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
+          },
+          "published_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Published At"
+          },
+          "source_sku_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Sku Id"
+          },
+          "source_updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Updated At"
+          },
+          "raw_payload": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Raw Payload"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "publish_version",
+          "product_code",
+          "sku_code",
+          "sku_name",
+          "display_sku_name",
+          "sales_unit_code",
+          "sales_unit_name",
+          "barcode",
+          "spec_text",
+          "is_sellable",
+          "sort_order",
+          "published_at",
+          "source_sku_id",
+          "source_updated_at",
+          "raw_payload"
+        ],
+        "title": "PublishedSkuContract"
+      },
+      "PublishedSkusResponse": {
+        "properties": {
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count"
+          },
+          "skus": {
+            "items": {
+              "$ref": "#/components/schemas/PublishedSkuContract"
+            },
+            "type": "array",
+            "title": "Skus"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count",
+          "skus"
+        ],
+        "title": "PublishedSkusResponse"
       },
       "ValidationError": {
         "properties": {
