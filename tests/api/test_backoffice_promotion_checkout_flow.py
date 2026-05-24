@@ -5,31 +5,18 @@ from sqlalchemy import create_engine, text
 
 from app.core.config import load_settings
 from app.main import app
-from tests.helpers.published_catalog import seed_default_published_catalog
+from tests.helpers.published_catalog import (
+    seed_default_published_catalog,
+    seed_published_promotion,
+)
 
 
 def reset_promotions_for_checkout_flow() -> None:
     engine = create_engine(load_settings().database_url)
     try:
         with engine.begin() as connection:
-            connection.execute(
-                text(
-                    """
-                    UPDATE d2c_coupons
-                    SET status = 'draft',
-                        is_active = FALSE
-                    """
-                )
-            )
-            connection.execute(
-                text(
-                    """
-                    UPDATE d2c_promotions
-                    SET status = 'draft',
-                        is_active = FALSE
-                    """
-                )
-            )
+            connection.execute(text("DELETE FROM d2c_published_coupons"))
+            connection.execute(text("DELETE FROM d2c_published_promotions"))
     finally:
         engine.dispose()
 
@@ -104,90 +91,38 @@ def checkout_payload(cart_code: str) -> dict[str, str]:
     }
 
 
-def create_runtime_promotion() -> str:
+def create_published_promotion(*, is_active: bool = False) -> tuple[str, str]:
     promotion_code = unique_code("FLOWPROMO")
-    engine = create_engine(load_settings().database_url)
-    try:
-        with engine.begin() as connection:
-            promotion_id = connection.execute(
-                text(
-                    """
-                    INSERT INTO d2c_promotions (
-                      promotion_code,
-                      name,
-                      description,
-                      promotion_type,
-                      discount_type,
-                      discount_value,
-                      scope_type,
-                      min_order_amount_cents,
-                      max_discount_cents,
-                      currency,
-                      status,
-                      priority,
-                      stackable,
-                      is_active
-                    )
-                    VALUES (
-                      :promotion_code,
-                      '后台创建后前台执行测试',
-                      'runtime seed creates, checkout executes',
-                      'store_campaign',
-                      'percentage',
-                      10,
-                      'all_store',
-                      NULL,
-                      NULL,
-                      'USD',
-                      'draft',
-                      10,
-                      FALSE,
-                      FALSE
-                    )
-                    RETURNING id
-                    """
-                ),
-                {"promotion_code": promotion_code},
-            ).scalar_one()
-
-            connection.execute(
-                text(
-                    """
-                    INSERT INTO d2c_promotion_targets (
-                      promotion_id,
-                      target_type,
-                      target_id,
-                      target_code
-                    )
-                    VALUES (:promotion_id, 'all_store', NULL, NULL)
-                    """
-                ),
-                {"promotion_id": promotion_id},
-            )
-    finally:
-        engine.dispose()
-
-    return promotion_code
+    row = seed_published_promotion(
+        promotion_code=promotion_code,
+        promotion_name="后台发布后前台执行测试",
+        is_active=is_active,
+    )
+    return promotion_code, str(row["publish_version"])
 
 
-def set_runtime_promotion_active(promotion_code: str, *, is_active: bool) -> None:
-    status = "active" if is_active else "paused"
+def set_published_promotion_active(
+    *,
+    publish_version: str,
+    promotion_code: str,
+    is_active: bool,
+) -> None:
     engine = create_engine(load_settings().database_url)
     try:
         with engine.begin() as connection:
             connection.execute(
                 text(
                     """
-                    UPDATE d2c_promotions
-                    SET status = :status,
-                        is_active = :is_active,
+                    UPDATE d2c_published_promotions
+                    SET is_active = :is_active,
                         updated_at = now()
-                    WHERE promotion_code = :promotion_code
+                    WHERE publish_version = :publish_version
+                      AND promotion_code = :promotion_code
                     """
                 ),
                 {
+                    "publish_version": publish_version,
                     "promotion_code": promotion_code,
-                    "status": status,
                     "is_active": is_active,
                 },
             )
@@ -195,10 +130,10 @@ def set_runtime_promotion_active(promotion_code: str, *, is_active: bool) -> Non
         engine.dispose()
 
 
-def test_seeded_runtime_promotion_is_applied_then_deactivated() -> None:
+def test_seeded_published_promotion_is_applied_then_deactivated() -> None:
     reset_promotions_for_checkout_flow()
     client = TestClient(app)
-    promotion_code = create_runtime_promotion()
+    promotion_code, publish_version = create_published_promotion(is_active=False)
 
     token = register_customer(client)
     draft_cart_code = create_cart_with_item(client)
@@ -214,7 +149,11 @@ def test_seeded_runtime_promotion_is_applied_then_deactivated() -> None:
     assert draft_checkout_response.json()["payable_cents"] == 3798
     assert draft_checkout_response.json()["promotion_code"] is None
 
-    set_runtime_promotion_active(promotion_code, is_active=True)
+    set_published_promotion_active(
+        publish_version=publish_version,
+        promotion_code=promotion_code,
+        is_active=True,
+    )
 
     active_cart_code = create_cart_with_item(client)
     active_checkout_response = client.post(
@@ -229,7 +168,11 @@ def test_seeded_runtime_promotion_is_applied_then_deactivated() -> None:
     assert active_checkout_response.json()["promotion_code"] == promotion_code
     assert active_checkout_response.json()["payment"]["amount_cents"] == 3419
 
-    set_runtime_promotion_active(promotion_code, is_active=False)
+    set_published_promotion_active(
+        publish_version=publish_version,
+        promotion_code=promotion_code,
+        is_active=False,
+    )
 
     paused_cart_code = create_cart_with_item(client)
     paused_checkout_response = client.post(

@@ -33,14 +33,12 @@ def test_order_models_are_bound_to_expected_tables() -> None:
         "subtotal_cents",
         "discount_cents",
         "payable_cents",
-        "promotion_id",
         "promotion_code",
         "promotion_name",
         "promotion_type",
         "promotion_discount_type",
         "promotion_discount_value",
         "promotion_publish_version",
-        "coupon_id",
         "coupon_code",
         "coupon_name",
         "coupon_type",
@@ -57,6 +55,7 @@ def test_order_models_are_bound_to_expected_tables() -> None:
         "created_at",
         "updated_at",
     }.issubset(order_columns)
+
 
     line_columns = set(D2COrderLine.__table__.columns.keys())
     assert {
@@ -159,6 +158,8 @@ def test_order_owner_tables_exist_in_database() -> None:
 
         order_fk_targets = {fk["referred_table"] for fk in inspector.get_foreign_keys("d2c_orders")}
         assert {"d2c_customers", "d2c_carts"}.issubset(order_fk_targets)
+        assert "d2c_promotions" not in order_fk_targets
+        assert "d2c_coupons" not in order_fk_targets
 
         line_fk_targets = {
             fk["referred_table"] for fk in inspector.get_foreign_keys("d2c_order_lines")
