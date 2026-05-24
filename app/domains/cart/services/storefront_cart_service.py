@@ -112,6 +112,41 @@ def _line_names(published_item: PublishedCartItem) -> tuple[str, str]:
     return product_name, sku_name
 
 
+def _apply_published_snapshot(
+    cart_line: CartLine,
+    published_item: PublishedCartItem,
+) -> None:
+    product, sku, price = published_item
+    product_name, sku_name = _line_names(published_item)
+
+    cart_line.product_id = None
+    cart_line.sku_id = None
+    cart_line.publish_version = product.publish_version
+    cart_line.product_code = product.product_code
+    cart_line.sku_code = sku.sku_code
+    cart_line.product_name = product_name
+    cart_line.sku_name = sku_name
+
+    cart_line.pms_item_id = product.pms_item_id
+    cart_line.pms_sku = product.pms_sku
+    cart_line.category_code = product.category_code
+    cart_line.category_name = product.category_name
+    cart_line.brand_code = product.brand_code
+    cart_line.brand_name = product.brand_name
+    cart_line.sales_unit_code = sku.sales_unit_code
+    cart_line.sales_unit_name = sku.sales_unit_name
+    cart_line.barcode = sku.barcode
+    cart_line.spec_text = sku.spec_text
+
+    cart_line.price_list_code = price.price_list_code
+    cart_line.compare_at_price_cents = price.compare_at_price_cents
+    cart_line.source_product_id = product.source_product_id
+    cart_line.source_sku_id = sku.source_sku_id
+    cart_line.source_price_id = price.source_price_id
+    cart_line.unit_price_cents = price.price_cents
+    cart_line.currency = price.currency
+
+
 def upsert_cart_item(
     session: Session,
     payload: CartItemUpsertRequest,
@@ -141,36 +176,29 @@ def upsert_cart_item(
         session.commit()
         return response
 
-    product_name, sku_name = _line_names(published_item)
     line_subtotal_cents = price.price_cents * payload.quantity
 
     if existing_line is None:
-        create_cart_line(
-            session,
-            CartLine(
-                cart_id=cart.id,
-                product_id=None,
-                sku_id=None,
-                publish_version=product.publish_version,
-                product_code=product.product_code,
-                sku_code=sku.sku_code,
-                product_name=product_name,
-                sku_name=sku_name,
-                quantity=payload.quantity,
-                unit_price_cents=price.price_cents,
-                currency=price.currency,
-                line_subtotal_cents=line_subtotal_cents,
-            ),
+        product_name, sku_name = _line_names(published_item)
+        cart_line = CartLine(
+            cart_id=cart.id,
+            product_id=None,
+            sku_id=None,
+            publish_version=product.publish_version,
+            product_code=product.product_code,
+            sku_code=sku.sku_code,
+            product_name=product_name,
+            sku_name=sku_name,
+            quantity=payload.quantity,
+            unit_price_cents=price.price_cents,
+            currency=price.currency,
+            line_subtotal_cents=line_subtotal_cents,
         )
+        _apply_published_snapshot(cart_line, published_item)
+        create_cart_line(session, cart_line)
     else:
-        existing_line.product_id = None
-        existing_line.sku_id = None
-        existing_line.product_code = product.product_code
-        existing_line.product_name = product_name
-        existing_line.sku_name = sku_name
+        _apply_published_snapshot(existing_line, published_item)
         existing_line.quantity = payload.quantity
-        existing_line.unit_price_cents = price.price_cents
-        existing_line.currency = price.currency
         existing_line.line_subtotal_cents = line_subtotal_cents
 
     response = build_cart_response(session, cart)

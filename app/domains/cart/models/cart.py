@@ -122,6 +122,21 @@ class CartLine(Base):
     sku_code: Mapped[str] = mapped_column(String(128), nullable=False)
     product_name: Mapped[str] = mapped_column(String(255), nullable=False)
     sku_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    pms_item_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    pms_sku: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    category_code: Mapped[str | None] = mapped_column(String(96), nullable=True)
+    category_name: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    brand_code: Mapped[str | None] = mapped_column(String(96), nullable=True)
+    brand_name: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    sales_unit_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    sales_unit_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    barcode: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    spec_text: Mapped[str | None] = mapped_column(String(240), nullable=True)
+    price_list_code: Mapped[str | None] = mapped_column(String(96), nullable=True)
+    compare_at_price_cents: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    source_product_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    source_sku_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    source_price_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     quantity: Mapped[int] = mapped_column(
         Integer,
         nullable=False,
