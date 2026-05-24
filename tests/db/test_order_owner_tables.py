@@ -54,6 +54,7 @@ def test_order_models_are_bound_to_expected_tables() -> None:
         "order_id",
         "product_id",
         "sku_id",
+        "publish_version",
         "product_code",
         "sku_code",
         "product_name",
@@ -63,6 +64,9 @@ def test_order_models_are_bound_to_expected_tables() -> None:
         "line_subtotal_cents",
         "created_at",
     }.issubset(line_columns)
+
+    assert D2COrderLine.__table__.columns["product_id"].nullable is True
+    assert D2COrderLine.__table__.columns["sku_id"].nullable is True
 
 
 def test_order_owner_tables_exist_in_database() -> None:
@@ -94,6 +98,7 @@ def test_order_owner_tables_exist_in_database() -> None:
             "order_id",
             "product_id",
             "sku_id",
+            "publish_version",
             "product_code",
             "sku_code",
             "product_name",
@@ -110,7 +115,7 @@ def test_order_owner_tables_exist_in_database() -> None:
         line_fk_targets = {
             fk["referred_table"] for fk in inspector.get_foreign_keys("d2c_order_lines")
         }
-        assert {"d2c_orders", "d2c_products", "d2c_product_skus"}.issubset(line_fk_targets)
+        assert line_fk_targets == {"d2c_orders"}
 
         with engine.connect() as connection:
             order_indexes = (
@@ -144,5 +149,8 @@ def test_order_owner_tables_exist_in_database() -> None:
                 .all()
             )
             assert "ix_d2c_order_lines_order_id" in line_indexes
+            assert "ix_d2c_order_lines_publish_version" in line_indexes
+            assert "ix_d2c_order_lines_product_code" in line_indexes
+            assert "ix_d2c_order_lines_sku_code" in line_indexes
     finally:
         engine.dispose()

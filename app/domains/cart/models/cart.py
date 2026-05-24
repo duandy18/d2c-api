@@ -97,10 +97,16 @@ class Cart(Base):
 class CartLine(Base):
     __tablename__ = "d2c_cart_lines"
     __table_args__ = (
-        UniqueConstraint("cart_id", "sku_id", name="uq_d2c_cart_lines_cart_id_sku_id"),
+        UniqueConstraint(
+            "cart_id",
+            "publish_version",
+            "sku_code",
+            name="uq_d2c_cart_lines_cart_id_publish_version_sku_code",
+        ),
         Index("ix_d2c_cart_lines_cart_id", "cart_id"),
-        Index("ix_d2c_cart_lines_product_id", "product_id"),
-        Index("ix_d2c_cart_lines_sku_id", "sku_id"),
+        Index("ix_d2c_cart_lines_publish_version", "publish_version"),
+        Index("ix_d2c_cart_lines_product_code", "product_code"),
+        Index("ix_d2c_cart_lines_sku_code", "sku_code"),
     )
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
@@ -109,16 +115,13 @@ class CartLine(Base):
         ForeignKey("d2c_carts.id", ondelete="CASCADE"),
         nullable=False,
     )
-    product_id: Mapped[int] = mapped_column(
-        BigInteger,
-        ForeignKey("d2c_products.id", ondelete="RESTRICT"),
-        nullable=False,
-    )
-    sku_id: Mapped[int] = mapped_column(
-        BigInteger,
-        ForeignKey("d2c_product_skus.id", ondelete="RESTRICT"),
-        nullable=False,
-    )
+    product_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    sku_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    publish_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    product_code: Mapped[str] = mapped_column(String(96), nullable=False)
+    sku_code: Mapped[str] = mapped_column(String(128), nullable=False)
+    product_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    sku_name: Mapped[str] = mapped_column(String(255), nullable=False)
     quantity: Mapped[int] = mapped_column(
         Integer,
         nullable=False,

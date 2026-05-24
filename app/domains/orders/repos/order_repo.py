@@ -1,10 +1,9 @@
 """Order and payment domain repositories."""
 
-from sqlalchemy import Select, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.domains.cart.models.cart import Cart, CartLine
-from app.domains.catalog.models.catalog import Product, ProductSku
 from app.domains.orders.models.order import D2COrder, D2COrderLine, D2CPayment
 
 
@@ -16,21 +15,12 @@ def get_cart_by_code(
     return session.scalar(statement)
 
 
-def _cart_lines_query(cart_id: int) -> Select[tuple[CartLine, Product, ProductSku]]:
-    return (
-        select(CartLine, Product, ProductSku)
-        .join(Product, Product.id == CartLine.product_id)
-        .join(ProductSku, ProductSku.id == CartLine.sku_id)
-        .where(CartLine.cart_id == cart_id)
-        .order_by(CartLine.id)
-    )
-
-
-def list_cart_line_rows_for_checkout(
+def list_cart_lines_for_checkout(
     session: Session,
     cart_id: int,
-) -> list[tuple[CartLine, Product, ProductSku]]:
-    return list(session.execute(_cart_lines_query(cart_id)).all())
+) -> list[CartLine]:
+    statement = select(CartLine).where(CartLine.cart_id == cart_id).order_by(CartLine.id)
+    return list(session.scalars(statement).all())
 
 
 def create_order(

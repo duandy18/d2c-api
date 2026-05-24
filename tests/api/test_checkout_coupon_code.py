@@ -5,6 +5,7 @@ from sqlalchemy import create_engine, text
 
 from app.core.config import load_settings
 from app.main import app
+from tests.helpers.published_catalog import seed_default_published_catalog
 
 
 def unique_code(prefix: str) -> str:
@@ -64,6 +65,7 @@ def register_customer(client: TestClient) -> str:
 
 
 def create_cart_with_item(client: TestClient) -> str:
+    seed_default_published_catalog()
     response = client.post(
         "/cart/items",
         json={
