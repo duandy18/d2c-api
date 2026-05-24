@@ -35,11 +35,11 @@ def test_d2c_frontend_origins_can_preflight_health(origin: str) -> None:
         "http://localhost:5288",
     ],
 )
-def test_backoffice_origin_can_preflight_catalog_with_client_header(origin: str) -> None:
+def test_backoffice_origin_can_preflight_promotions_with_client_header(origin: str) -> None:
     client = TestClient(app)
 
     response = client.options(
-        "/backoffice/catalog/health",
+        "/backoffice/promotions/health",
         headers={
             "Origin": origin,
             "Access-Control-Request-Method": "GET",
