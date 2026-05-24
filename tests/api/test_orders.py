@@ -6,7 +6,10 @@ from sqlalchemy import create_engine, text
 
 from app.core.config import load_settings
 from app.main import app
-from tests.helpers.published_catalog import seed_default_published_catalog
+from tests.helpers.published_catalog import (
+    seed_default_published_catalog,
+    seed_published_promotion,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -14,26 +17,12 @@ def reset_active_promotions() -> None:
     engine = create_engine(load_settings().database_url)
     try:
         with engine.begin() as connection:
-            connection.execute(
-                text(
-                    """
-                    UPDATE d2c_promotions
-                    SET status = 'draft',
-                        is_active = FALSE
-                    """
-                )
-            )
+            connection.execute(text("DELETE FROM d2c_published_coupons"))
+            connection.execute(text("DELETE FROM d2c_published_promotions"))
         yield
         with engine.begin() as connection:
-            connection.execute(
-                text(
-                    """
-                    UPDATE d2c_promotions
-                    SET status = 'draft',
-                        is_active = FALSE
-                    """
-                )
-            )
+            connection.execute(text("DELETE FROM d2c_published_coupons"))
+            connection.execute(text("DELETE FROM d2c_published_promotions"))
     finally:
         engine.dispose()
 
@@ -103,62 +92,17 @@ def create_active_all_store_percentage_promotion(
     discount_value: int,
     max_discount_cents: int | None = None,
     min_order_amount_cents: int | None = None,
-) -> str:
+) -> tuple[str, str]:
     promotion_code = f"PROMO-{uuid4().hex[:16].upper()}"
-
-    engine = create_engine(load_settings().database_url)
-    try:
-        with engine.begin() as connection:
-            connection.execute(
-                text(
-                    """
-                    INSERT INTO d2c_promotions (
-                      promotion_code,
-                      name,
-                      description,
-                      promotion_type,
-                      discount_type,
-                      discount_value,
-                      scope_type,
-                      min_order_amount_cents,
-                      max_discount_cents,
-                      currency,
-                      status,
-                      priority,
-                      stackable,
-                      is_active
-                    )
-                    VALUES (
-                      :promotion_code,
-                      :name,
-                      :description,
-                      'store_campaign',
-                      'percentage',
-                      :discount_value,
-                      'all_store',
-                      :min_order_amount_cents,
-                      :max_discount_cents,
-                      'USD',
-                      'active',
-                      10,
-                      FALSE,
-                      TRUE
-                    )
-                    """
-                ),
-                {
-                    "promotion_code": promotion_code,
-                    "name": "测试全店折扣",
-                    "description": "测试 checkout 自动全店百分比促销",
-                    "discount_value": discount_value,
-                    "min_order_amount_cents": min_order_amount_cents,
-                    "max_discount_cents": max_discount_cents,
-                },
-            )
-    finally:
-        engine.dispose()
-
-    return promotion_code
+    row = seed_published_promotion(
+        promotion_code=promotion_code,
+        promotion_name="测试全店折扣",
+        discount_value=discount_value,
+        min_order_amount_cents=min_order_amount_cents,
+        max_discount_cents=max_discount_cents,
+        is_active=True,
+    )
+    return promotion_code, str(row["publish_version"])
 
 
 def checkout_payload(cart_code: str) -> dict[str, str]:
@@ -286,7 +230,7 @@ def test_checkout_applies_active_all_store_percentage_promotion() -> None:
     client = TestClient(app)
     token = register_customer(client)
     cart_code = create_cart_with_item(client)
-    promotion_code = create_active_all_store_percentage_promotion(
+    promotion_code, publish_version = create_active_all_store_percentage_promotion(
         discount_value=10,
     )
 
@@ -352,7 +296,7 @@ def test_checkout_applies_active_all_store_percentage_promotion() -> None:
     assert order_row["promotion_type"] == "store_campaign"
     assert order_row["promotion_discount_type"] == "percentage"
     assert order_row["promotion_discount_value"] == 10
-    assert order_row["promotion_publish_version"] is None
+    assert order_row["promotion_publish_version"] == publish_version
     assert payment_amount == 3419
 
 

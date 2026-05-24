@@ -59,9 +59,7 @@ class D2COrder(Base):
         Index("ix_d2c_orders_cart_code", "cart_code"),
         Index("ix_d2c_orders_status", "status"),
         Index("ix_d2c_orders_created_at", "created_at"),
-        Index("ix_d2c_orders_promotion_id", "promotion_id"),
         Index("ix_d2c_orders_promotion_code", "promotion_code"),
-        Index("ix_d2c_orders_coupon_id", "coupon_id"),
         Index("ix_d2c_orders_coupon_code", "coupon_code"),
         Index("ix_d2c_orders_promotion_publish_version", "promotion_publish_version"),
         Index("ix_d2c_orders_coupon_publish_version", "coupon_publish_version"),
@@ -91,22 +89,12 @@ class D2COrder(Base):
         server_default="0",
     )
     payable_cents: Mapped[int] = mapped_column(Integer, nullable=False)
-    promotion_id: Mapped[int | None] = mapped_column(
-        BigInteger,
-        ForeignKey("d2c_promotions.id", ondelete="SET NULL"),
-        nullable=True,
-    )
     promotion_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
     promotion_name: Mapped[str | None] = mapped_column(String(160), nullable=True)
     promotion_type: Mapped[str | None] = mapped_column(String(32), nullable=True)
     promotion_discount_type: Mapped[str | None] = mapped_column(String(32), nullable=True)
     promotion_discount_value: Mapped[int | None] = mapped_column(Integer, nullable=True)
     promotion_publish_version: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    coupon_id: Mapped[int | None] = mapped_column(
-        BigInteger,
-        ForeignKey("d2c_coupons.id", ondelete="SET NULL"),
-        nullable=True,
-    )
     coupon_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
     coupon_name: Mapped[str | None] = mapped_column(String(160), nullable=True)
     coupon_type: Mapped[str | None] = mapped_column(String(32), nullable=True)

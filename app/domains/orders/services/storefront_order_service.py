@@ -27,7 +27,7 @@ from app.domains.orders.repos.order_repo import (
     list_cart_lines_for_checkout,
     list_order_lines,
 )
-from app.domains.promotions.models.promotion import Coupon, CustomerCoupon, Promotion
+from app.domains.promotions.models.promotion import CustomerCoupon
 from app.domains.promotions.repos.checkout_promotion_repo import (
     count_coupon_used,
     count_customer_coupon_used,
@@ -35,6 +35,7 @@ from app.domains.promotions.repos.checkout_promotion_repo import (
     get_active_public_coupon_promotion_by_code,
     get_best_active_all_store_percentage_promotion,
 )
+from app.domains.published.models.published import PublishedCoupon, PublishedPromotion
 from app.security.passwords import hash_session_token
 
 
@@ -121,12 +122,12 @@ def _normalize_coupon_code(coupon_code: str | None) -> str | None:
 def _ensure_coupon_usage_allowed(
     session: Session,
     *,
-    coupon: Coupon,
+    coupon: PublishedCoupon,
     customer_id: int,
 ) -> None:
     if (
         coupon.total_limit is not None
-        and count_coupon_used(session, coupon.id) >= coupon.total_limit
+        and count_coupon_used(session, coupon.coupon_code) >= coupon.total_limit
     ):
         raise CheckoutCouponUsageLimitExceededError("checkout_coupon_usage_limit_exceeded")
 
@@ -134,7 +135,7 @@ def _ensure_coupon_usage_allowed(
         coupon.per_customer_limit is not None
         and count_customer_coupon_used(
             session,
-            coupon_id=coupon.id,
+            coupon_code=coupon.coupon_code,
             customer_id=customer_id,
         )
         >= coupon.per_customer_limit
@@ -144,7 +145,7 @@ def _ensure_coupon_usage_allowed(
 
 def _calculate_percentage_discount_cents(
     subtotal_cents: int,
-    promotion: Promotion | None,
+    promotion: PublishedPromotion | None,
 ) -> int:
     if promotion is None:
         return 0
@@ -240,7 +241,8 @@ def checkout_order(
         raise CheckoutCartEmptyError("checkout_cart_empty")
 
     now = datetime.now(UTC)
-    coupon: Coupon | None = None
+    coupon: PublishedCoupon | None = None
+    promotion: PublishedPromotion | None = None
     coupon_code = _normalize_coupon_code(payload.coupon_code)
 
     if coupon_code is not None:
@@ -288,18 +290,18 @@ def checkout_order(
             subtotal_cents=cart.subtotal_cents,
             discount_cents=discount_cents,
             payable_cents=payable_cents,
-            promotion_id=promotion.id if promotion is not None else None,
             promotion_code=promotion.promotion_code if promotion is not None else None,
-            promotion_name=promotion.name if promotion is not None else None,
+            promotion_name=promotion.promotion_name if promotion is not None else None,
             promotion_type=promotion.promotion_type if promotion is not None else None,
             promotion_discount_type=promotion.discount_type if promotion is not None else None,
             promotion_discount_value=promotion.discount_value if promotion is not None else None,
-            promotion_publish_version=None,
-            coupon_id=coupon.id if coupon is not None else None,
+            promotion_publish_version=(
+                promotion.publish_version if promotion is not None else None
+            ),
             coupon_code=coupon.coupon_code if coupon is not None else None,
-            coupon_name=coupon.name if coupon is not None else None,
+            coupon_name=coupon.coupon_name if coupon is not None else None,
             coupon_type=coupon.coupon_type if coupon is not None else None,
-            coupon_publish_version=None,
+            coupon_publish_version=coupon.publish_version if coupon is not None else None,
             recipient_name=payload.recipient_name,
             recipient_phone=payload.recipient_phone,
             shipping_country=payload.shipping_country,
@@ -312,17 +314,26 @@ def checkout_order(
         ),
     )
 
-    if coupon is not None:
+    if coupon is not None and promotion is not None:
         create_customer_coupon_usage(
             session,
             CustomerCoupon(
                 customer_coupon_code=_new_customer_coupon_code(),
-                coupon_id=coupon.id,
+                    publish_version=coupon.publish_version,
+                coupon_code=coupon.coupon_code,
+                coupon_name=coupon.coupon_name,
+                coupon_type=coupon.coupon_type,
+                promotion_code=promotion.promotion_code,
+                promotion_name=promotion.promotion_name,
+                promotion_type=promotion.promotion_type,
+                promotion_discount_type=promotion.discount_type,
+                promotion_discount_value=promotion.discount_value,
                 customer_id=customer.id,
                 status="used",
                 claimed_at=now,
                 used_at=now,
                 order_id=order.id,
+                order_no=order.order_no,
             ),
         )
 

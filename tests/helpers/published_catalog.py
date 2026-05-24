@@ -7,7 +7,13 @@ from uuid import uuid4
 
 from app.core.config import load_settings
 from app.core.database import get_session_factory
-from app.domains.published.models.published import PublishedPrice, PublishedProduct, PublishedSku
+from app.domains.published.models.published import (
+    PublishedCoupon,
+    PublishedPrice,
+    PublishedProduct,
+    PublishedPromotion,
+    PublishedSku,
+)
 
 
 def _publish_version() -> str:
@@ -167,3 +173,110 @@ def seed_default_published_catalog() -> None:
         source_sku_id=602,
         source_price_id=702,
     )
+
+
+def seed_published_promotion(
+    *,
+    promotion_code: str,
+    publish_version: str | None = None,
+    promotion_name: str = "测试全店折扣",
+    promotion_type: str = "store_campaign",
+    discount_type: str = "percentage",
+    discount_value: int = 10,
+    scope_type: str = "all_store",
+    min_order_amount_cents: int | None = None,
+    max_discount_cents: int | None = None,
+    currency: str = "USD",
+    is_active: bool = True,
+) -> dict[str, str | int | bool | None]:
+    settings = load_settings()
+    session_factory = get_session_factory(settings.database_url)
+
+    resolved_publish_version = publish_version or _publish_version()
+    now = datetime.now(UTC)
+
+    with session_factory() as session:
+        session.add(
+            PublishedPromotion(
+                publish_version=resolved_publish_version,
+                promotion_code=promotion_code,
+                promotion_name=promotion_name,
+                promotion_type=promotion_type,
+                discount_type=discount_type,
+                discount_value=discount_value,
+                scope_type=scope_type,
+                min_order_amount_cents=min_order_amount_cents,
+                max_discount_cents=max_discount_cents,
+                currency=currency,
+                starts_at=None,
+                ends_at=None,
+                priority=10,
+                stackable=False,
+                is_active=is_active,
+                published_at=now,
+                source_promotion_id=None,
+                source_updated_at=now,
+                raw_payload={"source": "pytest"},
+            )
+        )
+        session.commit()
+
+    return {
+        "publish_version": resolved_publish_version,
+        "promotion_code": promotion_code,
+        "promotion_name": promotion_name,
+        "promotion_type": promotion_type,
+        "discount_type": discount_type,
+        "discount_value": discount_value,
+        "scope_type": scope_type,
+        "currency": currency,
+        "is_active": is_active,
+    }
+
+
+def seed_published_coupon(
+    *,
+    publish_version: str,
+    coupon_code: str,
+    promotion_code: str,
+    coupon_name: str = "Checkout Coupon",
+    coupon_type: str = "public_code",
+    total_limit: int | None = 100,
+    per_customer_limit: int | None = 1,
+    is_active: bool = True,
+) -> dict[str, str | int | bool | None]:
+    settings = load_settings()
+    session_factory = get_session_factory(settings.database_url)
+    now = datetime.now(UTC)
+
+    with session_factory() as session:
+        session.add(
+            PublishedCoupon(
+                publish_version=publish_version,
+                coupon_code=coupon_code,
+                coupon_name=coupon_name,
+                promotion_code=promotion_code,
+                coupon_type=coupon_type,
+                total_limit=total_limit,
+                per_customer_limit=per_customer_limit,
+                starts_at=None,
+                ends_at=None,
+                is_active=is_active,
+                published_at=now,
+                source_coupon_id=None,
+                source_updated_at=now,
+                raw_payload={"source": "pytest"},
+            )
+        )
+        session.commit()
+
+    return {
+        "publish_version": publish_version,
+        "coupon_code": coupon_code,
+        "coupon_name": coupon_name,
+        "promotion_code": promotion_code,
+        "coupon_type": coupon_type,
+        "total_limit": total_limit,
+        "per_customer_limit": per_customer_limit,
+        "is_active": is_active,
+    }
