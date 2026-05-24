@@ -254,7 +254,15 @@ def test_checkout_applies_active_public_coupon_code() -> None:
                           id,
                           coupon_code,
                           coupon_id,
+                          coupon_name,
+                          coupon_type,
+                          coupon_publish_version,
                           promotion_code,
+                          promotion_name,
+                          promotion_type,
+                          promotion_discount_type,
+                          promotion_discount_value,
+                          promotion_publish_version,
                           discount_cents,
                           payable_cents
                         FROM d2c_orders
@@ -292,7 +300,15 @@ def test_checkout_applies_active_public_coupon_code() -> None:
 
     assert order_row["coupon_code"] == coupon_code
     assert order_row["coupon_id"] is not None
+    assert order_row["coupon_name"] == "Checkout Coupon"
+    assert order_row["coupon_type"] == "public_code"
+    assert order_row["coupon_publish_version"] is None
     assert order_row["promotion_code"] == promotion_code
+    assert order_row["promotion_name"] == "Checkout Coupon Promotion"
+    assert order_row["promotion_type"] == "store_campaign"
+    assert order_row["promotion_discount_type"] == "percentage"
+    assert order_row["promotion_discount_value"] == 10
+    assert order_row["promotion_publish_version"] is None
     assert order_row["discount_cents"] == 379
     assert order_row["payable_cents"] == 3419
     assert customer_coupon_row["customer_coupon_code"].startswith("CCPN-")

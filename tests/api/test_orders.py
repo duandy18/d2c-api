@@ -317,7 +317,12 @@ def test_checkout_applies_active_all_store_percentage_promotion() -> None:
                         SELECT
                           discount_cents,
                           payable_cents,
-                          promotion_code
+                          promotion_code,
+                          promotion_name,
+                          promotion_type,
+                          promotion_discount_type,
+                          promotion_discount_value,
+                          promotion_publish_version
                         FROM d2c_orders
                         WHERE order_no = :order_no
                         """
@@ -343,6 +348,11 @@ def test_checkout_applies_active_all_store_percentage_promotion() -> None:
     assert order_row["discount_cents"] == 379
     assert order_row["payable_cents"] == 3419
     assert order_row["promotion_code"] == promotion_code
+    assert order_row["promotion_name"] == "测试全店折扣"
+    assert order_row["promotion_type"] == "store_campaign"
+    assert order_row["promotion_discount_type"] == "percentage"
+    assert order_row["promotion_discount_value"] == 10
+    assert order_row["promotion_publish_version"] is None
     assert payment_amount == 3419
 
 

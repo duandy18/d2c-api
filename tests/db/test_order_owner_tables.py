@@ -35,6 +35,16 @@ def test_order_models_are_bound_to_expected_tables() -> None:
         "payable_cents",
         "promotion_id",
         "promotion_code",
+        "promotion_name",
+        "promotion_type",
+        "promotion_discount_type",
+        "promotion_discount_value",
+        "promotion_publish_version",
+        "coupon_id",
+        "coupon_code",
+        "coupon_name",
+        "coupon_type",
+        "coupon_publish_version",
         "recipient_name",
         "recipient_phone",
         "shipping_country",
@@ -59,6 +69,21 @@ def test_order_models_are_bound_to_expected_tables() -> None:
         "sku_code",
         "product_name",
         "sku_name",
+        "pms_item_id",
+        "pms_sku",
+        "category_code",
+        "category_name",
+        "brand_code",
+        "brand_name",
+        "sales_unit_code",
+        "sales_unit_name",
+        "barcode",
+        "spec_text",
+        "price_list_code",
+        "compare_at_price_cents",
+        "source_product_id",
+        "source_sku_id",
+        "source_price_id",
         "quantity",
         "unit_price_cents",
         "line_subtotal_cents",
@@ -86,6 +111,14 @@ def test_order_owner_tables_exist_in_database() -> None:
             "currency",
             "item_count",
             "subtotal_cents",
+            "promotion_name",
+            "promotion_type",
+            "promotion_discount_type",
+            "promotion_discount_value",
+            "promotion_publish_version",
+            "coupon_name",
+            "coupon_type",
+            "coupon_publish_version",
             "recipient_name",
             "recipient_phone",
             "shipping_address_line1",
@@ -103,6 +136,21 @@ def test_order_owner_tables_exist_in_database() -> None:
             "sku_code",
             "product_name",
             "sku_name",
+            "pms_item_id",
+            "pms_sku",
+            "category_code",
+            "category_name",
+            "brand_code",
+            "brand_name",
+            "sales_unit_code",
+            "sales_unit_name",
+            "barcode",
+            "spec_text",
+            "price_list_code",
+            "compare_at_price_cents",
+            "source_product_id",
+            "source_sku_id",
+            "source_price_id",
             "quantity",
             "unit_price_cents",
             "line_subtotal_cents",
@@ -133,6 +181,8 @@ def test_order_owner_tables_exist_in_database() -> None:
                 .all()
             )
             assert "uq_d2c_orders_order_no" in order_indexes
+            assert "ix_d2c_orders_promotion_publish_version" in order_indexes
+            assert "ix_d2c_orders_coupon_publish_version" in order_indexes
 
             line_indexes = (
                 connection.execute(
@@ -152,5 +202,8 @@ def test_order_owner_tables_exist_in_database() -> None:
             assert "ix_d2c_order_lines_publish_version" in line_indexes
             assert "ix_d2c_order_lines_product_code" in line_indexes
             assert "ix_d2c_order_lines_sku_code" in line_indexes
+            assert "ix_d2c_order_lines_category_code" in line_indexes
+            assert "ix_d2c_order_lines_brand_code" in line_indexes
+            assert "ix_d2c_order_lines_price_list_code" in line_indexes
     finally:
         engine.dispose()

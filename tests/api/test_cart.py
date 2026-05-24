@@ -219,7 +219,22 @@ def test_cart_summary_fields_are_persisted() -> None:
                           product_code,
                           sku_code,
                           product_name,
-                          sku_name
+                          sku_name,
+                          pms_item_id,
+                          pms_sku,
+                          category_code,
+                          category_name,
+                          brand_code,
+                          brand_name,
+                          sales_unit_code,
+                          sales_unit_name,
+                          barcode,
+                          spec_text,
+                          price_list_code,
+                          compare_at_price_cents,
+                          source_product_id,
+                          source_sku_id,
+                          source_price_id
                         FROM d2c_cart_lines
                         WHERE cart_id = (
                           SELECT id FROM d2c_carts WHERE cart_code = :cart_code
@@ -244,6 +259,21 @@ def test_cart_summary_fields_are_persisted() -> None:
     assert line_row["sku_code"] == "CAT-FOOD-SALMON-1KG"
     assert line_row["product_name"] == "三文鱼成猫粮 1kg"
     assert line_row["sku_name"] == "三文鱼成猫粮 1kg"
+    assert line_row["pms_item_id"] == 1001
+    assert line_row["pms_sku"] == "PMS-CAT-FOOD-SALMON"
+    assert line_row["category_code"] == "cat_food"
+    assert line_row["category_name"] == "猫粮"
+    assert line_row["brand_code"] == "test_brand"
+    assert line_row["brand_name"] == "测试品牌"
+    assert line_row["sales_unit_code"] == "bag"
+    assert line_row["sales_unit_name"] == "袋"
+    assert line_row["barcode"] == "6900000000000"
+    assert line_row["spec_text"] == "1kg/袋"
+    assert line_row["price_list_code"] == "default"
+    assert line_row["compare_at_price_cents"] == 2299
+    assert line_row["source_product_id"] == 501
+    assert line_row["source_sku_id"] == 601
+    assert line_row["source_price_id"] == 701
 
 
 def test_cart_item_price_uses_published_price() -> None:
