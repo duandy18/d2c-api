@@ -46,6 +46,9 @@ def test_cart_table_columns() -> None:
             "publish_version",
             "product_code",
             "sku_code",
+            "offer_code",
+            "offer_title",
+            "price_code",
             "product_name",
             "sku_name",
             "pms_item_id",
@@ -82,7 +85,7 @@ def test_cart_line_unique_constraint() -> None:
         unique_constraints = inspector.get_unique_constraints("d2c_cart_lines")
         unique_names = {constraint["name"] for constraint in unique_constraints}
 
-        assert "uq_d2c_cart_lines_cart_id_publish_version_sku_code" in unique_names
+        assert "uq_d2c_cart_lines_cart_offer" in unique_names
         assert "uq_d2c_cart_lines_cart_id_sku_id" not in unique_names
     finally:
         engine.dispose()

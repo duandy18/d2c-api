@@ -4,9 +4,21 @@ from sqlalchemy import Select, and_, delete, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.domains.cart.models.cart import Cart, CartLine
-from app.domains.published.models.published import PublishedPrice, PublishedProduct, PublishedSku
+from app.domains.published.models.published import (
+    PublishedGroup,
+    PublishedOffer,
+    PublishedOfferComponent,
+    PublishedOfferPosition,
+    PublishedOfferPrice,
+)
 
-PublishedCartItem = tuple[PublishedProduct, PublishedSku, PublishedPrice]
+PublishedCartItem = tuple[
+    PublishedOffer,
+    PublishedOfferPrice,
+    PublishedOfferComponent | None,
+    PublishedGroup | None,
+    PublishedOfferPosition | None,
+]
 
 
 def get_active_cart(
@@ -30,54 +42,101 @@ def create_cart(session: Session, cart: Cart) -> Cart:
     return cart
 
 
-def _published_product_filters() -> tuple[object, ...]:
+def _published_offer_filters() -> tuple[object, ...]:
     return (
-        PublishedProduct.display_status == "visible",
-        PublishedProduct.sell_status == "sellable",
-        or_(PublishedProduct.visible_from.is_(None), PublishedProduct.visible_from <= func.now()),
-        or_(PublishedProduct.visible_until.is_(None), PublishedProduct.visible_until > func.now()),
+        PublishedOffer.display_status == "visible",
+        PublishedOffer.sell_status == "sellable",
     )
 
 
 def _published_price_filters() -> tuple[object, ...]:
     return (
-        PublishedPrice.channel == "storefront",
-        PublishedPrice.is_active.is_(True),
-        or_(PublishedPrice.effective_from.is_(None), PublishedPrice.effective_from <= func.now()),
-        or_(PublishedPrice.effective_until.is_(None), PublishedPrice.effective_until > func.now()),
+        PublishedOfferPrice.channel == "storefront",
+        PublishedOfferPrice.is_active.is_(True),
+        or_(
+            PublishedOfferPrice.effective_from.is_(None),
+            PublishedOfferPrice.effective_from <= func.now(),
+        ),
+        or_(
+            PublishedOfferPrice.effective_until.is_(None),
+            PublishedOfferPrice.effective_until > func.now(),
+        ),
+    )
+
+
+def _published_position_filters() -> tuple[object, ...]:
+    return (
+        PublishedOfferPosition.is_active.is_(True),
+        or_(
+            PublishedOfferPosition.visible_from.is_(None),
+            PublishedOfferPosition.visible_from <= func.now(),
+        ),
+        or_(
+            PublishedOfferPosition.visible_until.is_(None),
+            PublishedOfferPosition.visible_until > func.now(),
+        ),
     )
 
 
 def _published_cart_item_query(
-    product_code: str,
-    sku_code: str,
-) -> Select[tuple[PublishedProduct, PublishedSku, PublishedPrice]]:
+    offer_code: str,
+) -> Select[
+    tuple[
+        PublishedOffer,
+        PublishedOfferPrice,
+        PublishedOfferComponent | None,
+        PublishedGroup | None,
+        PublishedOfferPosition | None,
+    ]
+]:
     return (
-        select(PublishedProduct, PublishedSku, PublishedPrice)
-        .join(
-            PublishedSku,
-            and_(
-                PublishedSku.publish_version == PublishedProduct.publish_version,
-                PublishedSku.product_code == PublishedProduct.product_code,
-            ),
+        select(
+            PublishedOffer,
+            PublishedOfferPrice,
+            PublishedOfferComponent,
+            PublishedGroup,
+            PublishedOfferPosition,
         )
         .join(
-            PublishedPrice,
+            PublishedOfferPrice,
             and_(
-                PublishedPrice.publish_version == PublishedSku.publish_version,
-                PublishedPrice.sku_code == PublishedSku.sku_code,
+                PublishedOfferPrice.publish_version == PublishedOffer.publish_version,
+                PublishedOfferPrice.offer_code == PublishedOffer.offer_code,
             ),
         )
-        .where(PublishedProduct.product_code == product_code)
-        .where(PublishedSku.sku_code == sku_code)
-        .where(*_published_product_filters())
-        .where(PublishedSku.is_sellable.is_(True))
+        .outerjoin(
+            PublishedOfferComponent,
+            and_(
+                PublishedOfferComponent.publish_version == PublishedOffer.publish_version,
+                PublishedOfferComponent.offer_code == PublishedOffer.offer_code,
+                PublishedOfferComponent.component_no == 1,
+            ),
+        )
+        .outerjoin(
+            PublishedOfferPosition,
+            and_(
+                PublishedOfferPosition.publish_version == PublishedOffer.publish_version,
+                PublishedOfferPosition.offer_code == PublishedOffer.offer_code,
+            ),
+        )
+        .outerjoin(
+            PublishedGroup,
+            and_(
+                PublishedGroup.publish_version == PublishedOfferPosition.publish_version,
+                PublishedGroup.group_code == PublishedOfferPosition.group_code,
+            ),
+        )
+        .where(PublishedOffer.offer_code == offer_code)
+        .where(*_published_offer_filters())
         .where(*_published_price_filters())
+        .where(or_(PublishedOfferPosition.id.is_(None), *_published_position_filters()))
         .order_by(
-            PublishedProduct.published_at.desc(),
-            PublishedProduct.id.desc(),
-            PublishedPrice.priority,
-            PublishedPrice.id,
+            PublishedOffer.published_at.desc(),
+            PublishedOffer.id.desc(),
+            PublishedGroup.sort_order.nullslast(),
+            PublishedOfferPosition.sort_order.nullslast(),
+            PublishedOfferPrice.priority,
+            PublishedOfferPrice.id,
         )
         .limit(1)
     )
@@ -93,23 +152,22 @@ def list_cart_lines(
 
 def get_published_item_for_cart(
     session: Session,
-    product_code: str,
-    sku_code: str,
+    offer_code: str,
 ) -> PublishedCartItem | None:
-    return session.execute(_published_cart_item_query(product_code, sku_code)).first()
+    return session.execute(_published_cart_item_query(offer_code)).first()
 
 
-def get_cart_line_by_published_sku(
+def get_cart_line_by_published_offer(
     session: Session,
     cart_id: int,
     publish_version: str,
-    sku_code: str,
+    offer_code: str,
 ) -> CartLine | None:
     statement = (
         select(CartLine)
         .where(CartLine.cart_id == cart_id)
         .where(CartLine.publish_version == publish_version)
-        .where(CartLine.sku_code == sku_code)
+        .where(CartLine.offer_code == offer_code)
     )
     return session.scalar(statement)
 

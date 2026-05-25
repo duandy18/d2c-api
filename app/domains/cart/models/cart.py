@@ -12,6 +12,7 @@ from sqlalchemy import (
     Index,
     Integer,
     String,
+    Text,
     UniqueConstraint,
     func,
 )
@@ -100,11 +101,13 @@ class CartLine(Base):
         UniqueConstraint(
             "cart_id",
             "publish_version",
-            "sku_code",
-            name="uq_d2c_cart_lines_cart_id_publish_version_sku_code",
+            "offer_code",
+            name="uq_d2c_cart_lines_cart_offer",
         ),
         Index("ix_d2c_cart_lines_cart_id", "cart_id"),
         Index("ix_d2c_cart_lines_publish_version", "publish_version"),
+        Index("ix_d2c_cart_lines_offer_code", "offer_code"),
+        Index("ix_d2c_cart_lines_price_code", "price_code"),
         Index("ix_d2c_cart_lines_product_code", "product_code"),
         Index("ix_d2c_cart_lines_sku_code", "sku_code"),
     )
@@ -118,6 +121,16 @@ class CartLine(Base):
     product_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     sku_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     publish_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    offer_code: Mapped[str | None] = mapped_column(String(96), nullable=True)
+    offer_title: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    offer_type: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    offer_subtitle: Mapped[str | None] = mapped_column(String(240), nullable=True)
+    offer_image_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    group_code: Mapped[str | None] = mapped_column(String(96), nullable=True)
+    group_name: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    price_code: Mapped[str | None] = mapped_column(String(96), nullable=True)
+    source_offer_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    source_position_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     product_code: Mapped[str] = mapped_column(String(96), nullable=False)
     sku_code: Mapped[str] = mapped_column(String(128), nullable=False)
     product_name: Mapped[str] = mapped_column(String(255), nullable=False)

@@ -59,8 +59,7 @@ def create_cart_with_item(client: TestClient) -> str:
         json={
             "anonymous_id": unique_code("anon"),
             "session_code": unique_code("sess"),
-            "product_id": "pet-cat-food-salmon-001",
-            "sku": "CAT-FOOD-SALMON-1KG",
+            "offer_code": "offer-cat-food-salmon-001",
             "quantity": 2,
         },
     )

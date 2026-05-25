@@ -9,14 +9,12 @@ class CartIdentityRequest(BaseModel):
 
 
 class CartItemUpsertRequest(CartIdentityRequest):
-    product_id: str = Field(..., min_length=1, max_length=96)
-    sku: str = Field(..., min_length=1, max_length=128)
+    offer_code: str = Field(..., min_length=1, max_length=96)
     quantity: int = Field(..., ge=0, le=999)
 
 
 class CartLineResponse(BaseModel):
-    product_id: str
-    sku: str
+    offer_code: str
     name: str
     quantity: int
     unit_price_cents: int

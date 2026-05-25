@@ -7,7 +7,7 @@ from app.core.config import load_settings
 from app.main import app
 from tests.helpers.published_catalog import (
     seed_default_published_catalog,
-    seed_published_catalog_item,
+    seed_published_offer_catalog_item,
 )
 
 
@@ -62,8 +62,7 @@ def test_upsert_cart_item_sets_quantity_and_subtotal() -> None:
         "/cart/items",
         json={
             **identity,
-            "product_id": "pet-cat-food-salmon-001",
-            "sku": "CAT-FOOD-SALMON-1KG",
+            "offer_code": "offer-cat-food-salmon-001",
             "quantity": 2,
         },
     )
@@ -76,8 +75,7 @@ def test_upsert_cart_item_sets_quantity_and_subtotal() -> None:
     assert payload["subtotal_cents"] == 3798
     assert payload["lines"] == [
         {
-            "product_id": "pet-cat-food-salmon-001",
-            "sku": "CAT-FOOD-SALMON-1KG",
+            "offer_code": "offer-cat-food-salmon-001",
             "name": "三文鱼成猫粮 1kg",
             "quantity": 2,
             "unit_price_cents": 1899,
@@ -96,8 +94,7 @@ def test_upsert_cart_item_quantity_zero_removes_line() -> None:
         "/cart/items",
         json={
             **identity,
-            "product_id": "pet-cat-food-salmon-001",
-            "sku": "CAT-FOOD-SALMON-1KG",
+            "offer_code": "offer-cat-food-salmon-001",
             "quantity": 2,
         },
     )
@@ -105,8 +102,7 @@ def test_upsert_cart_item_quantity_zero_removes_line() -> None:
         "/cart/items",
         json={
             **identity,
-            "product_id": "pet-cat-food-salmon-001",
-            "sku": "CAT-FOOD-SALMON-1KG",
+            "offer_code": "offer-cat-food-salmon-001",
             "quantity": 0,
         },
     )
@@ -127,8 +123,7 @@ def test_clear_cart_removes_all_lines() -> None:
         "/cart/items",
         json={
             **identity,
-            "product_id": "pet-cat-food-salmon-001",
-            "sku": "CAT-FOOD-SALMON-1KG",
+            "offer_code": "offer-cat-food-salmon-001",
             "quantity": 2,
         },
     )
@@ -136,8 +131,7 @@ def test_clear_cart_removes_all_lines() -> None:
         "/cart/items",
         json={
             **identity,
-            "product_id": "pet-cat-litter-tofu-001",
-            "sku": "CAT-LITTER-TOFU-6L",
+            "offer_code": "offer-cat-litter-tofu-001",
             "quantity": 1,
         },
     )
@@ -151,7 +145,7 @@ def test_clear_cart_removes_all_lines() -> None:
     assert clear_response.json()["subtotal_cents"] == 0
 
 
-def test_upsert_cart_item_rejects_unknown_product() -> None:
+def test_upsert_cart_item_rejects_unknown_offer() -> None:
     client = TestClient(app)
     identity = cart_identity()
 
@@ -159,14 +153,13 @@ def test_upsert_cart_item_rejects_unknown_product() -> None:
         "/cart/items",
         json={
             **identity,
-            "product_id": "missing-product",
-            "sku": "MISSING-SKU",
+            "offer_code": "missing-offer",
             "quantity": 1,
         },
     )
 
     assert response.status_code == 404
-    assert response.json() == {"detail": "cart_product_not_found"}
+    assert response.json() == {"detail": "cart_offer_not_found"}
 
 
 def test_cart_summary_fields_are_persisted() -> None:
@@ -178,8 +171,7 @@ def test_cart_summary_fields_are_persisted() -> None:
         "/cart/items",
         json={
             **identity,
-            "product_id": "pet-cat-food-salmon-001",
-            "sku": "CAT-FOOD-SALMON-1KG",
+            "offer_code": "offer-cat-food-salmon-001",
             "quantity": 2,
         },
     )
@@ -216,6 +208,15 @@ def test_cart_summary_fields_are_persisted() -> None:
                           product_id,
                           sku_id,
                           publish_version,
+                          offer_code,
+                          offer_title,
+                          offer_type,
+                          offer_subtitle,
+                          group_code,
+                          group_name,
+                          price_code,
+                          source_offer_id,
+                          source_position_id,
                           product_code,
                           sku_code,
                           product_name,
@@ -224,12 +225,9 @@ def test_cart_summary_fields_are_persisted() -> None:
                           pms_sku,
                           category_code,
                           category_name,
-                          brand_code,
-                          brand_name,
                           sales_unit_code,
                           sales_unit_name,
                           barcode,
-                          spec_text,
                           price_list_code,
                           compare_at_price_cents,
                           source_product_id,
@@ -255,36 +253,43 @@ def test_cart_summary_fields_are_persisted() -> None:
     assert line_row["product_id"] is None
     assert line_row["sku_id"] is None
     assert line_row["publish_version"].startswith("TEST-PUB-")
-    assert line_row["product_code"] == "pet-cat-food-salmon-001"
+
+    assert line_row["offer_code"] == "offer-cat-food-salmon-001"
+    assert line_row["offer_title"] == "三文鱼成猫粮 1kg"
+    assert line_row["offer_type"] == "single"
+    assert line_row["offer_subtitle"] == "三文鱼成猫粮 1kg subtitle"
+    assert line_row["group_code"] == "cat_food"
+    assert line_row["group_name"] == "猫粮"
+    assert line_row["price_code"] == "price-offer-cat-food-salmon-001"
+    assert line_row["source_offer_id"] == 501
+    assert line_row["source_position_id"] == 801
+
+    assert line_row["product_code"] == "offer-cat-food-salmon-001"
     assert line_row["sku_code"] == "CAT-FOOD-SALMON-1KG"
     assert line_row["product_name"] == "三文鱼成猫粮 1kg"
-    assert line_row["sku_name"] == "三文鱼成猫粮 1kg"
+    assert line_row["sku_name"] == "CAT-FOOD-SALMON-1KG"
     assert line_row["pms_item_id"] == 1001
     assert line_row["pms_sku"] == "PMS-CAT-FOOD-SALMON"
     assert line_row["category_code"] == "cat_food"
     assert line_row["category_name"] == "猫粮"
-    assert line_row["brand_code"] == "test_brand"
-    assert line_row["brand_name"] == "测试品牌"
     assert line_row["sales_unit_code"] == "bag"
     assert line_row["sales_unit_name"] == "袋"
     assert line_row["barcode"] == "6900000000000"
-    assert line_row["spec_text"] == "1kg/袋"
-    assert line_row["price_list_code"] == "default"
+    assert line_row["price_list_code"] == "price-offer-cat-food-salmon-001"
     assert line_row["compare_at_price_cents"] == 2299
     assert line_row["source_product_id"] == 501
     assert line_row["source_sku_id"] == 601
     assert line_row["source_price_id"] == 701
 
 
-def test_cart_item_price_uses_published_price() -> None:
+def test_cart_item_price_uses_published_offer_price() -> None:
     client = TestClient(app)
     identity = cart_identity()
-    sku_code = "CAT-FOOD-SALMON-1KG"
     test_price_cents = 1777
 
-    seed_published_catalog_item(
-        product_code="pet-cat-food-salmon-001",
-        sku_code=sku_code,
+    seed_published_offer_catalog_item(
+        offer_code="offer-cat-food-salmon-price-test",
+        sku_code="CAT-FOOD-SALMON-1KG",
         display_name="三文鱼成猫粮 1kg",
         price_cents=test_price_cents,
     )
@@ -293,8 +298,7 @@ def test_cart_item_price_uses_published_price() -> None:
         "/cart/items",
         json={
             **identity,
-            "product_id": "pet-cat-food-salmon-001",
-            "sku": sku_code,
+            "offer_code": "offer-cat-food-salmon-price-test",
             "quantity": 2,
         },
     )
@@ -309,14 +313,22 @@ def test_cart_item_price_uses_published_price() -> None:
     assert payload["lines"][0]["line_subtotal_cents"] == test_price_cents * 2
 
 
-def test_cart_repo_service_no_longer_read_old_catalog_owner_tables() -> None:
+def test_cart_repo_service_read_terminal_offer_snapshot_tables_only() -> None:
     repo_text = open("app/domains/cart/repos/cart_repo.py", encoding="utf-8").read()
     service_text = open(
         "app/domains/cart/services/storefront_cart_service.py",
         encoding="utf-8",
     ).read()
 
+    required_tokens = [
+        "PublishedOffer",
+        "PublishedOfferPrice",
+        "PublishedOfferComponent",
+    ]
     forbidden_tokens = [
+        "PublishedProduct",
+        "PublishedSku",
+        "PublishedPrice",
         "PriceList",
         "ProductSku",
         "SkuPrice",
@@ -325,6 +337,9 @@ def test_cart_repo_service_no_longer_read_old_catalog_owner_tables() -> None:
         "d2c_price_lists",
         "d2c_sku_prices",
     ]
+
+    for token in required_tokens:
+        assert token in repo_text
 
     for token in forbidden_tokens:
         assert token not in repo_text

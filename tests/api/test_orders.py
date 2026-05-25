@@ -71,8 +71,7 @@ def create_cart_with_item(client: TestClient) -> str:
         "/cart/items",
         json={
             **identity,
-            "product_id": "pet-cat-food-salmon-001",
-            "sku": "CAT-FOOD-SALMON-1KG",
+            "offer_code": "offer-cat-food-salmon-001",
             "quantity": 2,
         },
     )
@@ -192,10 +191,10 @@ def test_checkout_converts_cart_to_pending_payment_order() -> None:
     assert payload["payment"]["amount_cents"] == 3798
     assert payload["lines"] == [
         {
-            "product_code": "pet-cat-food-salmon-001",
+            "product_code": "offer-cat-food-salmon-001",
             "sku_code": "CAT-FOOD-SALMON-1KG",
             "product_name": "三文鱼成猫粮 1kg",
-            "sku_name": "三文鱼成猫粮 1kg",
+            "sku_name": "CAT-FOOD-SALMON-1KG",
             "quantity": 2,
             "unit_price_cents": 1899,
             "line_subtotal_cents": 3798,
