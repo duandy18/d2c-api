@@ -6,7 +6,12 @@ from sqlalchemy import Select, and_, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.domains.published.models.published import (
-    PublishedGroup,
+    PublishedClientActionPolicy,
+    PublishedClientDataBinding,
+    PublishedClientPage,
+    PublishedClientRegion,
+    PublishedClientTrackingPolicy,
+    PublishedClientVisibilityRule,
     PublishedOffer,
     PublishedOfferPrice,
     PublishedStorefrontSection,
@@ -19,26 +24,20 @@ StorefrontHomeRow = tuple[
     PublishedStorefrontSectionPosition,
     PublishedOffer,
     PublishedOfferPrice,
-    PublishedGroup | None,
 ]
 
 
-def latest_storefront_publish_version(session: Session) -> str | None:
-    statement = (
-        select(PublishedStorefrontSectionPosition.publish_version)
-        .order_by(
-            PublishedStorefrontSectionPosition.published_at.desc(),
-            PublishedStorefrontSectionPosition.id.desc(),
-        )
-        .limit(1)
-    )
-    return session.scalar(statement)
-
-
-def _visible_group_filters() -> tuple[object, ...]:
+def _visible_page_filters() -> tuple[object, ...]:
     return (
-        PublishedGroup.display_status == "visible",
-        PublishedGroup.is_active.is_(True),
+        PublishedClientPage.display_status == "visible",
+        PublishedClientPage.is_active.is_(True),
+    )
+
+
+def _visible_region_filters() -> tuple[object, ...]:
+    return (
+        PublishedClientRegion.display_status == "visible",
+        PublishedClientRegion.is_active.is_(True),
     )
 
 
@@ -85,15 +84,46 @@ def _active_price_filters() -> tuple[object, ...]:
     )
 
 
-def list_home_groups(
+def latest_client_home_publish_version(
+    session: Session,
+    page_code: str = "home",
+) -> str | None:
+    statement = (
+        select(PublishedClientPage.publish_version)
+        .where(PublishedClientPage.page_code == page_code)
+        .where(*_visible_page_filters())
+        .order_by(PublishedClientPage.published_at.desc(), PublishedClientPage.id.desc())
+        .limit(1)
+    )
+    return session.scalar(statement)
+
+
+def get_home_page(
     session: Session,
     publish_version: str,
-) -> list[PublishedGroup]:
+    page_code: str = "home",
+) -> PublishedClientPage | None:
     statement = (
-        select(PublishedGroup)
-        .where(PublishedGroup.publish_version == publish_version)
-        .where(*_visible_group_filters())
-        .order_by(PublishedGroup.sort_order, PublishedGroup.id)
+        select(PublishedClientPage)
+        .where(PublishedClientPage.publish_version == publish_version)
+        .where(PublishedClientPage.page_code == page_code)
+        .where(*_visible_page_filters())
+        .limit(1)
+    )
+    return session.scalar(statement)
+
+
+def list_home_regions(
+    session: Session,
+    publish_version: str,
+    page_code: str,
+) -> list[PublishedClientRegion]:
+    statement = (
+        select(PublishedClientRegion)
+        .where(PublishedClientRegion.publish_version == publish_version)
+        .where(PublishedClientRegion.page_code == page_code)
+        .where(*_visible_region_filters())
+        .order_by(PublishedClientRegion.sort_order, PublishedClientRegion.id)
     )
     return list(session.scalars(statement).all())
 
@@ -126,6 +156,58 @@ def list_home_layouts(
     return list(session.scalars(statement).all())
 
 
+def list_home_data_bindings(
+    session: Session,
+    publish_version: str,
+) -> list[PublishedClientDataBinding]:
+    statement = (
+        select(PublishedClientDataBinding)
+        .where(PublishedClientDataBinding.publish_version == publish_version)
+        .where(PublishedClientDataBinding.is_active.is_(True))
+        .order_by(PublishedClientDataBinding.binding_code, PublishedClientDataBinding.id)
+    )
+    return list(session.scalars(statement).all())
+
+
+def list_home_visibility_rules(
+    session: Session,
+    publish_version: str,
+) -> list[PublishedClientVisibilityRule]:
+    statement = (
+        select(PublishedClientVisibilityRule)
+        .where(PublishedClientVisibilityRule.publish_version == publish_version)
+        .where(PublishedClientVisibilityRule.is_active.is_(True))
+        .order_by(PublishedClientVisibilityRule.priority, PublishedClientVisibilityRule.id)
+    )
+    return list(session.scalars(statement).all())
+
+
+def list_home_action_policies(
+    session: Session,
+    publish_version: str,
+) -> list[PublishedClientActionPolicy]:
+    statement = (
+        select(PublishedClientActionPolicy)
+        .where(PublishedClientActionPolicy.publish_version == publish_version)
+        .where(PublishedClientActionPolicy.is_active.is_(True))
+        .order_by(PublishedClientActionPolicy.policy_code, PublishedClientActionPolicy.id)
+    )
+    return list(session.scalars(statement).all())
+
+
+def list_home_tracking_policies(
+    session: Session,
+    publish_version: str,
+) -> list[PublishedClientTrackingPolicy]:
+    statement = (
+        select(PublishedClientTrackingPolicy)
+        .where(PublishedClientTrackingPolicy.publish_version == publish_version)
+        .where(PublishedClientTrackingPolicy.is_active.is_(True))
+        .order_by(PublishedClientTrackingPolicy.policy_code, PublishedClientTrackingPolicy.id)
+    )
+    return list(session.scalars(statement).all())
+
+
 def _home_rows_query(publish_version: str) -> Select[StorefrontHomeRow]:
     return (
         select(
@@ -133,7 +215,6 @@ def _home_rows_query(publish_version: str) -> Select[StorefrontHomeRow]:
             PublishedStorefrontSectionPosition,
             PublishedOffer,
             PublishedOfferPrice,
-            PublishedGroup,
         )
         .select_from(PublishedStorefrontSection)
         .join(
@@ -160,14 +241,6 @@ def _home_rows_query(publish_version: str) -> Select[StorefrontHomeRow]:
                 PublishedOfferPrice.offer_code == PublishedOffer.offer_code,
             ),
         )
-        .outerjoin(
-            PublishedGroup,
-            and_(
-                PublishedGroup.publish_version == PublishedStorefrontSection.publish_version,
-                PublishedGroup.group_code == PublishedStorefrontSection.group_code,
-                *_visible_group_filters(),
-            ),
-        )
         .where(PublishedStorefrontSection.publish_version == publish_version)
         .where(PublishedStorefrontSectionPosition.publish_version == publish_version)
         .where(PublishedOffer.publish_version == publish_version)
@@ -192,7 +265,4 @@ def list_home_rows(
     publish_version: str,
 ) -> list[StorefrontHomeRow]:
     rows = session.execute(_home_rows_query(publish_version)).all()
-    return [
-        (section, position, offer, price, group)
-        for section, position, offer, price, group in rows
-    ]
+    return [(section, position, offer, price) for section, position, offer, price in rows]

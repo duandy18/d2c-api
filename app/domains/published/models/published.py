@@ -210,7 +210,6 @@ class PublishedStorefrontSectionLayout(Base):
     )
 
 
-
 class PublishedStorefrontSectionPosition(Base):
     __tablename__ = "d2c_published_storefront_section_positions"
     __table_args__ = (
@@ -243,6 +242,254 @@ class PublishedStorefrontSectionPosition(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
+
+
+class PublishedClientPage(Base):
+    __tablename__ = "d2c_published_client_pages"
+    __table_args__ = (
+        UniqueConstraint("publish_version", "page_code", name="uq_d2c_pub_cp_code"),
+        Index("ix_d2c_pub_cp_status", "publish_version", "display_status", "is_active"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    publish_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    page_code: Mapped[str] = mapped_column(String(96), nullable=False)
+    page_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    route_path: Mapped[str] = mapped_column(String(240), nullable=False)
+    title: Mapped[str] = mapped_column(String(160), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    seo_title: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    seo_description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False)
+    display_status: Mapped[str] = mapped_column(String(32), nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    published_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    source_page_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    raw_payload: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class PublishedClientRegion(Base):
+    __tablename__ = "d2c_published_client_regions"
+    __table_args__ = (
+        UniqueConstraint("publish_version", "region_code", name="uq_d2c_pub_cr_code"),
+        Index("ix_d2c_pub_cr_page_sort", "publish_version", "page_code", "sort_order"),
+        Index("ix_d2c_pub_cr_status", "publish_version", "display_status", "is_active"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    publish_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    region_code: Mapped[str] = mapped_column(String(96), nullable=False)
+    page_code: Mapped[str] = mapped_column(String(96), nullable=False)
+    region_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    title: Mapped[str] = mapped_column(String(160), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False)
+    allowed_block_types: Mapped[list[str]] = mapped_column(JSON, nullable=False)
+    max_blocks: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    is_required: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    display_status: Mapped[str] = mapped_column(String(32), nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    published_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    source_region_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    raw_payload: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class PublishedClientBlockType(Base):
+    __tablename__ = "d2c_published_client_block_types"
+    __table_args__ = (
+        UniqueConstraint("publish_version", "block_type", name="uq_d2c_pub_cbt_code"),
+        Index("ix_d2c_pub_cbt_status", "publish_version", "display_status", "is_active"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    publish_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    block_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    display_name: Mapped[str] = mapped_column(String(160), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    renderer_key: Mapped[str] = mapped_column(String(120), nullable=False)
+    allowed_region_types: Mapped[list[str]] = mapped_column(JSON, nullable=False)
+    allowed_content_types: Mapped[list[str]] = mapped_column(JSON, nullable=False)
+    layout_schema: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    slot_schema: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    action_schema: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    analytics_schema: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    data_contract_version: Mapped[str] = mapped_column(String(32), nullable=False)
+    display_status: Mapped[str] = mapped_column(String(32), nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    published_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    source_block_type_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    raw_payload: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class PublishedClientSurface(Base):
+    __tablename__ = "d2c_published_client_surfaces"
+    __table_args__ = (
+        UniqueConstraint("publish_version", "surface_code", name="uq_d2c_pub_cs_code"),
+        Index("ix_d2c_pub_cs_type", "publish_version", "surface_type", "is_active"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    publish_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    surface_code: Mapped[str] = mapped_column(String(64), nullable=False)
+    surface_name: Mapped[str] = mapped_column(String(120), nullable=False)
+    surface_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    device_family: Mapped[str] = mapped_column(String(32), nullable=False)
+    supported_renderer_keys: Mapped[list[str]] = mapped_column(JSON, nullable=False)
+    breakpoint_profile: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    published_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    source_surface_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    raw_payload: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class PublishedClientDataBinding(Base):
+    __tablename__ = "d2c_published_client_data_bindings"
+    __table_args__ = (
+        UniqueConstraint("publish_version", "binding_code", name="uq_d2c_pub_cdb_code"),
+        Index("ix_d2c_pub_cdb_target", "publish_version", "target_type", "target_code"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    publish_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    binding_code: Mapped[str] = mapped_column(String(120), nullable=False)
+    target_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    target_code: Mapped[str] = mapped_column(String(96), nullable=False)
+    content_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    data_source_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    data_source_ref: Mapped[str] = mapped_column(String(120), nullable=False)
+    query_params: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    sort_policy: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    result_limit: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    refresh_policy: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    published_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    source_binding_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    raw_payload: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class PublishedClientVisibilityRule(Base):
+    __tablename__ = "d2c_published_client_visibility_rules"
+    __table_args__ = (
+        UniqueConstraint("publish_version", "rule_code", name="uq_d2c_pub_cvr_code"),
+        Index("ix_d2c_pub_cvr_target", "publish_version", "target_type", "target_code"),
+        Index("ix_d2c_pub_cvr_active", "publish_version", "is_active", "priority"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    publish_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    rule_code: Mapped[str] = mapped_column(String(120), nullable=False)
+    target_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    target_code: Mapped[str] = mapped_column(String(96), nullable=False)
+    client_surface_codes: Mapped[list[str]] = mapped_column(JSON, nullable=False)
+    customer_segments: Mapped[list[str]] = mapped_column(JSON, nullable=False)
+    login_state: Mapped[str] = mapped_column(String(32), nullable=False)
+    locale: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    currency: Mapped[str | None] = mapped_column(String(3), nullable=True)
+    visible_from: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    visible_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    rule_expression: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    priority: Mapped[int] = mapped_column(Integer, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    published_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    source_rule_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    raw_payload: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class PublishedClientActionPolicy(Base):
+    __tablename__ = "d2c_published_client_action_policies"
+    __table_args__ = (
+        UniqueConstraint("publish_version", "policy_code", name="uq_d2c_pub_cap_code"),
+        Index("ix_d2c_pub_cap_target", "publish_version", "target_type", "target_code"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    publish_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    policy_code: Mapped[str] = mapped_column(String(120), nullable=False)
+    target_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    target_code: Mapped[str] = mapped_column(String(96), nullable=False)
+    action_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    label: Mapped[str] = mapped_column(String(120), nullable=False)
+    target_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    target_page_code: Mapped[str | None] = mapped_column(String(96), nullable=True)
+    target_ref: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    open_mode: Mapped[str] = mapped_column(String(32), nullable=False)
+    action_payload: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    published_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    source_policy_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    raw_payload: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class PublishedClientTrackingPolicy(Base):
+    __tablename__ = "d2c_published_client_tracking_policies"
+    __table_args__ = (
+        UniqueConstraint("publish_version", "policy_code", name="uq_d2c_pub_ctp_code"),
+        Index("ix_d2c_pub_ctp_target", "publish_version", "target_type", "target_code"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    publish_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    policy_code: Mapped[str] = mapped_column(String(120), nullable=False)
+    target_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    target_code: Mapped[str] = mapped_column(String(96), nullable=False)
+    event_name: Mapped[str] = mapped_column(String(64), nullable=False)
+    event_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    event_trigger: Mapped[str] = mapped_column(String(32), nullable=False)
+    tracking_params: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    is_required: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    published_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    source_policy_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    raw_payload: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
 
 class PublishedGroup(Base):
     __tablename__ = "d2c_published_groups"
