@@ -11,6 +11,14 @@ from sqlalchemy.orm import Session
 from app.core.config import load_settings
 from app.core.database import get_session_factory
 from app.domains.published.models.published import (
+    PublishedClientActionPolicy,
+    PublishedClientBlockType,
+    PublishedClientDataBinding,
+    PublishedClientPage,
+    PublishedClientRegion,
+    PublishedClientSurface,
+    PublishedClientTrackingPolicy,
+    PublishedClientVisibilityRule,
     PublishedCoupon,
     PublishedGroup,
     PublishedOffer,
@@ -48,8 +56,197 @@ def _snapshot_payload(publish_version: str) -> dict[str, dict[str, Any]]:
     offer_code = _code("OFFER")
     promotion_code = _code("PROMO")
     coupon_code = _code("COUPON")
+    page_code = "home"
+    region_code = _code("REGION")
+    block_type = "offer_shelf"
+    surface_code = "web_desktop"
+    binding_code = _code("BINDING")
+    visibility_rule_code = _code("VIS")
+    action_policy_code = _code("ACTION")
+    tracking_policy_code = _code("TRACKING")
 
     return {
+        "/backoffice/read/v1/published/snapshot/client-pages": {
+            "publish_version": publish_version,
+            "count": 1,
+            "pages": [
+                {
+                    "publish_version": publish_version,
+                    "page_code": page_code,
+                    "page_type": "home",
+                    "route_path": "/",
+                    "title": "首页",
+                    "description": "pytest client page",
+                    "seo_title": "pytest home",
+                    "seo_description": "pytest seo description",
+                    "sort_order": 10,
+                    "display_status": "visible",
+                    "is_active": True,
+                    "published_at": _published_at(),
+                    "source_page_id": 101,
+                    "raw_payload": {"source": "pytest"},
+                }
+            ],
+        },
+        "/backoffice/read/v1/published/snapshot/client-regions": {
+            "publish_version": publish_version,
+            "count": 1,
+            "regions": [
+                {
+                    "publish_version": publish_version,
+                    "region_code": region_code,
+                    "page_code": page_code,
+                    "region_type": "main",
+                    "title": "首页主体",
+                    "description": "pytest client region",
+                    "sort_order": 10,
+                    "allowed_block_types": [block_type],
+                    "max_blocks": 8,
+                    "is_required": True,
+                    "display_status": "visible",
+                    "is_active": True,
+                    "published_at": _published_at(),
+                    "source_region_id": 102,
+                    "raw_payload": {"source": "pytest"},
+                }
+            ],
+        },
+        "/backoffice/read/v1/published/snapshot/client-block-types": {
+            "publish_version": publish_version,
+            "count": 1,
+            "block_types": [
+                {
+                    "publish_version": publish_version,
+                    "block_type": block_type,
+                    "display_name": "商品货架",
+                    "description": "pytest block type",
+                    "renderer_key": "storefront.offer_shelf",
+                    "allowed_region_types": ["main"],
+                    "allowed_content_types": ["offer"],
+                    "layout_schema": {"required": ["columns_mobile"]},
+                    "slot_schema": {"slots": ["offers"]},
+                    "action_schema": {"actions": ["add_to_cart"]},
+                    "analytics_schema": {"events": ["impression", "click"]},
+                    "data_contract_version": "v1",
+                    "display_status": "visible",
+                    "is_active": True,
+                    "published_at": _published_at(),
+                    "source_block_type_id": 103,
+                    "raw_payload": {"source": "pytest"},
+                }
+            ],
+        },
+        "/backoffice/read/v1/published/snapshot/client-surfaces": {
+            "publish_version": publish_version,
+            "count": 1,
+            "surfaces": [
+                {
+                    "publish_version": publish_version,
+                    "surface_code": surface_code,
+                    "surface_name": "Web Desktop",
+                    "surface_type": "web",
+                    "device_family": "desktop",
+                    "supported_renderer_keys": ["storefront.offer_shelf"],
+                    "breakpoint_profile": {"layout": "desktop"},
+                    "is_active": True,
+                    "published_at": _published_at(),
+                    "source_surface_id": 104,
+                    "raw_payload": {"source": "pytest"},
+                }
+            ],
+        },
+        "/backoffice/read/v1/published/snapshot/client-data-bindings": {
+            "publish_version": publish_version,
+            "count": 1,
+            "data_bindings": [
+                {
+                    "publish_version": publish_version,
+                    "binding_code": binding_code,
+                    "target_type": "block_type",
+                    "target_code": block_type,
+                    "content_type": "offer",
+                    "data_source_type": "section_positions",
+                    "data_source_ref": "published_section_positions",
+                    "query_params": {"section_type": block_type},
+                    "sort_policy": {"order_by": ["sort_order"]},
+                    "result_limit": 12,
+                    "refresh_policy": {"mode": "publish_snapshot"},
+                    "is_active": True,
+                    "published_at": _published_at(),
+                    "source_binding_id": 105,
+                    "raw_payload": {"source": "pytest"},
+                }
+            ],
+        },
+        "/backoffice/read/v1/published/snapshot/client-visibility-rules": {
+            "publish_version": publish_version,
+            "count": 1,
+            "visibility_rules": [
+                {
+                    "publish_version": publish_version,
+                    "rule_code": visibility_rule_code,
+                    "target_type": "block_type",
+                    "target_code": block_type,
+                    "client_surface_codes": [surface_code],
+                    "customer_segments": ["all"],
+                    "login_state": "any",
+                    "locale": None,
+                    "currency": None,
+                    "visible_from": None,
+                    "visible_until": None,
+                    "rule_expression": {"allow": True},
+                    "priority": 1,
+                    "is_active": True,
+                    "published_at": _published_at(),
+                    "source_rule_id": 106,
+                    "raw_payload": {"source": "pytest"},
+                }
+            ],
+        },
+        "/backoffice/read/v1/published/snapshot/client-action-policies": {
+            "publish_version": publish_version,
+            "count": 1,
+            "action_policies": [
+                {
+                    "publish_version": publish_version,
+                    "policy_code": action_policy_code,
+                    "target_type": "block_type",
+                    "target_code": block_type,
+                    "action_type": "add_to_cart",
+                    "label": "加入购物车",
+                    "target_url": None,
+                    "target_page_code": None,
+                    "target_ref": "offer_code",
+                    "open_mode": "same",
+                    "action_payload": {"param": "offer_code"},
+                    "is_active": True,
+                    "published_at": _published_at(),
+                    "source_policy_id": 107,
+                    "raw_payload": {"source": "pytest"},
+                }
+            ],
+        },
+        "/backoffice/read/v1/published/snapshot/client-tracking-policies": {
+            "publish_version": publish_version,
+            "count": 1,
+            "tracking_policies": [
+                {
+                    "publish_version": publish_version,
+                    "policy_code": tracking_policy_code,
+                    "target_type": "block_type",
+                    "target_code": block_type,
+                    "event_name": "add_to_cart",
+                    "event_type": "conversion",
+                    "event_trigger": "action_success",
+                    "tracking_params": {"include": ["offer_code", "quantity"]},
+                    "is_required": True,
+                    "is_active": True,
+                    "published_at": _published_at(),
+                    "source_policy_id": 108,
+                    "raw_payload": {"source": "pytest"},
+                }
+            ],
+        },
         "/backoffice/read/v1/published/snapshot/groups": {
             "publish_version": publish_version,
             "count": 1,
@@ -299,6 +496,14 @@ def test_snapshot_all_sync_pulls_terminal_runtime_rows(session: Session) -> None
     payload_by_endpoint = _snapshot_payload(publish_version)
 
     for model in (
+        PublishedClientTrackingPolicy,
+        PublishedClientActionPolicy,
+        PublishedClientVisibilityRule,
+        PublishedClientDataBinding,
+        PublishedClientSurface,
+        PublishedClientBlockType,
+        PublishedClientRegion,
+        PublishedClientPage,
         PublishedCoupon,
         PublishedPromotionTarget,
         PublishedStorefrontSectionPosition,
@@ -337,9 +542,17 @@ def test_snapshot_all_sync_pulls_terminal_runtime_rows(session: Session) -> None
 
     assert sync_run.status == "success"
     assert sync_run.publish_version == publish_version
-    assert sync_run.rows_fetched == 11
-    assert sync_run.rows_upserted == 11
+    assert sync_run.rows_fetched == 19
+    assert sync_run.rows_upserted == 19
 
+    assert session.scalar(select(PublishedClientPage)) is not None
+    assert session.scalar(select(PublishedClientRegion)) is not None
+    assert session.scalar(select(PublishedClientBlockType)) is not None
+    assert session.scalar(select(PublishedClientSurface)) is not None
+    assert session.scalar(select(PublishedClientDataBinding)) is not None
+    assert session.scalar(select(PublishedClientVisibilityRule)) is not None
+    assert session.scalar(select(PublishedClientActionPolicy)) is not None
+    assert session.scalar(select(PublishedClientTrackingPolicy)) is not None
     assert session.scalar(select(PublishedGroup)) is not None
     assert session.scalar(select(PublishedOffer)) is not None
     assert session.scalar(select(PublishedOfferComponent)) is not None
@@ -381,3 +594,86 @@ def test_snapshot_single_scope_sync_is_supported(session: Session) -> None:
     assert sync_run.status == "success"
     assert sync_run.rows_fetched == 1
     assert session.scalar(select(PublishedGroup)) is not None
+
+
+def test_snapshot_client_presentation_sync_pulls_all_client_runtime_rows(
+    session: Session,
+) -> None:
+    publish_version = _code("PUB")
+    payload_by_endpoint = _snapshot_payload(publish_version)
+
+    for model in (
+        PublishedClientTrackingPolicy,
+        PublishedClientActionPolicy,
+        PublishedClientVisibilityRule,
+        PublishedClientDataBinding,
+        PublishedClientSurface,
+        PublishedClientBlockType,
+        PublishedClientRegion,
+        PublishedClientPage,
+        PublishSyncRun,
+    ):
+        session.execute(delete(model))
+    session.commit()
+
+    def fake_fetcher(
+        _base_url: str,
+        endpoint: str,
+        _service_client: str,
+        _publish_version: str | None,
+    ) -> dict[str, Any]:
+        return payload_by_endpoint[endpoint]
+
+    sync_run = sync_published_scope(
+        session,
+        scope="snapshot-client-presentation",
+        base_url="http://backoffice.test",
+        service_client="d2c-service",
+        publish_version=publish_version,
+        requested_by="pytest",
+        fetcher=fake_fetcher,
+    )
+
+    assert sync_run.status == "success"
+    assert sync_run.publish_version == publish_version
+    assert sync_run.rows_fetched == 8
+    assert sync_run.rows_upserted == 8
+
+    assert session.scalar(select(PublishedClientPage)) is not None
+    assert session.scalar(select(PublishedClientRegion)) is not None
+    assert session.scalar(select(PublishedClientBlockType)) is not None
+    assert session.scalar(select(PublishedClientSurface)) is not None
+    assert session.scalar(select(PublishedClientDataBinding)) is not None
+    assert session.scalar(select(PublishedClientVisibilityRule)) is not None
+    assert session.scalar(select(PublishedClientActionPolicy)) is not None
+    assert session.scalar(select(PublishedClientTrackingPolicy)) is not None
+
+
+def test_snapshot_client_page_single_scope_sync_is_supported(session: Session) -> None:
+    publish_version = _code("PUB")
+    payload_by_endpoint = _snapshot_payload(publish_version)
+
+    session.execute(delete(PublishedClientPage))
+    session.commit()
+
+    def fake_fetcher(
+        _base_url: str,
+        endpoint: str,
+        _service_client: str,
+        _publish_version: str | None,
+    ) -> dict[str, Any]:
+        return payload_by_endpoint[endpoint]
+
+    sync_run = sync_published_scope(
+        session,
+        scope="snapshot-client-pages",
+        base_url="http://backoffice.test",
+        service_client="d2c-service",
+        publish_version=publish_version,
+        requested_by="pytest",
+        fetcher=fake_fetcher,
+    )
+
+    assert sync_run.status == "success"
+    assert sync_run.rows_fetched == 1
+    assert session.scalar(select(PublishedClientPage)) is not None

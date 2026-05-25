@@ -18,6 +18,14 @@ from sqlalchemy.orm import Session
 from app.core.config import load_settings
 from app.core.database import get_session_factory
 from app.domains.published.models.published import (
+    PublishedClientActionPolicy,
+    PublishedClientBlockType,
+    PublishedClientDataBinding,
+    PublishedClientPage,
+    PublishedClientRegion,
+    PublishedClientSurface,
+    PublishedClientTrackingPolicy,
+    PublishedClientVisibilityRule,
     PublishedCoupon,
     PublishedGroup,
     PublishedOffer,
@@ -42,11 +50,21 @@ SNAPSHOT_SCOPES = {
     "snapshot-storefront-sections",
     "snapshot-storefront-section-layouts",
     "snapshot-storefront-section-positions",
+    "snapshot-client-pages",
+    "snapshot-client-regions",
+    "snapshot-client-block-types",
+    "snapshot-client-surfaces",
+    "snapshot-client-data-bindings",
+    "snapshot-client-visibility-rules",
+    "snapshot-client-action-policies",
+    "snapshot-client-tracking-policies",
     "snapshot-promotion-rules",
     "snapshot-promotion-targets",
     "snapshot-coupons",
 }
-VALID_SCOPES = LEGACY_SCOPES | SNAPSHOT_SCOPES | {"all", "snapshot-all"}
+VALID_SCOPES = (
+    LEGACY_SCOPES | SNAPSHOT_SCOPES | {"all", "snapshot-all", "snapshot-client-presentation"}
+)
 
 ENDPOINT_BY_SCOPE = {
     "coupons": "/backoffice/read/v1/published/coupons",
@@ -61,6 +79,20 @@ ENDPOINT_BY_SCOPE = {
     ),
     "snapshot-storefront-section-positions": (
         "/backoffice/read/v1/published/snapshot/storefront-section-positions"
+    ),
+    "snapshot-client-pages": "/backoffice/read/v1/published/snapshot/client-pages",
+    "snapshot-client-regions": "/backoffice/read/v1/published/snapshot/client-regions",
+    "snapshot-client-block-types": "/backoffice/read/v1/published/snapshot/client-block-types",
+    "snapshot-client-surfaces": "/backoffice/read/v1/published/snapshot/client-surfaces",
+    "snapshot-client-data-bindings": "/backoffice/read/v1/published/snapshot/client-data-bindings",
+    "snapshot-client-visibility-rules": (
+        "/backoffice/read/v1/published/snapshot/client-visibility-rules"
+    ),
+    "snapshot-client-action-policies": (
+        "/backoffice/read/v1/published/snapshot/client-action-policies"
+    ),
+    "snapshot-client-tracking-policies": (
+        "/backoffice/read/v1/published/snapshot/client-tracking-policies"
     ),
     "snapshot-promotion-rules": "/backoffice/read/v1/published/snapshot/promotion-rules",
     "snapshot-promotion-targets": "/backoffice/read/v1/published/snapshot/promotion-targets",
@@ -219,6 +251,147 @@ STOREFRONT_SECTION_POSITION_FIELDS = (
     "is_active",
     "published_at",
     "source_position_id",
+    "raw_payload",
+)
+
+CLIENT_PAGE_FIELDS = (
+    "publish_version",
+    "page_code",
+    "page_type",
+    "route_path",
+    "title",
+    "description",
+    "seo_title",
+    "seo_description",
+    "sort_order",
+    "display_status",
+    "is_active",
+    "published_at",
+    "source_page_id",
+    "raw_payload",
+)
+
+CLIENT_REGION_FIELDS = (
+    "publish_version",
+    "region_code",
+    "page_code",
+    "region_type",
+    "title",
+    "description",
+    "sort_order",
+    "allowed_block_types",
+    "max_blocks",
+    "is_required",
+    "display_status",
+    "is_active",
+    "published_at",
+    "source_region_id",
+    "raw_payload",
+)
+
+CLIENT_BLOCK_TYPE_FIELDS = (
+    "publish_version",
+    "block_type",
+    "display_name",
+    "description",
+    "renderer_key",
+    "allowed_region_types",
+    "allowed_content_types",
+    "layout_schema",
+    "slot_schema",
+    "action_schema",
+    "analytics_schema",
+    "data_contract_version",
+    "display_status",
+    "is_active",
+    "published_at",
+    "source_block_type_id",
+    "raw_payload",
+)
+
+CLIENT_SURFACE_FIELDS = (
+    "publish_version",
+    "surface_code",
+    "surface_name",
+    "surface_type",
+    "device_family",
+    "supported_renderer_keys",
+    "breakpoint_profile",
+    "is_active",
+    "published_at",
+    "source_surface_id",
+    "raw_payload",
+)
+
+CLIENT_DATA_BINDING_FIELDS = (
+    "publish_version",
+    "binding_code",
+    "target_type",
+    "target_code",
+    "content_type",
+    "data_source_type",
+    "data_source_ref",
+    "query_params",
+    "sort_policy",
+    "result_limit",
+    "refresh_policy",
+    "is_active",
+    "published_at",
+    "source_binding_id",
+    "raw_payload",
+)
+
+CLIENT_VISIBILITY_RULE_FIELDS = (
+    "publish_version",
+    "rule_code",
+    "target_type",
+    "target_code",
+    "client_surface_codes",
+    "customer_segments",
+    "login_state",
+    "locale",
+    "currency",
+    "visible_from",
+    "visible_until",
+    "rule_expression",
+    "priority",
+    "is_active",
+    "published_at",
+    "source_rule_id",
+    "raw_payload",
+)
+
+CLIENT_ACTION_POLICY_FIELDS = (
+    "publish_version",
+    "policy_code",
+    "target_type",
+    "target_code",
+    "action_type",
+    "label",
+    "target_url",
+    "target_page_code",
+    "target_ref",
+    "open_mode",
+    "action_payload",
+    "is_active",
+    "published_at",
+    "source_policy_id",
+    "raw_payload",
+)
+
+CLIENT_TRACKING_POLICY_FIELDS = (
+    "publish_version",
+    "policy_code",
+    "target_type",
+    "target_code",
+    "event_name",
+    "event_type",
+    "event_trigger",
+    "tracking_params",
+    "is_required",
+    "is_active",
+    "published_at",
+    "source_policy_id",
     "raw_payload",
 )
 
@@ -598,6 +771,7 @@ def _sync_snapshot_storefront_section_layouts(
         conflict_columns=("publish_version", "section_code"),
     )
 
+
 def _sync_snapshot_storefront_section_positions(
     session: Session,
     base_url: str,
@@ -618,6 +792,173 @@ def _sync_snapshot_storefront_section_positions(
         conflict_columns=("publish_version", "position_code"),
     )
 
+
+def _sync_snapshot_client_pages(
+    session: Session,
+    base_url: str,
+    service_client: str,
+    publish_version: str | None,
+    fetcher: JsonFetcher,
+) -> ScopeResult:
+    return _sync_snapshot_rows(
+        session,
+        scope="snapshot-client-pages",
+        base_url=base_url,
+        service_client=service_client,
+        publish_version=publish_version,
+        fetcher=fetcher,
+        payload_key="pages",
+        fields=CLIENT_PAGE_FIELDS,
+        model=PublishedClientPage,
+        conflict_columns=("publish_version", "page_code"),
+    )
+
+
+def _sync_snapshot_client_regions(
+    session: Session,
+    base_url: str,
+    service_client: str,
+    publish_version: str | None,
+    fetcher: JsonFetcher,
+) -> ScopeResult:
+    return _sync_snapshot_rows(
+        session,
+        scope="snapshot-client-regions",
+        base_url=base_url,
+        service_client=service_client,
+        publish_version=publish_version,
+        fetcher=fetcher,
+        payload_key="regions",
+        fields=CLIENT_REGION_FIELDS,
+        model=PublishedClientRegion,
+        conflict_columns=("publish_version", "region_code"),
+    )
+
+
+def _sync_snapshot_client_block_types(
+    session: Session,
+    base_url: str,
+    service_client: str,
+    publish_version: str | None,
+    fetcher: JsonFetcher,
+) -> ScopeResult:
+    return _sync_snapshot_rows(
+        session,
+        scope="snapshot-client-block-types",
+        base_url=base_url,
+        service_client=service_client,
+        publish_version=publish_version,
+        fetcher=fetcher,
+        payload_key="block_types",
+        fields=CLIENT_BLOCK_TYPE_FIELDS,
+        model=PublishedClientBlockType,
+        conflict_columns=("publish_version", "block_type"),
+    )
+
+
+def _sync_snapshot_client_surfaces(
+    session: Session,
+    base_url: str,
+    service_client: str,
+    publish_version: str | None,
+    fetcher: JsonFetcher,
+) -> ScopeResult:
+    return _sync_snapshot_rows(
+        session,
+        scope="snapshot-client-surfaces",
+        base_url=base_url,
+        service_client=service_client,
+        publish_version=publish_version,
+        fetcher=fetcher,
+        payload_key="surfaces",
+        fields=CLIENT_SURFACE_FIELDS,
+        model=PublishedClientSurface,
+        conflict_columns=("publish_version", "surface_code"),
+    )
+
+
+def _sync_snapshot_client_data_bindings(
+    session: Session,
+    base_url: str,
+    service_client: str,
+    publish_version: str | None,
+    fetcher: JsonFetcher,
+) -> ScopeResult:
+    return _sync_snapshot_rows(
+        session,
+        scope="snapshot-client-data-bindings",
+        base_url=base_url,
+        service_client=service_client,
+        publish_version=publish_version,
+        fetcher=fetcher,
+        payload_key="data_bindings",
+        fields=CLIENT_DATA_BINDING_FIELDS,
+        model=PublishedClientDataBinding,
+        conflict_columns=("publish_version", "binding_code"),
+    )
+
+
+def _sync_snapshot_client_visibility_rules(
+    session: Session,
+    base_url: str,
+    service_client: str,
+    publish_version: str | None,
+    fetcher: JsonFetcher,
+) -> ScopeResult:
+    return _sync_snapshot_rows(
+        session,
+        scope="snapshot-client-visibility-rules",
+        base_url=base_url,
+        service_client=service_client,
+        publish_version=publish_version,
+        fetcher=fetcher,
+        payload_key="visibility_rules",
+        fields=CLIENT_VISIBILITY_RULE_FIELDS,
+        model=PublishedClientVisibilityRule,
+        conflict_columns=("publish_version", "rule_code"),
+    )
+
+
+def _sync_snapshot_client_action_policies(
+    session: Session,
+    base_url: str,
+    service_client: str,
+    publish_version: str | None,
+    fetcher: JsonFetcher,
+) -> ScopeResult:
+    return _sync_snapshot_rows(
+        session,
+        scope="snapshot-client-action-policies",
+        base_url=base_url,
+        service_client=service_client,
+        publish_version=publish_version,
+        fetcher=fetcher,
+        payload_key="action_policies",
+        fields=CLIENT_ACTION_POLICY_FIELDS,
+        model=PublishedClientActionPolicy,
+        conflict_columns=("publish_version", "policy_code"),
+    )
+
+
+def _sync_snapshot_client_tracking_policies(
+    session: Session,
+    base_url: str,
+    service_client: str,
+    publish_version: str | None,
+    fetcher: JsonFetcher,
+) -> ScopeResult:
+    return _sync_snapshot_rows(
+        session,
+        scope="snapshot-client-tracking-policies",
+        base_url=base_url,
+        service_client=service_client,
+        publish_version=publish_version,
+        fetcher=fetcher,
+        payload_key="tracking_policies",
+        fields=CLIENT_TRACKING_POLICY_FIELDS,
+        model=PublishedClientTrackingPolicy,
+        conflict_columns=("publish_version", "policy_code"),
+    )
 
 
 def _sync_snapshot_promotion_rules(
@@ -747,6 +1088,70 @@ def _sync_single_scope(
             publish_version,
             fetcher,
         )
+    if scope == "snapshot-client-pages":
+        return _sync_snapshot_client_pages(
+            session,
+            base_url,
+            service_client,
+            publish_version,
+            fetcher,
+        )
+    if scope == "snapshot-client-regions":
+        return _sync_snapshot_client_regions(
+            session,
+            base_url,
+            service_client,
+            publish_version,
+            fetcher,
+        )
+    if scope == "snapshot-client-block-types":
+        return _sync_snapshot_client_block_types(
+            session,
+            base_url,
+            service_client,
+            publish_version,
+            fetcher,
+        )
+    if scope == "snapshot-client-surfaces":
+        return _sync_snapshot_client_surfaces(
+            session,
+            base_url,
+            service_client,
+            publish_version,
+            fetcher,
+        )
+    if scope == "snapshot-client-data-bindings":
+        return _sync_snapshot_client_data_bindings(
+            session,
+            base_url,
+            service_client,
+            publish_version,
+            fetcher,
+        )
+    if scope == "snapshot-client-visibility-rules":
+        return _sync_snapshot_client_visibility_rules(
+            session,
+            base_url,
+            service_client,
+            publish_version,
+            fetcher,
+        )
+    if scope == "snapshot-client-action-policies":
+        return _sync_snapshot_client_action_policies(
+            session,
+            base_url,
+            service_client,
+            publish_version,
+            fetcher,
+        )
+    if scope == "snapshot-client-tracking-policies":
+        return _sync_snapshot_client_tracking_policies(
+            session,
+            base_url,
+            service_client,
+            publish_version,
+            fetcher,
+        )
     if scope == "snapshot-promotion-rules":
         return _sync_snapshot_promotion_rules(
             session,
@@ -784,6 +1189,17 @@ def _combine_results(scope: str, results: list[ScopeResult]) -> ScopeResult:
 def _child_scopes(scope: str) -> tuple[str, ...]:
     if scope == "all":
         return ("coupons",)
+    if scope == "snapshot-client-presentation":
+        return (
+            "snapshot-client-pages",
+            "snapshot-client-regions",
+            "snapshot-client-block-types",
+            "snapshot-client-surfaces",
+            "snapshot-client-data-bindings",
+            "snapshot-client-visibility-rules",
+            "snapshot-client-action-policies",
+            "snapshot-client-tracking-policies",
+        )
     if scope == "snapshot-all":
         return (
             "snapshot-groups",
@@ -794,6 +1210,14 @@ def _child_scopes(scope: str) -> tuple[str, ...]:
             "snapshot-storefront-sections",
             "snapshot-storefront-section-layouts",
             "snapshot-storefront-section-positions",
+            "snapshot-client-pages",
+            "snapshot-client-regions",
+            "snapshot-client-block-types",
+            "snapshot-client-surfaces",
+            "snapshot-client-data-bindings",
+            "snapshot-client-visibility-rules",
+            "snapshot-client-action-policies",
+            "snapshot-client-tracking-policies",
             "snapshot-promotion-rules",
             "snapshot-promotion-targets",
             "snapshot-coupons",
@@ -814,7 +1238,11 @@ def sync_published_scope(
     if scope not in VALID_SCOPES:
         raise ValueError(f"unsupported published sync scope: {scope}")
 
-    source_endpoint = "multiple" if scope in {"all", "snapshot-all"} else ENDPOINT_BY_SCOPE[scope]
+    source_endpoint = (
+        "multiple"
+        if scope in {"all", "snapshot-all", "snapshot-client-presentation"}
+        else ENDPOINT_BY_SCOPE[scope]
+    )
     sync_run = PublishSyncRun(
         sync_scope=scope,
         source_service="d2c-backoffice-api",

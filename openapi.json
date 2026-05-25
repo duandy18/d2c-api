@@ -2676,19 +2676,30 @@
         ],
         "title": "PublishedHealthResponse"
       },
-      "StorefrontHomeGroup": {
+      "StorefrontHomeBlock": {
         "properties": {
-          "group_code": {
+          "block_code": {
             "type": "string",
-            "title": "Group Code"
+            "title": "Block Code"
           },
-          "group_name": {
+          "block_type": {
             "type": "string",
-            "title": "Group Name"
+            "title": "Block Type"
           },
-          "group_kind": {
+          "title": {
             "type": "string",
-            "title": "Group Kind"
+            "title": "Title"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subtitle"
           },
           "description": {
             "anyOf": [
@@ -2701,32 +2712,175 @@
             ],
             "title": "Description"
           },
-          "image_url": {
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
+          },
+          "layout": {
+            "$ref": "#/components/schemas/StorefrontHomeBlockLayout"
+          },
+          "data_binding_codes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Data Binding Codes"
+          },
+          "visibility_rule_codes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Visibility Rule Codes"
+          },
+          "action_policy_codes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Action Policy Codes"
+          },
+          "tracking_policy_codes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tracking Policy Codes"
+          },
+          "positions": {
+            "items": {
+              "$ref": "#/components/schemas/StorefrontHomeBlockPosition"
+            },
+            "type": "array",
+            "title": "Positions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "block_code",
+          "block_type",
+          "title",
+          "sort_order",
+          "layout"
+        ],
+        "title": "StorefrontHomeBlock"
+      },
+      "StorefrontHomeBlockLayout": {
+        "properties": {
+          "display_type": {
+            "type": "string",
+            "title": "Display Type"
+          },
+          "columns_desktop": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Columns Desktop"
+          },
+          "columns_tablet": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Columns Tablet"
+          },
+          "columns_mobile": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Columns Mobile"
+          },
+          "card_size": {
+            "type": "string",
+            "title": "Card Size"
+          },
+          "image_ratio": {
+            "type": "string",
+            "title": "Image Ratio"
+          },
+          "show_promotion_badge": {
+            "type": "boolean",
+            "title": "Show Promotion Badge"
+          },
+          "show_sales_summary": {
+            "type": "boolean",
+            "title": "Show Sales Summary"
+          },
+          "show_review_summary": {
+            "type": "boolean",
+            "title": "Show Review Summary"
+          },
+          "show_compare_price": {
+            "type": "boolean",
+            "title": "Show Compare Price"
+          },
+          "show_quantity_stepper": {
+            "type": "boolean",
+            "title": "Show Quantity Stepper"
+          },
+          "max_items": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "integer",
+                "minimum": 1.0
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Image Url"
-          },
-          "sort_order": {
-            "type": "integer",
-            "title": "Sort Order"
+            "title": "Max Items"
           }
         },
         "type": "object",
         "required": [
-          "group_code",
-          "group_name",
-          "group_kind",
-          "sort_order"
+          "display_type",
+          "columns_desktop",
+          "columns_tablet",
+          "columns_mobile",
+          "card_size",
+          "image_ratio",
+          "show_promotion_badge",
+          "show_sales_summary",
+          "show_review_summary",
+          "show_compare_price",
+          "show_quantity_stepper"
         ],
-        "title": "StorefrontHomeGroup"
+        "title": "StorefrontHomeBlockLayout"
       },
-      "StorefrontHomeOfferCard": {
+      "StorefrontHomeBlockPosition": {
+        "properties": {
+          "position_code": {
+            "type": "string",
+            "title": "Position Code"
+          },
+          "offer_code": {
+            "type": "string",
+            "title": "Offer Code"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
+          },
+          "position_type": {
+            "type": "string",
+            "title": "Position Type"
+          },
+          "is_featured": {
+            "type": "boolean",
+            "title": "Is Featured"
+          },
+          "offer": {
+            "$ref": "#/components/schemas/StorefrontHomeOffer"
+          }
+        },
+        "type": "object",
+        "required": [
+          "position_code",
+          "offer_code",
+          "sort_order",
+          "position_type",
+          "is_featured",
+          "offer"
+        ],
+        "title": "StorefrontHomeBlockPosition"
+      },
+      "StorefrontHomeOffer": {
         "properties": {
           "offer_code": {
             "type": "string",
@@ -2772,26 +2926,6 @@
               }
             ],
             "title": "Image Url"
-          },
-          "group_code": {
-            "type": "string",
-            "title": "Group Code"
-          },
-          "group_name": {
-            "type": "string",
-            "title": "Group Name"
-          },
-          "position_code": {
-            "type": "string",
-            "title": "Position Code"
-          },
-          "position_sort_order": {
-            "type": "integer",
-            "title": "Position Sort Order"
-          },
-          "is_featured": {
-            "type": "boolean",
-            "title": "Is Featured"
           },
           "price_code": {
             "type": "string",
@@ -2906,123 +3040,29 @@
           "offer_code",
           "offer_type",
           "title",
-          "group_code",
-          "group_name",
-          "position_code",
-          "position_sort_order",
-          "is_featured",
           "price_code",
           "price_cents",
           "currency"
         ],
-        "title": "StorefrontHomeOfferCard"
+        "title": "StorefrontHomeOffer"
       },
-      "StorefrontHomeResponse": {
+      "StorefrontHomePage": {
         "properties": {
-          "data_source": {
+          "page_code": {
             "type": "string",
-            "const": "d2c_published_storefront_snapshot",
-            "title": "Data Source",
-            "default": "d2c_published_storefront_snapshot"
+            "title": "Page Code"
           },
-          "publish_version": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Publish Version"
-          },
-          "group_count": {
-            "type": "integer",
-            "minimum": 0.0,
-            "title": "Group Count"
-          },
-          "section_count": {
-            "type": "integer",
-            "minimum": 0.0,
-            "title": "Section Count"
-          },
-          "offer_count": {
-            "type": "integer",
-            "minimum": 0.0,
-            "title": "Offer Count"
-          },
-          "groups": {
-            "items": {
-              "$ref": "#/components/schemas/StorefrontHomeGroup"
-            },
-            "type": "array",
-            "title": "Groups"
-          },
-          "sections": {
-            "items": {
-              "$ref": "#/components/schemas/StorefrontHomeSection"
-            },
-            "type": "array",
-            "title": "Sections"
-          }
-        },
-        "type": "object",
-        "required": [
-          "publish_version",
-          "group_count",
-          "section_count",
-          "offer_count",
-          "groups",
-          "sections"
-        ],
-        "title": "StorefrontHomeResponse"
-      },
-      "StorefrontHomeSection": {
-        "properties": {
-          "section_code": {
+          "page_type": {
             "type": "string",
-            "title": "Section Code"
+            "title": "Page Type"
           },
-          "section_type": {
+          "route_path": {
             "type": "string",
-            "title": "Section Type"
-          },
-          "group_code": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Group Code"
-          },
-          "group_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Group Name"
+            "title": "Route Path"
           },
           "title": {
             "type": "string",
             "title": "Title"
-          },
-          "subtitle": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Subtitle"
           },
           "description": {
             "anyOf": [
@@ -3035,135 +3075,145 @@
             ],
             "title": "Description"
           },
-          "display_style": {
-            "type": "string",
-            "enum": [
-              "grid",
-              "list",
-              "ranking",
-              "banner"
-            ],
-            "title": "Display Style"
-          },
-          "sort_order": {
-            "type": "integer",
-            "title": "Sort Order"
-          },
-          "layout": {
-            "$ref": "#/components/schemas/StorefrontHomeSectionLayout"
-          },
-          "offers": {
+          "regions": {
             "items": {
-              "$ref": "#/components/schemas/StorefrontHomeOfferCard"
+              "$ref": "#/components/schemas/StorefrontHomeRegion"
             },
             "type": "array",
-            "title": "Offers"
+            "title": "Regions"
           }
         },
         "type": "object",
         "required": [
-          "section_code",
-          "section_type",
-          "group_code",
-          "group_name",
-          "title",
-          "display_style",
-          "sort_order",
-          "layout",
-          "offers"
+          "page_code",
+          "page_type",
+          "route_path",
+          "title"
         ],
-        "title": "StorefrontHomeSection"
+        "title": "StorefrontHomePage"
       },
-      "StorefrontHomeSectionLayout": {
+      "StorefrontHomeRegion": {
         "properties": {
-          "display_type": {
+          "region_code": {
             "type": "string",
-            "enum": [
-              "product_grid",
-              "featured_grid",
-              "ranking_list",
-              "horizontal_scroll",
-              "banner",
-              "promo_strip"
-            ],
-            "title": "Display Type"
+            "title": "Region Code"
           },
-          "columns_desktop": {
-            "type": "integer",
-            "minimum": 1.0,
-            "title": "Columns Desktop"
-          },
-          "columns_tablet": {
-            "type": "integer",
-            "minimum": 1.0,
-            "title": "Columns Tablet"
-          },
-          "columns_mobile": {
-            "type": "integer",
-            "minimum": 1.0,
-            "title": "Columns Mobile"
-          },
-          "card_size": {
+          "region_type": {
             "type": "string",
-            "enum": [
-              "compact",
-              "standard",
-              "large"
-            ],
-            "title": "Card Size"
+            "title": "Region Type"
           },
-          "image_ratio": {
+          "title": {
             "type": "string",
-            "title": "Image Ratio"
+            "title": "Title"
           },
-          "show_promotion_badge": {
-            "type": "boolean",
-            "title": "Show Promotion Badge"
-          },
-          "show_sales_summary": {
-            "type": "boolean",
-            "title": "Show Sales Summary"
-          },
-          "show_review_summary": {
-            "type": "boolean",
-            "title": "Show Review Summary"
-          },
-          "show_compare_price": {
-            "type": "boolean",
-            "title": "Show Compare Price"
-          },
-          "show_quantity_stepper": {
-            "type": "boolean",
-            "title": "Show Quantity Stepper"
-          },
-          "max_items": {
+          "description": {
             "anyOf": [
               {
-                "type": "integer",
-                "minimum": 1.0
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Max Items"
+            "title": "Description"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
+          },
+          "allowed_block_types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Allowed Block Types"
+          },
+          "blocks": {
+            "items": {
+              "$ref": "#/components/schemas/StorefrontHomeBlock"
+            },
+            "type": "array",
+            "title": "Blocks"
           }
         },
         "type": "object",
         "required": [
-          "display_type",
-          "columns_desktop",
-          "columns_tablet",
-          "columns_mobile",
-          "card_size",
-          "image_ratio",
-          "show_promotion_badge",
-          "show_sales_summary",
-          "show_review_summary",
-          "show_compare_price",
-          "show_quantity_stepper"
+          "region_code",
+          "region_type",
+          "title",
+          "sort_order"
         ],
-        "title": "StorefrontHomeSectionLayout"
+        "title": "StorefrontHomeRegion"
+      },
+      "StorefrontHomeResponse": {
+        "properties": {
+          "data_source": {
+            "type": "string",
+            "const": "d2c_published_client_presentation_snapshot",
+            "title": "Data Source",
+            "default": "d2c_published_client_presentation_snapshot"
+          },
+          "publish_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publish Version"
+          },
+          "page_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Code"
+          },
+          "surface_code": {
+            "type": "string",
+            "title": "Surface Code",
+            "default": "web_desktop"
+          },
+          "region_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Region Count"
+          },
+          "block_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Block Count"
+          },
+          "offer_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Offer Count"
+          },
+          "page": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StorefrontHomePage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "publish_version",
+          "region_count",
+          "block_count",
+          "offer_count"
+        ],
+        "title": "StorefrontHomeResponse"
       },
       "ValidationError": {
         "properties": {
