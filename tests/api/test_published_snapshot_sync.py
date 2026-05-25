@@ -21,6 +21,7 @@ from app.domains.published.models.published import (
     PublishedPromotionTarget,
     PublishedStorefrontSection,
     PublishedStorefrontSectionLayout,
+    PublishedStorefrontSectionPosition,
     PublishSyncRun,
 )
 from scripts.published.sync_published import sync_published_scope
@@ -205,6 +206,27 @@ def _snapshot_payload(publish_version: str) -> dict[str, dict[str, Any]]:
                 }
             ],
         },
+        "/backoffice/read/v1/published/snapshot/storefront-section-positions": {
+            "publish_version": publish_version,
+            "count": 1,
+            "positions": [
+                {
+                    "publish_version": publish_version,
+                    "section_code": _code("SECTION"),
+                    "position_code": _code("SEC-POS"),
+                    "offer_code": offer_code,
+                    "sort_order": 1,
+                    "position_type": "manual",
+                    "is_featured": True,
+                    "visible_from": None,
+                    "visible_until": None,
+                    "is_active": True,
+                    "published_at": _published_at(),
+                    "source_position_id": 11,
+                    "raw_payload": {"source": "test"},
+                }
+            ],
+        },
         "/backoffice/read/v1/published/snapshot/promotion-rules": {
             "publish_version": publish_version,
             "count": 1,
@@ -279,6 +301,7 @@ def test_snapshot_all_sync_pulls_terminal_runtime_rows(session: Session) -> None
     for model in (
         PublishedCoupon,
         PublishedPromotionTarget,
+        PublishedStorefrontSectionPosition,
         PublishedStorefrontSectionLayout,
         PublishedStorefrontSection,
         PublishedPromotionRule,
@@ -314,8 +337,8 @@ def test_snapshot_all_sync_pulls_terminal_runtime_rows(session: Session) -> None
 
     assert sync_run.status == "success"
     assert sync_run.publish_version == publish_version
-    assert sync_run.rows_fetched == 10
-    assert sync_run.rows_upserted == 10
+    assert sync_run.rows_fetched == 11
+    assert sync_run.rows_upserted == 11
 
     assert session.scalar(select(PublishedGroup)) is not None
     assert session.scalar(select(PublishedOffer)) is not None
@@ -323,6 +346,7 @@ def test_snapshot_all_sync_pulls_terminal_runtime_rows(session: Session) -> None
     assert session.scalar(select(PublishedOfferPrice)) is not None
     assert session.scalar(select(PublishedOfferPosition)) is not None
     assert session.scalar(select(PublishedStorefrontSectionLayout)) is not None
+    assert session.scalar(select(PublishedStorefrontSectionPosition)) is not None
     assert session.scalar(select(PublishedStorefrontSection)) is not None
     assert session.scalar(select(PublishedPromotionRule)) is not None
     assert session.scalar(select(PublishedPromotionTarget)) is not None

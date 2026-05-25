@@ -5,10 +5,10 @@ from sqlalchemy.orm import Session
 from app.domains.published.models.published import (
     PublishedGroup,
     PublishedOffer,
-    PublishedOfferPosition,
     PublishedOfferPrice,
     PublishedStorefrontSection,
     PublishedStorefrontSectionLayout,
+    PublishedStorefrontSectionPosition,
 )
 from app.domains.storefront.contracts.home_contract import (
     StorefrontHomeGroup,
@@ -47,20 +47,18 @@ def _display_style_from_display_type(display_type: str) -> str:
     return "grid"
 
 
-def _default_display_type(group_kind: str) -> str:
-    if group_kind == "hot":
+def _default_display_type(section_type: str) -> str:
+    if section_type == "ranking":
         return "ranking_list"
-    if group_kind == "bundle":
-        return "featured_grid"
-    if group_kind == "new":
-        return "horizontal_scroll"
-    if group_kind == "banner":
+    if section_type == "hero":
         return "banner"
+    if section_type == "promo":
+        return "promo_strip"
     return "product_grid"
 
 
-def _default_layout(group_kind: str) -> StorefrontHomeSectionLayout:
-    display_type = _default_display_type(group_kind)
+def _default_layout(section_type: str) -> StorefrontHomeSectionLayout:
+    display_type = _default_display_type(section_type)
 
     if display_type == "ranking_list":
         return StorefrontHomeSectionLayout(
@@ -78,38 +76,6 @@ def _default_layout(group_kind: str) -> StorefrontHomeSectionLayout:
             max_items=10,
         )
 
-    if display_type == "featured_grid":
-        return StorefrontHomeSectionLayout(
-            display_type="featured_grid",
-            columns_desktop=2,
-            columns_tablet=2,
-            columns_mobile=1,
-            card_size="large",
-            image_ratio="4:3",
-            show_promotion_badge=True,
-            show_sales_summary=True,
-            show_review_summary=True,
-            show_compare_price=True,
-            show_quantity_stepper=True,
-            max_items=8,
-        )
-
-    if display_type == "horizontal_scroll":
-        return StorefrontHomeSectionLayout(
-            display_type="horizontal_scroll",
-            columns_desktop=4,
-            columns_tablet=2,
-            columns_mobile=1,
-            card_size="standard",
-            image_ratio="1:1",
-            show_promotion_badge=True,
-            show_sales_summary=True,
-            show_review_summary=True,
-            show_compare_price=True,
-            show_quantity_stepper=True,
-            max_items=12,
-        )
-
     if display_type == "banner":
         return StorefrontHomeSectionLayout(
             display_type="banner",
@@ -119,6 +85,22 @@ def _default_layout(group_kind: str) -> StorefrontHomeSectionLayout:
             card_size="large",
             image_ratio="16:9",
             show_promotion_badge=False,
+            show_sales_summary=False,
+            show_review_summary=False,
+            show_compare_price=False,
+            show_quantity_stepper=False,
+            max_items=1,
+        )
+
+    if display_type == "promo_strip":
+        return StorefrontHomeSectionLayout(
+            display_type="promo_strip",
+            columns_desktop=1,
+            columns_tablet=1,
+            columns_mobile=1,
+            card_size="compact",
+            image_ratio="16:9",
+            show_promotion_badge=True,
             show_sales_summary=False,
             show_review_summary=False,
             show_compare_price=False,
@@ -144,10 +126,10 @@ def _default_layout(group_kind: str) -> StorefrontHomeSectionLayout:
 
 def _layout_schema(
     layout: PublishedStorefrontSectionLayout | None,
-    group_kind: str,
+    section_type: str,
 ) -> StorefrontHomeSectionLayout:
     if layout is None:
-        return _default_layout(group_kind)
+        return _default_layout(section_type)
 
     return StorefrontHomeSectionLayout(
         display_type=layout.display_type,
@@ -166,12 +148,12 @@ def _layout_schema(
 
 
 def _offer_tags(
-    group: PublishedGroup,
+    group: PublishedGroup | None,
     offer: PublishedOffer,
 ) -> list[str]:
     tags: list[str] = []
 
-    if group.group_name:
+    if group is not None and group.group_name:
         tags.append(group.group_name)
 
     if offer.offer_type:
@@ -182,11 +164,15 @@ def _offer_tags(
 
 def _offer_card_schema(
     *,
-    group: PublishedGroup,
-    position: PublishedOfferPosition,
+    section: PublishedStorefrontSection,
+    group: PublishedGroup | None,
+    position: PublishedStorefrontSectionPosition,
     offer: PublishedOffer,
     price: PublishedOfferPrice,
 ) -> StorefrontHomeOfferCard:
+    group_code = section.group_code or ""
+    group_name = group.group_name if group is not None else group_code
+
     return StorefrontHomeOfferCard(
         offer_code=offer.offer_code,
         offer_type=offer.offer_type,
@@ -194,8 +180,8 @@ def _offer_card_schema(
         subtitle=offer.subtitle,
         description=offer.description,
         image_url=offer.image_url,
-        group_code=group.group_code,
-        group_name=group.group_name,
+        group_code=group_code,
+        group_name=group_name,
         position_code=position.position_code,
         position_sort_order=position.sort_order,
         is_featured=position.is_featured,
@@ -214,20 +200,29 @@ def _offer_card_schema(
     )
 
 
-def _group_offers(
-    rows: list[tuple[PublishedGroup, PublishedOfferPosition, PublishedOffer, PublishedOfferPrice]],
+def _section_offers(
+    rows: list[
+        tuple[
+            PublishedStorefrontSection,
+            PublishedStorefrontSectionPosition,
+            PublishedOffer,
+            PublishedOfferPrice,
+            PublishedGroup | None,
+        ]
+    ],
 ) -> dict[str, list[StorefrontHomeOfferCard]]:
-    offers_by_group: dict[str, list[StorefrontHomeOfferCard]] = {}
-    seen_position_price: set[tuple[str, str]] = set()
+    offers_by_section: dict[str, list[StorefrontHomeOfferCard]] = {}
+    seen_position_offer: set[tuple[str, str]] = set()
 
-    for group, position, offer, price in rows:
+    for section, position, offer, price, group in rows:
         dedupe_key = (position.position_code, offer.offer_code)
-        if dedupe_key in seen_position_price:
+        if dedupe_key in seen_position_offer:
             continue
 
-        seen_position_price.add(dedupe_key)
-        offers_by_group.setdefault(group.group_code, []).append(
+        seen_position_offer.add(dedupe_key)
+        offers_by_section.setdefault(section.section_code, []).append(
             _offer_card_schema(
+                section=section,
                 group=group,
                 position=position,
                 offer=offer,
@@ -235,21 +230,7 @@ def _group_offers(
             )
         )
 
-    return offers_by_group
-
-
-def _section_group_kind(
-    section: PublishedStorefrontSection,
-    groups_by_code: dict[str, PublishedGroup],
-) -> str:
-    if section.group_code is None:
-        return "manual"
-
-    group = groups_by_code.get(section.group_code)
-    if group is None:
-        return "manual"
-
-    return group.group_kind
+    return offers_by_section
 
 
 def _section_group_name(
@@ -261,7 +242,7 @@ def _section_group_name(
 
     group = groups_by_code.get(section.group_code)
     if group is None:
-        return None
+        return section.group_code
 
     return group.group_name
 
@@ -271,14 +252,13 @@ def _build_sections_from_published_sections(
     groups_by_code: dict[str, PublishedGroup],
     sections: list[PublishedStorefrontSection],
     layouts_by_section: dict[str, PublishedStorefrontSectionLayout],
-    offers_by_group: dict[str, list[StorefrontHomeOfferCard]],
+    offers_by_section: dict[str, list[StorefrontHomeOfferCard]],
 ) -> list[StorefrontHomeSection]:
     result: list[StorefrontHomeSection] = []
 
     for section in sections:
-        group_kind = _section_group_kind(section, groups_by_code)
-        layout = _layout_schema(layouts_by_section.get(section.section_code), group_kind)
-        offers = offers_by_group.get(section.group_code or "", [])
+        layout = _layout_schema(layouts_by_section.get(section.section_code), section.section_type)
+        offers = offers_by_section.get(section.section_code, [])
         if layout.max_items is not None:
             offers = offers[: layout.max_items]
 
@@ -293,38 +273,6 @@ def _build_sections_from_published_sections(
                 description=section.description,
                 display_style=_display_style_from_display_type(layout.display_type),
                 sort_order=section.sort_order,
-                layout=layout,
-                offers=offers,
-            )
-        )
-
-    return result
-
-
-def _build_fallback_sections(
-    *,
-    groups: list[PublishedGroup],
-    offers_by_group: dict[str, list[StorefrontHomeOfferCard]],
-) -> list[StorefrontHomeSection]:
-    result: list[StorefrontHomeSection] = []
-
-    for group in groups:
-        layout = _default_layout(group.group_kind)
-        offers = offers_by_group.get(group.group_code, [])
-        if layout.max_items is not None:
-            offers = offers[: layout.max_items]
-
-        result.append(
-            StorefrontHomeSection(
-                section_code=group.group_code,
-                section_type="offer_shelf",
-                group_code=group.group_code,
-                group_name=group.group_name,
-                title=group.group_name,
-                subtitle=None,
-                description=group.description,
-                display_style=_display_style_from_display_type(layout.display_type),
-                sort_order=group.sort_order,
                 layout=layout,
                 offers=offers,
             )
@@ -349,22 +297,19 @@ def get_storefront_home(session: Session) -> StorefrontHomeResponse:
     groups = list_home_groups(session, publish_version)
     groups_by_code = {group.group_code: group for group in groups}
     rows = list_home_rows(session, publish_version)
-    offers_by_group = _group_offers(rows)
+    offers_by_section = _section_offers(rows)
 
     published_sections = list_home_sections(session, publish_version)
     layouts_by_section = {
         layout.section_code: layout for layout in list_home_layouts(session, publish_version)
     }
 
-    if published_sections:
-        sections = _build_sections_from_published_sections(
-            groups_by_code=groups_by_code,
-            sections=published_sections,
-            layouts_by_section=layouts_by_section,
-            offers_by_group=offers_by_group,
-        )
-    else:
-        sections = _build_fallback_sections(groups=groups, offers_by_group=offers_by_group)
+    sections = _build_sections_from_published_sections(
+        groups_by_code=groups_by_code,
+        sections=published_sections,
+        layouts_by_section=layouts_by_section,
+        offers_by_section=offers_by_section,
+    )
 
     sections = [
         section

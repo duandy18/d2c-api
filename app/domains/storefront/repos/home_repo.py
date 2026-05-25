@@ -8,26 +8,28 @@ from sqlalchemy.orm import Session
 from app.domains.published.models.published import (
     PublishedGroup,
     PublishedOffer,
-    PublishedOfferPosition,
     PublishedOfferPrice,
     PublishedStorefrontSection,
     PublishedStorefrontSectionLayout,
+    PublishedStorefrontSectionPosition,
 )
 
 StorefrontHomeRow = tuple[
-    PublishedGroup,
-    PublishedOfferPosition,
+    PublishedStorefrontSection,
+    PublishedStorefrontSectionPosition,
     PublishedOffer,
     PublishedOfferPrice,
+    PublishedGroup | None,
 ]
 
 
 def latest_storefront_publish_version(session: Session) -> str | None:
     statement = (
-        select(PublishedOffer.publish_version)
-        .where(PublishedOffer.display_status == "visible")
-        .where(PublishedOffer.sell_status == "sellable")
-        .order_by(PublishedOffer.published_at.desc(), PublishedOffer.id.desc())
+        select(PublishedStorefrontSectionPosition.publish_version)
+        .order_by(
+            PublishedStorefrontSectionPosition.published_at.desc(),
+            PublishedStorefrontSectionPosition.id.desc(),
+        )
         .limit(1)
     )
     return session.scalar(statement)
@@ -54,16 +56,16 @@ def _visible_offer_filters() -> tuple[object, ...]:
     )
 
 
-def _active_position_filters() -> tuple[object, ...]:
+def _active_section_position_filters() -> tuple[object, ...]:
     return (
-        PublishedOfferPosition.is_active.is_(True),
+        PublishedStorefrontSectionPosition.is_active.is_(True),
         or_(
-            PublishedOfferPosition.visible_from.is_(None),
-            PublishedOfferPosition.visible_from <= func.now(),
+            PublishedStorefrontSectionPosition.visible_from.is_(None),
+            PublishedStorefrontSectionPosition.visible_from <= func.now(),
         ),
         or_(
-            PublishedOfferPosition.visible_until.is_(None),
-            PublishedOfferPosition.visible_until > func.now(),
+            PublishedStorefrontSectionPosition.visible_until.is_(None),
+            PublishedStorefrontSectionPosition.visible_until > func.now(),
         ),
     )
 
@@ -117,7 +119,8 @@ def list_home_layouts(
         select(PublishedStorefrontSectionLayout)
         .where(PublishedStorefrontSectionLayout.publish_version == publish_version)
         .order_by(
-            PublishedStorefrontSectionLayout.section_code, PublishedStorefrontSectionLayout.id
+            PublishedStorefrontSectionLayout.section_code,
+            PublishedStorefrontSectionLayout.id,
         )
     )
     return list(session.scalars(statement).all())
@@ -126,24 +129,28 @@ def list_home_layouts(
 def _home_rows_query(publish_version: str) -> Select[StorefrontHomeRow]:
     return (
         select(
-            PublishedGroup,
-            PublishedOfferPosition,
+            PublishedStorefrontSection,
+            PublishedStorefrontSectionPosition,
             PublishedOffer,
             PublishedOfferPrice,
+            PublishedGroup,
         )
-        .select_from(PublishedGroup)
+        .select_from(PublishedStorefrontSection)
         .join(
-            PublishedOfferPosition,
+            PublishedStorefrontSectionPosition,
             and_(
-                PublishedOfferPosition.publish_version == PublishedGroup.publish_version,
-                PublishedOfferPosition.group_code == PublishedGroup.group_code,
+                PublishedStorefrontSectionPosition.publish_version
+                == PublishedStorefrontSection.publish_version,
+                PublishedStorefrontSectionPosition.section_code
+                == PublishedStorefrontSection.section_code,
             ),
         )
         .join(
             PublishedOffer,
             and_(
-                PublishedOffer.publish_version == PublishedOfferPosition.publish_version,
-                PublishedOffer.offer_code == PublishedOfferPosition.offer_code,
+                PublishedOffer.publish_version
+                == PublishedStorefrontSectionPosition.publish_version,
+                PublishedOffer.offer_code == PublishedStorefrontSectionPosition.offer_code,
             ),
         )
         .join(
@@ -153,19 +160,27 @@ def _home_rows_query(publish_version: str) -> Select[StorefrontHomeRow]:
                 PublishedOfferPrice.offer_code == PublishedOffer.offer_code,
             ),
         )
-        .where(PublishedGroup.publish_version == publish_version)
-        .where(PublishedOfferPosition.publish_version == publish_version)
+        .outerjoin(
+            PublishedGroup,
+            and_(
+                PublishedGroup.publish_version == PublishedStorefrontSection.publish_version,
+                PublishedGroup.group_code == PublishedStorefrontSection.group_code,
+                *_visible_group_filters(),
+            ),
+        )
+        .where(PublishedStorefrontSection.publish_version == publish_version)
+        .where(PublishedStorefrontSectionPosition.publish_version == publish_version)
         .where(PublishedOffer.publish_version == publish_version)
         .where(PublishedOfferPrice.publish_version == publish_version)
-        .where(*_visible_group_filters())
+        .where(*_visible_section_filters())
+        .where(*_active_section_position_filters())
         .where(*_visible_offer_filters())
-        .where(*_active_position_filters())
         .where(*_active_price_filters())
         .order_by(
-            PublishedGroup.sort_order,
-            PublishedGroup.id,
-            PublishedOfferPosition.sort_order,
-            PublishedOfferPosition.id,
+            PublishedStorefrontSection.sort_order,
+            PublishedStorefrontSection.id,
+            PublishedStorefrontSectionPosition.sort_order,
+            PublishedStorefrontSectionPosition.id,
             PublishedOfferPrice.priority,
             PublishedOfferPrice.id,
         )
@@ -177,4 +192,7 @@ def list_home_rows(
     publish_version: str,
 ) -> list[StorefrontHomeRow]:
     rows = session.execute(_home_rows_query(publish_version)).all()
-    return [(group, position, offer, price) for group, position, offer, price in rows]
+    return [
+        (section, position, offer, price, group)
+        for section, position, offer, price, group in rows
+    ]
