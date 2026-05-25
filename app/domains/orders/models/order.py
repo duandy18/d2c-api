@@ -151,6 +151,9 @@ class D2COrderLine(Base):
         ),
         Index("ix_d2c_order_lines_order_id", "order_id"),
         Index("ix_d2c_order_lines_publish_version", "publish_version"),
+        Index("ix_d2c_order_lines_offer_code", "offer_code"),
+        Index("ix_d2c_order_lines_group_code", "group_code"),
+        Index("ix_d2c_order_lines_price_code", "price_code"),
         Index("ix_d2c_order_lines_product_code", "product_code"),
         Index("ix_d2c_order_lines_sku_code", "sku_code"),
         Index("ix_d2c_order_lines_category_code", "category_code"),
@@ -167,6 +170,16 @@ class D2COrderLine(Base):
     product_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     sku_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     publish_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    offer_code: Mapped[str | None] = mapped_column(String(96), nullable=True)
+    offer_title: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    offer_type: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    offer_subtitle: Mapped[str | None] = mapped_column(String(240), nullable=True)
+    offer_image_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    group_code: Mapped[str | None] = mapped_column(String(96), nullable=True)
+    group_name: Mapped[str | None] = mapped_column(String(160), nullable=True)
+    price_code: Mapped[str | None] = mapped_column(String(96), nullable=True)
+    source_offer_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    source_position_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     product_code: Mapped[str] = mapped_column(String(96), nullable=False)
     sku_code: Mapped[str] = mapped_column(String(128), nullable=False)
     product_name: Mapped[str] = mapped_column(String(255), nullable=False)

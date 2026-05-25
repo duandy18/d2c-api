@@ -56,7 +56,6 @@ def test_order_models_are_bound_to_expected_tables() -> None:
         "updated_at",
     }.issubset(order_columns)
 
-
     line_columns = set(D2COrderLine.__table__.columns.keys())
     assert {
         "id",
@@ -64,6 +63,16 @@ def test_order_models_are_bound_to_expected_tables() -> None:
         "product_id",
         "sku_id",
         "publish_version",
+        "offer_code",
+        "offer_title",
+        "offer_type",
+        "offer_subtitle",
+        "offer_image_url",
+        "group_code",
+        "group_name",
+        "price_code",
+        "source_offer_id",
+        "source_position_id",
         "product_code",
         "sku_code",
         "product_name",
@@ -131,6 +140,16 @@ def test_order_owner_tables_exist_in_database() -> None:
             "product_id",
             "sku_id",
             "publish_version",
+            "offer_code",
+            "offer_title",
+            "offer_type",
+            "offer_subtitle",
+            "offer_image_url",
+            "group_code",
+            "group_name",
+            "price_code",
+            "source_offer_id",
+            "source_position_id",
             "product_code",
             "sku_code",
             "product_name",
@@ -201,6 +220,9 @@ def test_order_owner_tables_exist_in_database() -> None:
             )
             assert "ix_d2c_order_lines_order_id" in line_indexes
             assert "ix_d2c_order_lines_publish_version" in line_indexes
+            assert "ix_d2c_order_lines_offer_code" in line_indexes
+            assert "ix_d2c_order_lines_group_code" in line_indexes
+            assert "ix_d2c_order_lines_price_code" in line_indexes
             assert "ix_d2c_order_lines_product_code" in line_indexes
             assert "ix_d2c_order_lines_sku_code" in line_indexes
             assert "ix_d2c_order_lines_category_code" in line_indexes

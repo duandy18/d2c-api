@@ -160,6 +160,12 @@ def _calculate_percentage_discount_cents(
 
 def _build_line_response(line: D2COrderLine) -> OrderLineResponse:
     return OrderLineResponse(
+        offer_code=line.offer_code,
+        offer_title=line.offer_title,
+        offer_type=line.offer_type,
+        group_code=line.group_code,
+        group_name=line.group_name,
+        price_code=line.price_code,
         product_code=line.product_code,
         sku_code=line.sku_code,
         product_name=line.product_name,
@@ -319,7 +325,7 @@ def checkout_order(
             session,
             CustomerCoupon(
                 customer_coupon_code=_new_customer_coupon_code(),
-                    publish_version=coupon.publish_version,
+                publish_version=coupon.publish_version,
                 coupon_code=coupon.coupon_code,
                 coupon_name=coupon.coupon_name,
                 coupon_type=coupon.coupon_type,
@@ -345,6 +351,16 @@ def checkout_order(
                 product_id=None,
                 sku_id=None,
                 publish_version=cart_line.publish_version,
+                offer_code=cart_line.offer_code,
+                offer_title=cart_line.offer_title,
+                offer_type=cart_line.offer_type,
+                offer_subtitle=cart_line.offer_subtitle,
+                offer_image_url=cart_line.offer_image_url,
+                group_code=cart_line.group_code,
+                group_name=cart_line.group_name,
+                price_code=cart_line.price_code,
+                source_offer_id=cart_line.source_offer_id,
+                source_position_id=cart_line.source_position_id,
                 product_code=cart_line.product_code,
                 sku_code=cart_line.sku_code,
                 product_name=cart_line.product_name,

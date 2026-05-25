@@ -191,6 +191,12 @@ def test_checkout_converts_cart_to_pending_payment_order() -> None:
     assert payload["payment"]["amount_cents"] == 3798
     assert payload["lines"] == [
         {
+            "offer_code": "offer-cat-food-salmon-001",
+            "offer_title": "三文鱼成猫粮 1kg",
+            "offer_type": "single",
+            "group_code": "cat_food",
+            "group_name": "猫粮",
+            "price_code": "price-offer-cat-food-salmon-001",
             "product_code": "offer-cat-food-salmon-001",
             "sku_code": "CAT-FOOD-SALMON-1KG",
             "product_name": "三文鱼成猫粮 1kg",
@@ -218,11 +224,43 @@ def test_checkout_converts_cart_to_pending_payment_order() -> None:
                 .mappings()
                 .one()
             )
+            line_row = (
+                connection.execute(
+                    text(
+                        """
+                        SELECT
+                          offer_code,
+                          offer_title,
+                          offer_type,
+                          group_code,
+                          group_name,
+                          price_code,
+                          source_offer_id,
+                          source_position_id
+                        FROM d2c_order_lines
+                        WHERE order_id = (
+                          SELECT id FROM d2c_orders WHERE order_no = :order_no
+                        )
+                        """
+                    ),
+                    {"order_no": payload["order_no"]},
+                )
+                .mappings()
+                .one()
+            )
     finally:
         engine.dispose()
 
     assert row["status"] == "converted"
     assert row["customer_id"] is not None
+    assert line_row["offer_code"] == "offer-cat-food-salmon-001"
+    assert line_row["offer_title"] == "三文鱼成猫粮 1kg"
+    assert line_row["offer_type"] == "single"
+    assert line_row["group_code"] == "cat_food"
+    assert line_row["group_name"] == "猫粮"
+    assert line_row["price_code"] == "price-offer-cat-food-salmon-001"
+    assert line_row["source_offer_id"] == 501
+    assert line_row["source_position_id"] == 801
 
 
 def test_checkout_applies_active_all_store_percentage_promotion() -> None:
