@@ -22,6 +22,12 @@ class OrderCheckoutRequest(BaseModel):
 
 
 class OrderLineResponse(BaseModel):
+    offer_code: str | None = None
+    offer_title: str | None = None
+    offer_type: str | None = None
+    group_code: str | None = None
+    group_name: str | None = None
+    price_code: str | None = None
     product_code: str
     sku_code: str
     product_name: str
