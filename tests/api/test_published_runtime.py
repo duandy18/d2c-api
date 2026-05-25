@@ -34,7 +34,6 @@ def test_published_empty_lists_are_stable() -> None:
         "/published/products": "products",
         "/published/skus": "skus",
         "/published/prices": "prices",
-        "/published/promotions": "promotions",
         "/published/coupons": "coupons",
         "/published/sync-runs": "sync_runs",
     }

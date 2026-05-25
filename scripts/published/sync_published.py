@@ -26,14 +26,13 @@ from app.domains.published.models.published import (
     PublishedOfferPrice,
     PublishedPrice,
     PublishedProduct,
-    PublishedPromotion,
     PublishedPromotionRule,
     PublishedPromotionTarget,
     PublishedSku,
     PublishSyncRun,
 )
 
-LEGACY_SCOPES = {"catalog", "prices", "promotions", "coupons"}
+LEGACY_SCOPES = {"catalog", "prices", "coupons"}
 SNAPSHOT_SCOPES = {
     "snapshot-groups",
     "snapshot-offers",
@@ -49,7 +48,6 @@ VALID_SCOPES = LEGACY_SCOPES | SNAPSHOT_SCOPES | {"all", "snapshot-all"}
 ENDPOINT_BY_SCOPE = {
     "catalog": "/backoffice/read/v1/published/catalog",
     "prices": "/backoffice/read/v1/published/prices",
-    "promotions": "/backoffice/read/v1/published/promotions",
     "coupons": "/backoffice/read/v1/published/coupons",
     "snapshot-groups": "/backoffice/read/v1/published/snapshot/groups",
     "snapshot-offers": "/backoffice/read/v1/published/snapshot/offers",
@@ -121,27 +119,6 @@ PRICE_FIELDS = (
     "raw_payload",
 )
 
-PROMOTION_FIELDS = (
-    "publish_version",
-    "promotion_code",
-    "promotion_name",
-    "promotion_type",
-    "discount_type",
-    "discount_value",
-    "scope_type",
-    "min_order_amount_cents",
-    "max_discount_cents",
-    "currency",
-    "starts_at",
-    "ends_at",
-    "priority",
-    "stackable",
-    "is_active",
-    "published_at",
-    "source_promotion_id",
-    "source_updated_at",
-    "raw_payload",
-)
 
 COUPON_FIELDS = (
     "publish_version",
@@ -481,36 +458,6 @@ def _sync_prices(
     )
 
 
-def _sync_promotions(
-    session: Session,
-    base_url: str,
-    service_client: str,
-    publish_version: str | None,
-    fetcher: JsonFetcher,
-) -> ScopeResult:
-    payload = fetcher(base_url, ENDPOINT_BY_SCOPE["promotions"], service_client, publish_version)
-    resolved_version = payload.get("publish_version") or publish_version
-
-    promotions = [
-        _normalize_row(item, PROMOTION_FIELDS)
-        for item in payload.get("promotions", [])
-        if isinstance(item, dict)
-    ]
-
-    rows_upserted = _upsert_rows(
-        session,
-        PublishedPromotion,
-        promotions,
-        ("publish_version", "promotion_code"),
-    )
-
-    return ScopeResult(
-        publish_version=resolved_version,
-        rows_fetched=len(promotions),
-        rows_upserted=rows_upserted,
-    )
-
-
 def _sync_coupons(
     session: Session,
     base_url: str,
@@ -762,8 +709,6 @@ def _sync_single_scope(
         return _sync_catalog(session, base_url, service_client, publish_version, fetcher)
     if scope == "prices":
         return _sync_prices(session, base_url, service_client, publish_version, fetcher)
-    if scope == "promotions":
-        return _sync_promotions(session, base_url, service_client, publish_version, fetcher)
     if scope == "coupons":
         return _sync_coupons(session, base_url, service_client, publish_version, fetcher)
     if scope == "snapshot-groups":
@@ -826,7 +771,7 @@ def _combine_results(scope: str, results: list[ScopeResult]) -> ScopeResult:
 
 def _child_scopes(scope: str) -> tuple[str, ...]:
     if scope == "all":
-        return ("catalog", "prices", "promotions", "coupons")
+        return ("catalog", "prices", "coupons")
     if scope == "snapshot-all":
         return (
             "snapshot-groups",

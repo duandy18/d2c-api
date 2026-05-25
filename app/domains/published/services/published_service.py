@@ -10,8 +10,6 @@ from app.domains.published.contracts.published_contract import (
     PublishedPricesResponse,
     PublishedProductContract,
     PublishedProductsResponse,
-    PublishedPromotionContract,
-    PublishedPromotionsResponse,
     PublishedSkuContract,
     PublishedSkusResponse,
     PublishSyncRunContract,
@@ -21,7 +19,6 @@ from app.domains.published.models.published import (
     PublishedCoupon,
     PublishedPrice,
     PublishedProduct,
-    PublishedPromotion,
     PublishedSku,
     PublishSyncRun,
 )
@@ -30,7 +27,6 @@ from app.domains.published.repos.published_repo import (
     list_published_coupons,
     list_published_prices,
     list_published_products,
-    list_published_promotions,
     list_published_skus,
 )
 
@@ -125,36 +121,6 @@ def _build_price(row: PublishedPrice) -> PublishedPriceContract:
 def get_published_prices(session: Session) -> PublishedPricesResponse:
     rows = [_build_price(row) for row in list_published_prices(session)]
     return PublishedPricesResponse(count=len(rows), prices=rows)
-
-
-def _build_promotion(row: PublishedPromotion) -> PublishedPromotionContract:
-    return PublishedPromotionContract(
-        id=row.id,
-        publish_version=row.publish_version,
-        promotion_code=row.promotion_code,
-        promotion_name=row.promotion_name,
-        promotion_type=row.promotion_type,
-        discount_type=row.discount_type,
-        discount_value=row.discount_value,
-        scope_type=row.scope_type,
-        min_order_amount_cents=row.min_order_amount_cents,
-        max_discount_cents=row.max_discount_cents,
-        currency=row.currency,
-        starts_at=row.starts_at,
-        ends_at=row.ends_at,
-        priority=row.priority,
-        stackable=row.stackable,
-        is_active=row.is_active,
-        published_at=row.published_at,
-        source_promotion_id=row.source_promotion_id,
-        source_updated_at=row.source_updated_at,
-        raw_payload=row.raw_payload,
-    )
-
-
-def get_published_promotions(session: Session) -> PublishedPromotionsResponse:
-    rows = [_build_promotion(row) for row in list_published_promotions(session)]
-    return PublishedPromotionsResponse(count=len(rows), promotions=rows)
 
 
 def _build_coupon(row: PublishedCoupon) -> PublishedCouponContract:

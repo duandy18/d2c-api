@@ -13,7 +13,7 @@ def test_published_runtime_tables_exist() -> None:
         assert "d2c_published_products" in table_names
         assert "d2c_published_skus" in table_names
         assert "d2c_published_prices" in table_names
-        assert "d2c_published_promotions" in table_names
+        assert "d2c_published_promotions" not in table_names
         assert "d2c_published_coupons" in table_names
         assert "d2c_publish_sync_runs" in table_names
     finally:
@@ -83,9 +83,7 @@ def test_published_marketing_runtime_columns_exist() -> None:
     try:
         inspector = inspect(engine)
 
-        promotion_columns = {
-            column["name"] for column in inspector.get_columns("d2c_published_promotions")
-        }
+        table_names = set(inspector.get_table_names())
         coupon_columns = {
             column["name"] for column in inspector.get_columns("d2c_published_coupons")
         }
@@ -93,23 +91,7 @@ def test_published_marketing_runtime_columns_exist() -> None:
             column["name"] for column in inspector.get_columns("d2c_publish_sync_runs")
         }
 
-        assert {
-            "publish_version",
-            "promotion_code",
-            "promotion_name",
-            "promotion_type",
-            "discount_type",
-            "discount_value",
-            "scope_type",
-            "min_order_amount_cents",
-            "max_discount_cents",
-            "currency",
-            "priority",
-            "stackable",
-            "is_active",
-            "raw_payload",
-        }.issubset(promotion_columns)
-
+        assert "d2c_published_promotions" not in table_names
         assert {
             "publish_version",
             "coupon_code",
@@ -155,10 +137,6 @@ def test_published_runtime_constraints_exist() -> None:
             constraint["name"]
             for constraint in inspector.get_unique_constraints("d2c_published_prices")
         }
-        promotion_unique = {
-            constraint["name"]
-            for constraint in inspector.get_unique_constraints("d2c_published_promotions")
-        }
         coupon_unique = {
             constraint["name"]
             for constraint in inspector.get_unique_constraints("d2c_published_coupons")
@@ -167,7 +145,6 @@ def test_published_runtime_constraints_exist() -> None:
         assert "uq_d2c_published_products_version_product" in product_unique
         assert "uq_d2c_published_skus_version_sku" in sku_unique
         assert "uq_d2c_published_prices_version_list_channel_sku" in price_unique
-        assert "uq_d2c_published_promotions_version_code" in promotion_unique
         assert "uq_d2c_published_coupons_version_code" in coupon_unique
     finally:
         engine.dispose()

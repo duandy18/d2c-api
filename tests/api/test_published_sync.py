@@ -12,7 +12,6 @@ from app.domains.published.models.published import (
     PublishedCoupon,
     PublishedPrice,
     PublishedProduct,
-    PublishedPromotion,
     PublishedSku,
     PublishSyncRun,
 )
@@ -26,7 +25,6 @@ def _code(prefix: str) -> str:
 def _export_payloads(publish_version: str) -> dict[str, dict[str, object]]:
     product_code = _code("PRODUCT")
     sku_code = _code("SKU")
-    promotion_code = _code("PROMO")
     coupon_code = _code("COUPON")
     now = datetime.now(UTC).isoformat()
 
@@ -103,33 +101,6 @@ def _export_payloads(publish_version: str) -> dict[str, dict[str, object]]:
                 }
             ],
         },
-        "/backoffice/read/v1/published/promotions": {
-            "publish_version": publish_version,
-            "count": 1,
-            "promotions": [
-                {
-                    "publish_version": publish_version,
-                    "promotion_code": promotion_code,
-                    "promotion_name": "Runtime Promotion",
-                    "promotion_type": "store_campaign",
-                    "discount_type": "percentage",
-                    "discount_value": 10,
-                    "scope_type": "all_store",
-                    "min_order_amount_cents": None,
-                    "max_discount_cents": None,
-                    "currency": "USD",
-                    "starts_at": None,
-                    "ends_at": None,
-                    "priority": 10,
-                    "stackable": False,
-                    "is_active": True,
-                    "published_at": now,
-                    "source_promotion_id": 4,
-                    "source_updated_at": now,
-                    "raw_payload": {"source": "pytest"},
-                }
-            ],
-        },
         "/backoffice/read/v1/published/coupons": {
             "publish_version": publish_version,
             "count": 1,
@@ -138,7 +109,7 @@ def _export_payloads(publish_version: str) -> dict[str, dict[str, object]]:
                     "publish_version": publish_version,
                     "coupon_code": coupon_code,
                     "coupon_name": "Runtime Coupon",
-                    "promotion_code": promotion_code,
+                    "promotion_code": _code("PROMO"),
                     "coupon_type": "public_code",
                     "total_limit": 100,
                     "per_customer_limit": 1,
@@ -195,23 +166,18 @@ def test_sync_published_all_upserts_runtime_tables() -> None:
         price = session.scalar(
             select(PublishedPrice).where(PublishedPrice.publish_version == publish_version)
         )
-        promotion = session.scalar(
-            select(PublishedPromotion).where(PublishedPromotion.publish_version == publish_version)
-        )
         coupon = session.scalar(
             select(PublishedCoupon).where(PublishedCoupon.publish_version == publish_version)
         )
 
         assert sync_run.status == "success"
-        assert sync_run.rows_fetched == 5
-        assert sync_run.rows_upserted == 5
+        assert sync_run.rows_fetched == 4
+        assert sync_run.rows_upserted == 4
         assert sync_run.rows_deleted == 0
         assert product_count == 1
         assert sku_count == 1
         assert price is not None
         assert price.price_cents == 1234
-        assert promotion is not None
-        assert promotion.discount_value == 10
         assert coupon is not None
         assert coupon.per_customer_limit == 1
 

@@ -7,7 +7,6 @@ from app.domains.published.models.published import (
     PublishedCoupon,
     PublishedPrice,
     PublishedProduct,
-    PublishedPromotion,
     PublishedSku,
     PublishSyncRun,
 )
@@ -37,15 +36,6 @@ def list_published_prices(session: Session) -> list[PublishedPrice]:
         PublishedPrice.publish_version,
         PublishedPrice.priority,
         PublishedPrice.id,
-    )
-    return list(session.scalars(statement).all())
-
-
-def list_published_promotions(session: Session) -> list[PublishedPromotion]:
-    statement = select(PublishedPromotion).order_by(
-        PublishedPromotion.publish_version,
-        PublishedPromotion.priority,
-        PublishedPromotion.id,
     )
     return list(session.scalars(statement).all())
 

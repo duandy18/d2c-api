@@ -18,7 +18,6 @@ def reset_promotions_for_checkout_flow() -> None:
             connection.execute(text("DELETE FROM d2c_published_coupons"))
             connection.execute(text("DELETE FROM d2c_published_promotion_targets"))
             connection.execute(text("DELETE FROM d2c_published_promotion_rules"))
-            connection.execute(text("DELETE FROM d2c_published_promotions"))
     finally:
         engine.dispose()
 
