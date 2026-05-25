@@ -18,7 +18,7 @@ PUBLISH_VERSION ?=
 REQUESTED_BY ?= cli
 
 DEV_ENV := D2C_ENVIRONMENT="$(D2C_ENV)" D2C_DATABASE_URL="$(DEV_DB_DSN)" D2C_TEST_DATABASE_URL="$(DEV_DB_DSN)" PYTHONPATH=.
-TEST_ENV := D2C_ENVIRONMENT=test D2C_DATABASE_URL="$(DEV_TEST_DB_DSN)" D2C_TEST_DATABASE_URL="$(DEV_TEST_DB_DSN)" PYTHONPATH=.
+TEST_ENV := D2C_DATABASE_URL="$(DEV_TEST_DB_DSN)" D2C_TEST_DATABASE_URL="$(DEV_TEST_DB_DSN)" PYTHONPATH=.
 PUBLISHED_SYNC_ENV := $(DEV_ENV) D2C_BACKOFFICE_API_BASE_URL="$(D2C_BACKOFFICE_API_BASE_URL)" D2C_SERVICE_CLIENT_CODE="$(D2C_SERVICE_CLIENT_CODE)" D2C_PUBLISH_VERSION="$(PUBLISH_VERSION)" D2C_PUBLISH_SYNC_REQUESTED_BY="$(REQUESTED_BY)"
 
 .PHONY: clean-pyc install lint test routes openapi check
@@ -27,6 +27,7 @@ PUBLISHED_SYNC_ENV := $(DEV_ENV) D2C_BACKOFFICE_API_BASE_URL="$(D2C_BACKOFFICE_A
 .PHONY: up down restart status logs
 .PHONY: sync-published-catalog sync-published-prices sync-published-promotions
 .PHONY: sync-published-coupons sync-published-all
+.PHONY: sync-published-snapshot-all sync-published-client-presentation
 
 clean-pyc:
 	find . -type d -name "__pycache__" -prune -exec rm -rf {} + 2>/dev/null || true
@@ -41,7 +42,7 @@ lint: clean-pyc
 	$(PYTHON) -m ruff check .
 
 test: clean-pyc
-	$(PYTHON) -m pytest $(TESTS)
+	$(TEST_ENV) $(PYTHON) -m pytest $(TESTS)
 
 routes:
 	$(PYTHON) scripts/list_routes.py
@@ -86,8 +87,16 @@ sync-published-promotions: clean-pyc
 sync-published-coupons: clean-pyc
 	$(PUBLISHED_SYNC_ENV) $(PYTHON) scripts/published/sync_published.py --scope coupons
 
+# Legacy compatibility target: --scope all currently expands to coupons only.
+# Use sync-published-snapshot-all for terminal published snapshot runtime sync.
 sync-published-all: clean-pyc
 	$(PUBLISHED_SYNC_ENV) $(PYTHON) scripts/published/sync_published.py --scope all
+
+sync-published-snapshot-all: clean-pyc
+	$(PUBLISHED_SYNC_ENV) $(PYTHON) scripts/published/sync_published.py --scope snapshot-all
+
+sync-published-client-presentation: clean-pyc
+	$(PUBLISHED_SYNC_ENV) $(PYTHON) scripts/published/sync_published.py --scope snapshot-client-presentation
 
 uvicorn:
 	$(PYTHON) -m uvicorn app.main:app --host $(HOST) --port $(PORT) --reload
