@@ -12,7 +12,7 @@ from app.domains.cart.contracts.storefront_cart_contract import (
     CartResponse,
 )
 from app.domains.cart.services.storefront_cart_service import (
-    CartProductNotFoundError,
+    CartOfferNotFoundError,
     clear_cart,
     get_cart,
     upsert_cart_item,
@@ -53,7 +53,7 @@ def cart_items_upsert(
 ) -> CartResponse:
     try:
         return upsert_cart_item(session, payload)
-    except CartProductNotFoundError as exc:
+    except CartOfferNotFoundError as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(exc),

@@ -1,4 +1,4 @@
-"""Storefront cart service."""
+"""Storefront cart service backed by terminal Offer snapshots."""
 
 from uuid import uuid4
 
@@ -18,13 +18,13 @@ from app.domains.cart.repos.cart_repo import (
     create_cart_line,
     delete_cart_line,
     get_active_cart,
-    get_cart_line_by_published_sku,
+    get_cart_line_by_published_offer,
     get_published_item_for_cart,
     list_cart_lines,
 )
 
 
-class CartProductNotFoundError(Exception):
+class CartOfferNotFoundError(Exception):
     pass
 
 
@@ -61,9 +61,8 @@ def get_or_create_cart(
 
 def _build_line_response(cart_line: CartLine) -> CartLineResponse:
     return CartLineResponse(
-        product_id=cart_line.product_code,
-        sku=cart_line.sku_code,
-        name=cart_line.product_name,
+        offer_code=cart_line.offer_code or cart_line.product_code,
+        name=cart_line.offer_title or cart_line.product_name,
         quantity=cart_line.quantity,
         unit_price_cents=cart_line.unit_price_cents,
         currency=cart_line.currency,
@@ -106,42 +105,60 @@ def get_cart(
 
 
 def _line_names(published_item: PublishedCartItem) -> tuple[str, str]:
-    product, sku, _price = published_item
-    product_name = product.display_name or product.product_name
-    sku_name = sku.display_sku_name or sku.sku_name
+    offer, _price, component, _group, _position = published_item
+    product_name = offer.title
+    sku_name = component.sku_code if component is not None else offer.title
     return product_name, sku_name
+
+
+def _legacy_sku_code(published_item: PublishedCartItem) -> str:
+    offer, _price, component, _group, _position = published_item
+    return component.sku_code if component is not None else offer.offer_code
 
 
 def _apply_published_snapshot(
     cart_line: CartLine,
     published_item: PublishedCartItem,
 ) -> None:
-    product, sku, price = published_item
+    offer, price, component, group, position = published_item
     product_name, sku_name = _line_names(published_item)
 
     cart_line.product_id = None
     cart_line.sku_id = None
-    cart_line.publish_version = product.publish_version
-    cart_line.product_code = product.product_code
-    cart_line.sku_code = sku.sku_code
+    cart_line.publish_version = offer.publish_version
+
+    cart_line.offer_code = offer.offer_code
+    cart_line.offer_title = offer.title
+    cart_line.offer_type = offer.offer_type
+    cart_line.offer_subtitle = offer.subtitle
+    cart_line.offer_image_url = offer.image_url
+    cart_line.group_code = group.group_code if group is not None else None
+    cart_line.group_name = group.group_name if group is not None else None
+    cart_line.price_code = price.price_code
+    cart_line.source_offer_id = offer.source_offer_id
+    cart_line.source_position_id = position.source_position_id if position is not None else None
+
+    # Transitional internal snapshot fields used by checkout/order until the next cut.
+    cart_line.product_code = offer.offer_code
+    cart_line.sku_code = _legacy_sku_code(published_item)
     cart_line.product_name = product_name
     cart_line.sku_name = sku_name
 
-    cart_line.pms_item_id = product.pms_item_id
-    cart_line.pms_sku = product.pms_sku
-    cart_line.category_code = product.category_code
-    cart_line.category_name = product.category_name
-    cart_line.brand_code = product.brand_code
-    cart_line.brand_name = product.brand_name
-    cart_line.sales_unit_code = sku.sales_unit_code
-    cart_line.sales_unit_name = sku.sales_unit_name
-    cart_line.barcode = sku.barcode
-    cart_line.spec_text = sku.spec_text
+    cart_line.pms_item_id = component.pms_item_id if component is not None else None
+    cart_line.pms_sku = component.pms_sku if component is not None else None
+    cart_line.category_code = group.group_code if group is not None else None
+    cart_line.category_name = group.group_name if group is not None else None
+    cart_line.brand_code = None
+    cart_line.brand_name = None
+    cart_line.sales_unit_code = component.uom_code if component is not None else None
+    cart_line.sales_unit_name = component.uom_name if component is not None else None
+    cart_line.barcode = component.barcode if component is not None else None
+    cart_line.spec_text = None
 
-    cart_line.price_list_code = price.price_list_code
+    cart_line.price_list_code = price.price_code
     cart_line.compare_at_price_cents = price.compare_at_price_cents
-    cart_line.source_product_id = product.source_product_id
-    cart_line.source_sku_id = sku.source_sku_id
+    cart_line.source_product_id = offer.source_offer_id
+    cart_line.source_sku_id = component.source_component_id if component is not None else None
     cart_line.source_price_id = price.source_price_id
     cart_line.unit_price_cents = price.price_cents
     cart_line.currency = price.currency
@@ -154,19 +171,18 @@ def upsert_cart_item(
     cart = get_or_create_cart(session, payload.anonymous_id, payload.session_code)
     published_item = get_published_item_for_cart(
         session,
-        payload.product_id,
-        payload.sku,
+        payload.offer_code,
     )
 
     if published_item is None:
-        raise CartProductNotFoundError("cart_product_not_found")
+        raise CartOfferNotFoundError("cart_offer_not_found")
 
-    product, sku, price = published_item
-    existing_line = get_cart_line_by_published_sku(
+    offer, price, _component, _group, _position = published_item
+    existing_line = get_cart_line_by_published_offer(
         session,
         cart.id,
-        product.publish_version,
-        sku.sku_code,
+        offer.publish_version,
+        offer.offer_code,
     )
 
     if payload.quantity == 0:
@@ -184,9 +200,11 @@ def upsert_cart_item(
             cart_id=cart.id,
             product_id=None,
             sku_id=None,
-            publish_version=product.publish_version,
-            product_code=product.product_code,
-            sku_code=sku.sku_code,
+            publish_version=offer.publish_version,
+            offer_code=offer.offer_code,
+            offer_title=offer.title,
+            product_code=offer.offer_code,
+            sku_code=_legacy_sku_code(published_item),
             product_name=product_name,
             sku_name=sku_name,
             quantity=payload.quantity,

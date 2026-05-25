@@ -1533,17 +1533,11 @@
             "minLength": 8,
             "title": "Session Code"
           },
-          "product_id": {
+          "offer_code": {
             "type": "string",
             "maxLength": 96,
             "minLength": 1,
-            "title": "Product Id"
-          },
-          "sku": {
-            "type": "string",
-            "maxLength": 128,
-            "minLength": 1,
-            "title": "Sku"
+            "title": "Offer Code"
           },
           "quantity": {
             "type": "integer",
@@ -1556,21 +1550,16 @@
         "required": [
           "anonymous_id",
           "session_code",
-          "product_id",
-          "sku",
+          "offer_code",
           "quantity"
         ],
         "title": "CartItemUpsertRequest"
       },
       "CartLineResponse": {
         "properties": {
-          "product_id": {
+          "offer_code": {
             "type": "string",
-            "title": "Product Id"
-          },
-          "sku": {
-            "type": "string",
-            "title": "Sku"
+            "title": "Offer Code"
           },
           "name": {
             "type": "string",
@@ -1595,8 +1584,7 @@
         },
         "type": "object",
         "required": [
-          "product_id",
-          "sku",
+          "offer_code",
           "name",
           "quantity",
           "unit_price_cents",
