@@ -30,8 +30,8 @@ def test_published_catalog_runtime_tables_remain_available() -> None:
         inspector = inspect(engine)
         table_names = set(inspector.get_table_names())
 
-        assert "d2c_published_products" in table_names
-        assert "d2c_published_skus" in table_names
-        assert "d2c_published_prices" in table_names
+        assert "d2c_published_products" not in table_names
+        assert "d2c_published_skus" not in table_names
+        assert "d2c_published_prices" not in table_names
     finally:
         engine.dispose()

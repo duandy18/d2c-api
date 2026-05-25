@@ -10,9 +10,6 @@ from app.core.config import load_settings
 from app.core.database import get_session_factory
 from app.domains.published.models.published import (
     PublishedCoupon,
-    PublishedPrice,
-    PublishedProduct,
-    PublishedSku,
     PublishSyncRun,
 )
 from scripts.published.sync_published import sync_published_scope
@@ -23,84 +20,10 @@ def _code(prefix: str) -> str:
 
 
 def _export_payloads(publish_version: str) -> dict[str, dict[str, object]]:
-    product_code = _code("PRODUCT")
-    sku_code = _code("SKU")
     coupon_code = _code("COUPON")
     now = datetime.now(UTC).isoformat()
 
     return {
-        "/backoffice/read/v1/published/catalog": {
-            "publish_version": publish_version,
-            "product_count": 1,
-            "sku_count": 1,
-            "products": [
-                {
-                    "publish_version": publish_version,
-                    "pms_item_id": 1001,
-                    "pms_sku": "PMS-1001",
-                    "product_code": product_code,
-                    "product_name": "PMS Product",
-                    "display_name": "Runtime Product",
-                    "description": "Runtime description",
-                    "image_url": "https://example.test/product.png",
-                    "category_code": "cat",
-                    "category_name": "Category",
-                    "brand_code": "brand",
-                    "brand_name": "Brand",
-                    "display_status": "visible",
-                    "sell_status": "sellable",
-                    "sort_order": 10,
-                    "visible_from": None,
-                    "visible_until": None,
-                    "published_at": now,
-                    "source_product_id": 1,
-                    "source_updated_at": now,
-                    "raw_payload": {"source": "pytest"},
-                }
-            ],
-            "skus": [
-                {
-                    "publish_version": publish_version,
-                    "product_code": product_code,
-                    "sku_code": sku_code,
-                    "sku_name": "PMS Product",
-                    "display_sku_name": "Runtime SKU",
-                    "sales_unit_code": "bag",
-                    "sales_unit_name": "Bag",
-                    "barcode": "6900000000000",
-                    "spec_text": "1kg",
-                    "is_sellable": True,
-                    "sort_order": 10,
-                    "published_at": now,
-                    "source_sku_id": 2,
-                    "source_updated_at": now,
-                    "raw_payload": {"source": "pytest"},
-                }
-            ],
-        },
-        "/backoffice/read/v1/published/prices": {
-            "publish_version": publish_version,
-            "count": 1,
-            "prices": [
-                {
-                    "publish_version": publish_version,
-                    "price_list_code": "default",
-                    "channel": "storefront",
-                    "sku_code": sku_code,
-                    "currency": "USD",
-                    "price_cents": 1234,
-                    "compare_at_price_cents": 1500,
-                    "effective_from": None,
-                    "effective_until": None,
-                    "is_active": True,
-                    "priority": 10,
-                    "published_at": now,
-                    "source_price_id": 3,
-                    "source_updated_at": now,
-                    "raw_payload": {"source": "pytest"},
-                }
-            ],
-        },
         "/backoffice/read/v1/published/coupons": {
             "publish_version": publish_version,
             "count": 1,
@@ -153,31 +76,14 @@ def test_sync_published_all_upserts_runtime_tables() -> None:
             fetcher=fake_fetcher,
         )
 
-        product_count = len(
-            session.scalars(
-                select(PublishedProduct).where(PublishedProduct.publish_version == publish_version)
-            ).all()
-        )
-        sku_count = len(
-            session.scalars(
-                select(PublishedSku).where(PublishedSku.publish_version == publish_version)
-            ).all()
-        )
-        price = session.scalar(
-            select(PublishedPrice).where(PublishedPrice.publish_version == publish_version)
-        )
         coupon = session.scalar(
             select(PublishedCoupon).where(PublishedCoupon.publish_version == publish_version)
         )
 
         assert sync_run.status == "success"
-        assert sync_run.rows_fetched == 4
-        assert sync_run.rows_upserted == 4
+        assert sync_run.rows_fetched == 1
+        assert sync_run.rows_upserted == 1
         assert sync_run.rows_deleted == 0
-        assert product_count == 1
-        assert sku_count == 1
-        assert price is not None
-        assert price.price_cents == 1234
         assert coupon is not None
         assert coupon.per_customer_limit == 1
 
@@ -200,7 +106,7 @@ def test_sync_published_failure_is_recorded() -> None:
         with pytest.raises(RuntimeError, match="backoffice_export_failed"):
             sync_published_scope(
                 session,
-                scope="catalog",
+                scope="coupons",
                 base_url="http://backoffice.test",
                 service_client="d2c-service",
                 publish_version=publish_version,
@@ -218,3 +124,21 @@ def test_sync_published_failure_is_recorded() -> None:
         assert sync_run.status == "failed"
         assert sync_run.error_code == "RuntimeError"
         assert sync_run.error_message == "backoffice_export_failed"
+
+
+def test_legacy_catalog_sync_scopes_are_retired() -> None:
+    settings = load_settings()
+    session_factory = get_session_factory(settings.test_database_url)
+
+    with session_factory() as session:
+        for scope in ("catalog", "prices"):
+            with pytest.raises(ValueError, match="unsupported published sync scope"):
+                sync_published_scope(
+                    session,
+                    scope=scope,
+                    base_url="http://backoffice.test",
+                    service_client="d2c-service",
+                    publish_version=_code("PUB"),
+                    requested_by="pytest",
+                    fetcher=lambda *_args: {},
+                )
