@@ -542,6 +542,27 @@
         }
       }
     },
+    "/storefront/home": {
+      "get": {
+        "tags": [
+          "storefront"
+        ],
+        "summary": "Storefront Home",
+        "operationId": "storefront_home_storefront_home_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorefrontHomeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/orders/health": {
       "get": {
         "tags": [
@@ -2654,6 +2675,359 @@
           "storage"
         ],
         "title": "PublishedHealthResponse"
+      },
+      "StorefrontHomeGroup": {
+        "properties": {
+          "group_code": {
+            "type": "string",
+            "title": "Group Code"
+          },
+          "group_name": {
+            "type": "string",
+            "title": "Group Name"
+          },
+          "group_kind": {
+            "type": "string",
+            "title": "Group Kind"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
+          }
+        },
+        "type": "object",
+        "required": [
+          "group_code",
+          "group_name",
+          "group_kind",
+          "sort_order"
+        ],
+        "title": "StorefrontHomeGroup"
+      },
+      "StorefrontHomeOfferCard": {
+        "properties": {
+          "offer_code": {
+            "type": "string",
+            "title": "Offer Code"
+          },
+          "offer_type": {
+            "type": "string",
+            "title": "Offer Type"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subtitle"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "group_code": {
+            "type": "string",
+            "title": "Group Code"
+          },
+          "group_name": {
+            "type": "string",
+            "title": "Group Name"
+          },
+          "position_code": {
+            "type": "string",
+            "title": "Position Code"
+          },
+          "position_sort_order": {
+            "type": "integer",
+            "title": "Position Sort Order"
+          },
+          "is_featured": {
+            "type": "boolean",
+            "title": "Is Featured"
+          },
+          "price_code": {
+            "type": "string",
+            "title": "Price Code"
+          },
+          "price_cents": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Price Cents"
+          },
+          "compare_at_price_cents": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compare At Price Cents"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "promotion_badge": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Promotion Badge"
+          },
+          "sold_quantity": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sold Quantity"
+          },
+          "paid_customer_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paid Customer Count"
+          },
+          "rating_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating Score"
+          },
+          "review_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Count"
+          },
+          "review_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Summary"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags"
+          },
+          "stock_status": {
+            "type": "string",
+            "enum": [
+              "in_stock",
+              "low_stock",
+              "out_of_stock"
+            ],
+            "title": "Stock Status",
+            "default": "in_stock"
+          }
+        },
+        "type": "object",
+        "required": [
+          "offer_code",
+          "offer_type",
+          "title",
+          "group_code",
+          "group_name",
+          "position_code",
+          "position_sort_order",
+          "is_featured",
+          "price_code",
+          "price_cents",
+          "currency"
+        ],
+        "title": "StorefrontHomeOfferCard"
+      },
+      "StorefrontHomeResponse": {
+        "properties": {
+          "data_source": {
+            "type": "string",
+            "const": "d2c_published_storefront_snapshot",
+            "title": "Data Source",
+            "default": "d2c_published_storefront_snapshot"
+          },
+          "publish_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publish Version"
+          },
+          "group_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Group Count"
+          },
+          "section_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Section Count"
+          },
+          "offer_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Offer Count"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/StorefrontHomeGroup"
+            },
+            "type": "array",
+            "title": "Groups"
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/StorefrontHomeSection"
+            },
+            "type": "array",
+            "title": "Sections"
+          }
+        },
+        "type": "object",
+        "required": [
+          "publish_version",
+          "group_count",
+          "section_count",
+          "offer_count",
+          "groups",
+          "sections"
+        ],
+        "title": "StorefrontHomeResponse"
+      },
+      "StorefrontHomeSection": {
+        "properties": {
+          "section_code": {
+            "type": "string",
+            "title": "Section Code"
+          },
+          "group_code": {
+            "type": "string",
+            "title": "Group Code"
+          },
+          "group_name": {
+            "type": "string",
+            "title": "Group Name"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "display_style": {
+            "type": "string",
+            "enum": [
+              "grid",
+              "list",
+              "ranking",
+              "banner"
+            ],
+            "title": "Display Style"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
+          },
+          "offers": {
+            "items": {
+              "$ref": "#/components/schemas/StorefrontHomeOfferCard"
+            },
+            "type": "array",
+            "title": "Offers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "section_code",
+          "group_code",
+          "group_name",
+          "title",
+          "display_style",
+          "sort_order",
+          "offers"
+        ],
+        "title": "StorefrontHomeSection"
       },
       "ValidationError": {
         "properties": {
