@@ -15,7 +15,6 @@ from app.domains.published.contracts.published_contract import (
     PublishedHealthResponse,
     PublishedPricesResponse,
     PublishedProductsResponse,
-    PublishedPromotionsResponse,
     PublishedSkusResponse,
     PublishSyncRunsResponse,
 )
@@ -25,7 +24,6 @@ from app.domains.published.services.published_service import (
     get_published_health,
     get_published_prices,
     get_published_products,
-    get_published_promotions,
     get_published_skus,
 )
 
@@ -73,14 +71,6 @@ def published_prices(
     session: SessionDep,
 ) -> PublishedPricesResponse:
     return get_published_prices(session)
-
-
-@router.get("/promotions", response_model=PublishedPromotionsResponse)
-def published_promotions(
-    _: ServiceClientDep,
-    session: SessionDep,
-) -> PublishedPromotionsResponse:
-    return get_published_promotions(session)
 
 
 @router.get("/coupons", response_model=PublishedCouponsResponse)

@@ -90,34 +90,6 @@ class PublishedPricesResponse(BaseModel):
     prices: list[PublishedPriceContract]
 
 
-class PublishedPromotionContract(BaseModel):
-    id: int
-    publish_version: str
-    promotion_code: str
-    promotion_name: str
-    promotion_type: str
-    discount_type: str
-    discount_value: int
-    scope_type: str
-    min_order_amount_cents: int | None
-    max_discount_cents: int | None
-    currency: str
-    starts_at: datetime | None
-    ends_at: datetime | None
-    priority: int
-    stackable: bool
-    is_active: bool
-    published_at: datetime
-    source_promotion_id: int | None
-    source_updated_at: datetime | None
-    raw_payload: dict[str, Any] | None
-
-
-class PublishedPromotionsResponse(BaseModel):
-    count: int = Field(..., ge=0)
-    promotions: list[PublishedPromotionContract]
-
-
 class PublishedCouponContract(BaseModel):
     id: int
     publish_version: str
