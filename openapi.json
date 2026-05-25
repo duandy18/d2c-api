@@ -2983,17 +2983,57 @@
             "type": "string",
             "title": "Section Code"
           },
-          "group_code": {
+          "section_type": {
             "type": "string",
+            "title": "Section Type"
+          },
+          "group_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Group Code"
           },
           "group_name": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Group Name"
           },
           "title": {
             "type": "string",
             "title": "Title"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subtitle"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
           },
           "display_style": {
             "type": "string",
@@ -3009,6 +3049,9 @@
             "type": "integer",
             "title": "Sort Order"
           },
+          "layout": {
+            "$ref": "#/components/schemas/StorefrontHomeSectionLayout"
+          },
           "offers": {
             "items": {
               "$ref": "#/components/schemas/StorefrontHomeOfferCard"
@@ -3020,14 +3063,107 @@
         "type": "object",
         "required": [
           "section_code",
+          "section_type",
           "group_code",
           "group_name",
           "title",
           "display_style",
           "sort_order",
+          "layout",
           "offers"
         ],
         "title": "StorefrontHomeSection"
+      },
+      "StorefrontHomeSectionLayout": {
+        "properties": {
+          "display_type": {
+            "type": "string",
+            "enum": [
+              "product_grid",
+              "featured_grid",
+              "ranking_list",
+              "horizontal_scroll",
+              "banner",
+              "promo_strip"
+            ],
+            "title": "Display Type"
+          },
+          "columns_desktop": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Columns Desktop"
+          },
+          "columns_tablet": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Columns Tablet"
+          },
+          "columns_mobile": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Columns Mobile"
+          },
+          "card_size": {
+            "type": "string",
+            "enum": [
+              "compact",
+              "standard",
+              "large"
+            ],
+            "title": "Card Size"
+          },
+          "image_ratio": {
+            "type": "string",
+            "title": "Image Ratio"
+          },
+          "show_promotion_badge": {
+            "type": "boolean",
+            "title": "Show Promotion Badge"
+          },
+          "show_sales_summary": {
+            "type": "boolean",
+            "title": "Show Sales Summary"
+          },
+          "show_review_summary": {
+            "type": "boolean",
+            "title": "Show Review Summary"
+          },
+          "show_compare_price": {
+            "type": "boolean",
+            "title": "Show Compare Price"
+          },
+          "show_quantity_stepper": {
+            "type": "boolean",
+            "title": "Show Quantity Stepper"
+          },
+          "max_items": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "display_type",
+          "columns_desktop",
+          "columns_tablet",
+          "columns_mobile",
+          "card_size",
+          "image_ratio",
+          "show_promotion_badge",
+          "show_sales_summary",
+          "show_review_summary",
+          "show_compare_price",
+          "show_quantity_stepper"
+        ],
+        "title": "StorefrontHomeSectionLayout"
       },
       "ValidationError": {
         "properties": {

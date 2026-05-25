@@ -147,6 +147,69 @@ class PublishSyncRun(Base):
     raw_summary: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
 
 
+class PublishedStorefrontSection(Base):
+    __tablename__ = "d2c_published_storefront_sections"
+    __table_args__ = (
+        UniqueConstraint("publish_version", "section_code", name="uq_d2c_pub_sections_code"),
+        Index("ix_d2c_pub_sections_group_sort", "publish_version", "group_code", "sort_order"),
+        Index("ix_d2c_pub_sections_status", "publish_version", "display_status", "is_active"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    publish_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    section_code: Mapped[str] = mapped_column(String(96), nullable=False)
+    section_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    group_code: Mapped[str | None] = mapped_column(String(96), nullable=True)
+    title: Mapped[str] = mapped_column(String(160), nullable=False)
+    subtitle: Mapped[str | None] = mapped_column(String(240), nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False)
+    display_status: Mapped[str] = mapped_column(String(32), nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    source_section_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    raw_payload: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    published_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class PublishedStorefrontSectionLayout(Base):
+    __tablename__ = "d2c_published_storefront_section_layouts"
+    __table_args__ = (
+        UniqueConstraint("publish_version", "section_code", name="uq_d2c_pub_section_layouts_code"),
+        Index("ix_d2c_pub_section_layouts_display", "publish_version", "display_type"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    publish_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    section_code: Mapped[str] = mapped_column(String(96), nullable=False)
+    display_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    columns_desktop: Mapped[int] = mapped_column(Integer, nullable=False)
+    columns_tablet: Mapped[int] = mapped_column(Integer, nullable=False)
+    columns_mobile: Mapped[int] = mapped_column(Integer, nullable=False)
+    card_size: Mapped[str] = mapped_column(String(32), nullable=False)
+    image_ratio: Mapped[str] = mapped_column(String(16), nullable=False)
+    show_promotion_badge: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    show_sales_summary: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    show_review_summary: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    show_compare_price: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    show_quantity_stepper: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    max_items: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    source_layout_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    raw_payload: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    published_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
 class PublishedGroup(Base):
     __tablename__ = "d2c_published_groups"
     __table_args__ = (

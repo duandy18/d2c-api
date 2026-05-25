@@ -10,6 +10,8 @@ from app.domains.published.models.published import (
     PublishedOffer,
     PublishedOfferPosition,
     PublishedOfferPrice,
+    PublishedStorefrontSection,
+    PublishedStorefrontSectionLayout,
 )
 
 StorefrontHomeRow = tuple[
@@ -35,6 +37,13 @@ def _visible_group_filters() -> tuple[object, ...]:
     return (
         PublishedGroup.display_status == "visible",
         PublishedGroup.is_active.is_(True),
+    )
+
+
+def _visible_section_filters() -> tuple[object, ...]:
+    return (
+        PublishedStorefrontSection.display_status == "visible",
+        PublishedStorefrontSection.is_active.is_(True),
     )
 
 
@@ -83,6 +92,33 @@ def list_home_groups(
         .where(PublishedGroup.publish_version == publish_version)
         .where(*_visible_group_filters())
         .order_by(PublishedGroup.sort_order, PublishedGroup.id)
+    )
+    return list(session.scalars(statement).all())
+
+
+def list_home_sections(
+    session: Session,
+    publish_version: str,
+) -> list[PublishedStorefrontSection]:
+    statement = (
+        select(PublishedStorefrontSection)
+        .where(PublishedStorefrontSection.publish_version == publish_version)
+        .where(*_visible_section_filters())
+        .order_by(PublishedStorefrontSection.sort_order, PublishedStorefrontSection.id)
+    )
+    return list(session.scalars(statement).all())
+
+
+def list_home_layouts(
+    session: Session,
+    publish_version: str,
+) -> list[PublishedStorefrontSectionLayout]:
+    statement = (
+        select(PublishedStorefrontSectionLayout)
+        .where(PublishedStorefrontSectionLayout.publish_version == publish_version)
+        .order_by(
+            PublishedStorefrontSectionLayout.section_code, PublishedStorefrontSectionLayout.id
+        )
     )
     return list(session.scalars(statement).all())
 
