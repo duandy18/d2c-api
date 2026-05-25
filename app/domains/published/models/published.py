@@ -210,6 +210,40 @@ class PublishedStorefrontSectionLayout(Base):
     )
 
 
+
+class PublishedStorefrontSectionPosition(Base):
+    __tablename__ = "d2c_published_storefront_section_positions"
+    __table_args__ = (
+        UniqueConstraint(
+            "publish_version",
+            "position_code",
+            name="uq_d2c_pub_sec_pos_code",
+        ),
+        Index("ix_d2c_pub_sec_pos_section", "publish_version", "section_code", "sort_order"),
+        Index("ix_d2c_pub_sec_pos_offer", "publish_version", "offer_code"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    publish_version: Mapped[str] = mapped_column(String(64), nullable=False)
+    section_code: Mapped[str] = mapped_column(String(96), nullable=False)
+    position_code: Mapped[str] = mapped_column(String(120), nullable=False)
+    offer_code: Mapped[str] = mapped_column(String(96), nullable=False)
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False)
+    position_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    is_featured: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    visible_from: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    visible_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    published_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    source_position_id: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    raw_payload: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
 class PublishedGroup(Base):
     __tablename__ = "d2c_published_groups"
     __table_args__ = (
