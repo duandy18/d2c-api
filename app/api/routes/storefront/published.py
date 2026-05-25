@@ -1,7 +1,7 @@
 """Runtime published model inspection routes.
 
-These routes are not the public storefront catalog. Storefront/cart/checkout
-will switch to the published model in later cuts.
+These routes expose service-client-gated runtime inspection surfaces.
+Legacy published products/skus/prices/promotions debug routes are retired.
 """
 
 from typing import Annotated
@@ -13,18 +13,12 @@ from app.core.database import get_session
 from app.domains.published.contracts.published_contract import (
     PublishedCouponsResponse,
     PublishedHealthResponse,
-    PublishedPricesResponse,
-    PublishedProductsResponse,
-    PublishedSkusResponse,
     PublishSyncRunsResponse,
 )
 from app.domains.published.services.published_service import (
     get_publish_sync_runs,
     get_published_coupons,
     get_published_health,
-    get_published_prices,
-    get_published_products,
-    get_published_skus,
 )
 
 router = APIRouter(prefix="/published", tags=["published"])
@@ -47,30 +41,6 @@ ServiceClientDep = Annotated[None, Depends(require_service_client)]
 @router.get("/health", response_model=PublishedHealthResponse)
 def published_health(_: ServiceClientDep) -> PublishedHealthResponse:
     return get_published_health()
-
-
-@router.get("/products", response_model=PublishedProductsResponse)
-def published_products(
-    _: ServiceClientDep,
-    session: SessionDep,
-) -> PublishedProductsResponse:
-    return get_published_products(session)
-
-
-@router.get("/skus", response_model=PublishedSkusResponse)
-def published_skus(
-    _: ServiceClientDep,
-    session: SessionDep,
-) -> PublishedSkusResponse:
-    return get_published_skus(session)
-
-
-@router.get("/prices", response_model=PublishedPricesResponse)
-def published_prices(
-    _: ServiceClientDep,
-    session: SessionDep,
-) -> PublishedPricesResponse:
-    return get_published_prices(session)
 
 
 @router.get("/coupons", response_model=PublishedCouponsResponse)

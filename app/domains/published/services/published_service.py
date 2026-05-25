@@ -6,28 +6,16 @@ from app.domains.published.contracts.published_contract import (
     PublishedCouponContract,
     PublishedCouponsResponse,
     PublishedHealthResponse,
-    PublishedPriceContract,
-    PublishedPricesResponse,
-    PublishedProductContract,
-    PublishedProductsResponse,
-    PublishedSkuContract,
-    PublishedSkusResponse,
     PublishSyncRunContract,
     PublishSyncRunsResponse,
 )
 from app.domains.published.models.published import (
     PublishedCoupon,
-    PublishedPrice,
-    PublishedProduct,
-    PublishedSku,
     PublishSyncRun,
 )
 from app.domains.published.repos.published_repo import (
     list_publish_sync_runs,
     list_published_coupons,
-    list_published_prices,
-    list_published_products,
-    list_published_skus,
 )
 
 
@@ -37,90 +25,6 @@ def get_published_health() -> PublishedHealthResponse:
         module="published",
         storage="d2c_published_runtime_model",
     )
-
-
-def _build_product(row: PublishedProduct) -> PublishedProductContract:
-    return PublishedProductContract(
-        id=row.id,
-        publish_version=row.publish_version,
-        pms_item_id=row.pms_item_id,
-        pms_sku=row.pms_sku,
-        product_code=row.product_code,
-        product_name=row.product_name,
-        display_name=row.display_name,
-        description=row.description,
-        image_url=row.image_url,
-        category_code=row.category_code,
-        category_name=row.category_name,
-        brand_code=row.brand_code,
-        brand_name=row.brand_name,
-        display_status=row.display_status,
-        sell_status=row.sell_status,
-        sort_order=row.sort_order,
-        visible_from=row.visible_from,
-        visible_until=row.visible_until,
-        published_at=row.published_at,
-        source_product_id=row.source_product_id,
-        source_updated_at=row.source_updated_at,
-        raw_payload=row.raw_payload,
-    )
-
-
-def get_published_products(session: Session) -> PublishedProductsResponse:
-    rows = [_build_product(row) for row in list_published_products(session)]
-    return PublishedProductsResponse(count=len(rows), products=rows)
-
-
-def _build_sku(row: PublishedSku) -> PublishedSkuContract:
-    return PublishedSkuContract(
-        id=row.id,
-        publish_version=row.publish_version,
-        product_code=row.product_code,
-        sku_code=row.sku_code,
-        sku_name=row.sku_name,
-        display_sku_name=row.display_sku_name,
-        sales_unit_code=row.sales_unit_code,
-        sales_unit_name=row.sales_unit_name,
-        barcode=row.barcode,
-        spec_text=row.spec_text,
-        is_sellable=row.is_sellable,
-        sort_order=row.sort_order,
-        published_at=row.published_at,
-        source_sku_id=row.source_sku_id,
-        source_updated_at=row.source_updated_at,
-        raw_payload=row.raw_payload,
-    )
-
-
-def get_published_skus(session: Session) -> PublishedSkusResponse:
-    rows = [_build_sku(row) for row in list_published_skus(session)]
-    return PublishedSkusResponse(count=len(rows), skus=rows)
-
-
-def _build_price(row: PublishedPrice) -> PublishedPriceContract:
-    return PublishedPriceContract(
-        id=row.id,
-        publish_version=row.publish_version,
-        price_list_code=row.price_list_code,
-        channel=row.channel,
-        sku_code=row.sku_code,
-        currency=row.currency,
-        price_cents=row.price_cents,
-        compare_at_price_cents=row.compare_at_price_cents,
-        effective_from=row.effective_from,
-        effective_until=row.effective_until,
-        is_active=row.is_active,
-        priority=row.priority,
-        published_at=row.published_at,
-        source_price_id=row.source_price_id,
-        source_updated_at=row.source_updated_at,
-        raw_payload=row.raw_payload,
-    )
-
-
-def get_published_prices(session: Session) -> PublishedPricesResponse:
-    rows = [_build_price(row) for row in list_published_prices(session)]
-    return PublishedPricesResponse(count=len(rows), prices=rows)
 
 
 def _build_coupon(row: PublishedCoupon) -> PublishedCouponContract:
