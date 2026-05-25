@@ -1674,9 +1674,9 @@
         "properties": {
           "data_source": {
             "type": "string",
-            "const": "d2c_database_catalog",
+            "const": "d2c_published_offer_snapshot",
             "title": "Data Source",
-            "default": "d2c_database_catalog"
+            "default": "d2c_published_offer_snapshot"
           },
           "count": {
             "type": "integer",
@@ -1703,12 +1703,12 @@
           "code": {
             "type": "string",
             "title": "Code",
-            "description": "Storefront category code."
+            "description": "Storefront group code."
           },
           "name": {
             "type": "string",
             "title": "Name",
-            "description": "Storefront category name."
+            "description": "Storefront group name."
           },
           "sort_order": {
             "type": "integer",
@@ -1729,27 +1729,27 @@
           "product_id": {
             "type": "string",
             "title": "Product Id",
-            "description": "Stable D2C catalog product identifier."
+            "description": "Stable storefront Offer identifier."
           },
           "sku": {
             "type": "string",
             "title": "Sku",
-            "description": "Display SKU."
+            "description": "Display SKU placeholder; currently mirrors offer code."
           },
           "name": {
             "type": "string",
             "title": "Name",
-            "description": "Product display name."
+            "description": "Offer display title."
           },
           "category": {
             "type": "string",
             "title": "Category",
-            "description": "First-level storefront category."
+            "description": "Primary storefront group name."
           },
           "description": {
             "type": "string",
             "title": "Description",
-            "description": "Short storefront description."
+            "description": "Offer storefront description."
           },
           "price_cents": {
             "type": "integer",
@@ -1801,7 +1801,7 @@
               }
             ],
             "title": "Image Url",
-            "description": "Optional product image URL."
+            "description": "Optional offer image URL."
           }
         },
         "type": "object",
@@ -1819,16 +1819,16 @@
         "properties": {
           "data_source": {
             "type": "string",
-            "const": "d2c_database_catalog",
+            "const": "d2c_published_offer_snapshot",
             "title": "Data Source",
             "description": "Current data source.",
-            "default": "d2c_database_catalog"
+            "default": "d2c_published_offer_snapshot"
           },
           "count": {
             "type": "integer",
             "minimum": 0.0,
             "title": "Count",
-            "description": "Number of returned products."
+            "description": "Number of returned offers."
           },
           "products": {
             "items": {

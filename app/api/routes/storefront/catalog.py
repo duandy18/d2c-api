@@ -26,7 +26,7 @@ def catalog_health() -> dict[str, str]:
     return {
         "status": "ok",
         "module": "catalog",
-        "data_source": "d2c_database_catalog",
+        "data_source": "d2c_published_offer_snapshot",
     }
 
 
