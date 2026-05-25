@@ -33,6 +33,8 @@ def reset_promotions_and_coupons() -> None:
     try:
         with engine.begin() as connection:
             connection.execute(text("DELETE FROM d2c_published_coupons"))
+            connection.execute(text("DELETE FROM d2c_published_promotion_targets"))
+            connection.execute(text("DELETE FROM d2c_published_promotion_rules"))
             connection.execute(text("DELETE FROM d2c_published_promotions"))
     finally:
         engine.dispose()

@@ -1,4 +1,9 @@
-"""Promotion checkout repositories."""
+"""Promotion checkout repositories.
+
+Checkout reads terminal published PromotionRule / PromotionTarget / Coupon
+snapshots. Legacy d2c_published_promotions remains available only for old
+published debug/read surfaces and is no longer part of checkout execution.
+"""
 
 from datetime import datetime
 
@@ -6,9 +11,46 @@ from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.domains.promotions.models.promotion import CustomerCoupon
-from app.domains.published.models.published import PublishedCoupon, PublishedPromotion
+from app.domains.published.models.published import (
+    PublishedCoupon,
+    PublishedPromotionRule,
+    PublishedPromotionTarget,
+)
 
-PublishedCouponPromotion = tuple[PublishedCoupon, PublishedPromotion]
+PublishedCouponPromotion = tuple[PublishedCoupon, PublishedPromotionRule]
+
+
+def _active_rule_filters(
+    *,
+    currency: str,
+    subtotal_cents: int,
+    now: datetime,
+) -> tuple[object, ...]:
+    return (
+        PublishedPromotionRule.is_active.is_(True),
+        PublishedPromotionRule.discount_type == "percentage",
+        PublishedPromotionRule.currency == currency,
+        or_(
+            PublishedPromotionRule.starts_at.is_(None),
+            PublishedPromotionRule.starts_at <= now,
+        ),
+        or_(
+            PublishedPromotionRule.ends_at.is_(None),
+            PublishedPromotionRule.ends_at > now,
+        ),
+        or_(
+            PublishedPromotionRule.threshold_amount_cents.is_(None),
+            PublishedPromotionRule.threshold_amount_cents <= subtotal_cents,
+        ),
+    )
+
+
+def _all_store_target_filters() -> tuple[object, ...]:
+    return (
+        PublishedPromotionTarget.target_type == "all_store",
+        PublishedPromotionTarget.target_code.is_(None),
+        PublishedPromotionTarget.target_id.is_(None),
+    )
 
 
 def get_best_active_all_store_percentage_promotion(
@@ -17,35 +59,22 @@ def get_best_active_all_store_percentage_promotion(
     currency: str,
     subtotal_cents: int,
     now: datetime,
-) -> PublishedPromotion | None:
+) -> PublishedPromotionRule | None:
     statement = (
-        select(PublishedPromotion)
-        .where(PublishedPromotion.is_active.is_(True))
-        .where(PublishedPromotion.scope_type == "all_store")
-        .where(PublishedPromotion.discount_type == "percentage")
-        .where(PublishedPromotion.currency == currency)
-        .where(
-            or_(
-                PublishedPromotion.starts_at.is_(None),
-                PublishedPromotion.starts_at <= now,
-            )
+        select(PublishedPromotionRule)
+        .join(
+            PublishedPromotionTarget,
+            and_(
+                PublishedPromotionTarget.publish_version == PublishedPromotionRule.publish_version,
+                PublishedPromotionTarget.promotion_code == PublishedPromotionRule.promotion_code,
+            ),
         )
-        .where(
-            or_(
-                PublishedPromotion.ends_at.is_(None),
-                PublishedPromotion.ends_at > now,
-            )
-        )
-        .where(
-            or_(
-                PublishedPromotion.min_order_amount_cents.is_(None),
-                PublishedPromotion.min_order_amount_cents <= subtotal_cents,
-            )
-        )
+        .where(*_active_rule_filters(currency=currency, subtotal_cents=subtotal_cents, now=now))
+        .where(*_all_store_target_filters())
         .order_by(
-            PublishedPromotion.published_at.desc(),
-            PublishedPromotion.priority,
-            PublishedPromotion.id,
+            PublishedPromotionRule.published_at.desc(),
+            PublishedPromotionRule.priority,
+            PublishedPromotionRule.id,
         )
         .limit(1)
     )
@@ -61,12 +90,19 @@ def get_active_public_coupon_promotion_by_code(
     now: datetime,
 ) -> PublishedCouponPromotion | None:
     statement = (
-        select(PublishedCoupon, PublishedPromotion)
+        select(PublishedCoupon, PublishedPromotionRule)
         .join(
-            PublishedPromotion,
+            PublishedPromotionRule,
             and_(
-                PublishedPromotion.publish_version == PublishedCoupon.publish_version,
-                PublishedPromotion.promotion_code == PublishedCoupon.promotion_code,
+                PublishedPromotionRule.publish_version == PublishedCoupon.publish_version,
+                PublishedPromotionRule.promotion_code == PublishedCoupon.promotion_code,
+            ),
+        )
+        .join(
+            PublishedPromotionTarget,
+            and_(
+                PublishedPromotionTarget.publish_version == PublishedPromotionRule.publish_version,
+                PublishedPromotionTarget.promotion_code == PublishedPromotionRule.promotion_code,
             ),
         )
         .where(PublishedCoupon.coupon_code == coupon_code)
@@ -84,31 +120,11 @@ def get_active_public_coupon_promotion_by_code(
                 PublishedCoupon.ends_at > now,
             )
         )
-        .where(PublishedPromotion.is_active.is_(True))
-        .where(PublishedPromotion.scope_type == "all_store")
-        .where(PublishedPromotion.discount_type == "percentage")
-        .where(PublishedPromotion.currency == currency)
-        .where(
-            or_(
-                PublishedPromotion.starts_at.is_(None),
-                PublishedPromotion.starts_at <= now,
-            )
-        )
-        .where(
-            or_(
-                PublishedPromotion.ends_at.is_(None),
-                PublishedPromotion.ends_at > now,
-            )
-        )
-        .where(
-            or_(
-                PublishedPromotion.min_order_amount_cents.is_(None),
-                PublishedPromotion.min_order_amount_cents <= subtotal_cents,
-            )
-        )
+        .where(*_active_rule_filters(currency=currency, subtotal_cents=subtotal_cents, now=now))
+        .where(*_all_store_target_filters())
         .order_by(
             PublishedCoupon.published_at.desc(),
-            PublishedPromotion.priority,
+            PublishedPromotionRule.priority,
             PublishedCoupon.id,
         )
         .limit(1)

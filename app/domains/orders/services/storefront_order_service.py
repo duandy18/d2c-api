@@ -35,7 +35,7 @@ from app.domains.promotions.repos.checkout_promotion_repo import (
     get_active_public_coupon_promotion_by_code,
     get_best_active_all_store_percentage_promotion,
 )
-from app.domains.published.models.published import PublishedCoupon, PublishedPromotion
+from app.domains.published.models.published import PublishedCoupon, PublishedPromotionRule
 from app.security.passwords import hash_session_token
 
 
@@ -145,7 +145,7 @@ def _ensure_coupon_usage_allowed(
 
 def _calculate_percentage_discount_cents(
     subtotal_cents: int,
-    promotion: PublishedPromotion | None,
+    promotion: PublishedPromotionRule | None,
 ) -> int:
     if promotion is None:
         return 0
@@ -248,7 +248,7 @@ def checkout_order(
 
     now = datetime.now(UTC)
     coupon: PublishedCoupon | None = None
-    promotion: PublishedPromotion | None = None
+    promotion: PublishedPromotionRule | None = None
     coupon_code = _normalize_coupon_code(payload.coupon_code)
 
     if coupon_code is not None:
