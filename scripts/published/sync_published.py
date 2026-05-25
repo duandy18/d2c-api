@@ -7,6 +7,7 @@ import os
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from decimal import Decimal
 from typing import Any
 
 import httpx
@@ -18,20 +19,46 @@ from app.core.config import load_settings
 from app.core.database import get_session_factory
 from app.domains.published.models.published import (
     PublishedCoupon,
+    PublishedGroup,
+    PublishedOffer,
+    PublishedOfferComponent,
+    PublishedOfferPosition,
+    PublishedOfferPrice,
     PublishedPrice,
     PublishedProduct,
     PublishedPromotion,
+    PublishedPromotionRule,
+    PublishedPromotionTarget,
     PublishedSku,
     PublishSyncRun,
 )
 
-VALID_SCOPES = {"catalog", "prices", "promotions", "coupons", "all"}
+LEGACY_SCOPES = {"catalog", "prices", "promotions", "coupons"}
+SNAPSHOT_SCOPES = {
+    "snapshot-groups",
+    "snapshot-offers",
+    "snapshot-offer-components",
+    "snapshot-offer-prices",
+    "snapshot-offer-positions",
+    "snapshot-promotion-rules",
+    "snapshot-promotion-targets",
+    "snapshot-coupons",
+}
+VALID_SCOPES = LEGACY_SCOPES | SNAPSHOT_SCOPES | {"all", "snapshot-all"}
 
 ENDPOINT_BY_SCOPE = {
     "catalog": "/backoffice/read/v1/published/catalog",
     "prices": "/backoffice/read/v1/published/prices",
     "promotions": "/backoffice/read/v1/published/promotions",
     "coupons": "/backoffice/read/v1/published/coupons",
+    "snapshot-groups": "/backoffice/read/v1/published/snapshot/groups",
+    "snapshot-offers": "/backoffice/read/v1/published/snapshot/offers",
+    "snapshot-offer-components": "/backoffice/read/v1/published/snapshot/offer-components",
+    "snapshot-offer-prices": "/backoffice/read/v1/published/snapshot/offer-prices",
+    "snapshot-offer-positions": "/backoffice/read/v1/published/snapshot/offer-positions",
+    "snapshot-promotion-rules": "/backoffice/read/v1/published/snapshot/promotion-rules",
+    "snapshot-promotion-targets": "/backoffice/read/v1/published/snapshot/promotion-targets",
+    "snapshot-coupons": "/backoffice/read/v1/published/snapshot/coupons",
 }
 
 PRODUCT_FIELDS = (
@@ -133,6 +160,124 @@ COUPON_FIELDS = (
     "raw_payload",
 )
 
+GROUP_FIELDS = (
+    "publish_version",
+    "group_code",
+    "group_name",
+    "group_kind",
+    "description",
+    "image_url",
+    "sort_order",
+    "display_status",
+    "is_active",
+    "published_at",
+    "source_group_id",
+    "raw_payload",
+)
+
+OFFER_FIELDS = (
+    "publish_version",
+    "offer_code",
+    "offer_type",
+    "title",
+    "subtitle",
+    "description",
+    "image_url",
+    "display_status",
+    "sell_status",
+    "published_at",
+    "source_offer_id",
+    "raw_payload",
+)
+
+OFFER_COMPONENT_FIELDS = (
+    "publish_version",
+    "offer_code",
+    "component_no",
+    "pms_item_id",
+    "pms_sku",
+    "pms_sku_code_id",
+    "sku_code",
+    "pms_item_uom_id",
+    "uom_code",
+    "uom_name",
+    "pms_barcode_id",
+    "barcode",
+    "quantity",
+    "component_role",
+    "sort_order",
+    "required",
+    "published_at",
+    "source_component_id",
+    "raw_payload",
+)
+
+OFFER_PRICE_FIELDS = (
+    "publish_version",
+    "offer_code",
+    "price_code",
+    "channel",
+    "currency",
+    "price_cents",
+    "compare_at_price_cents",
+    "effective_from",
+    "effective_until",
+    "is_active",
+    "priority",
+    "published_at",
+    "source_price_id",
+    "raw_payload",
+)
+
+OFFER_POSITION_FIELDS = (
+    "publish_version",
+    "position_code",
+    "group_code",
+    "offer_code",
+    "sort_order",
+    "position_source",
+    "is_featured",
+    "visible_from",
+    "visible_until",
+    "is_active",
+    "published_at",
+    "source_position_id",
+    "raw_payload",
+)
+
+PROMOTION_RULE_FIELDS = (
+    "publish_version",
+    "promotion_code",
+    "promotion_name",
+    "description",
+    "promotion_type",
+    "discount_type",
+    "discount_value",
+    "threshold_amount_cents",
+    "max_discount_cents",
+    "currency",
+    "starts_at",
+    "ends_at",
+    "priority",
+    "stackable",
+    "is_active",
+    "display_badge",
+    "published_at",
+    "source_promotion_rule_id",
+    "raw_payload",
+)
+
+PROMOTION_TARGET_FIELDS = (
+    "publish_version",
+    "promotion_code",
+    "target_type",
+    "target_id",
+    "target_code",
+    "published_at",
+    "source_target_id",
+    "raw_payload",
+)
+
 DATETIME_FIELDS = {
     "visible_from",
     "visible_until",
@@ -143,6 +288,8 @@ DATETIME_FIELDS = {
     "starts_at",
     "ends_at",
 }
+
+DECIMAL_FIELDS = {"quantity"}
 
 
 @dataclass(frozen=True)
@@ -195,6 +342,8 @@ def _normalize_row(item: dict[str, Any], fields: tuple[str, ...]) -> dict[str, A
         value = item.get(field)
         if field in DATETIME_FIELDS:
             value = _parse_datetime(value)
+        elif field in DECIMAL_FIELDS and value is not None:
+            value = Decimal(str(value))
         row[field] = value
 
     return row
@@ -392,6 +541,215 @@ def _sync_coupons(
     )
 
 
+def _sync_snapshot_rows(
+    session: Session,
+    *,
+    scope: str,
+    base_url: str,
+    service_client: str,
+    publish_version: str | None,
+    fetcher: JsonFetcher,
+    payload_key: str,
+    fields: tuple[str, ...],
+    model: type[Any],
+    conflict_columns: tuple[str, ...],
+) -> ScopeResult:
+    payload = fetcher(base_url, ENDPOINT_BY_SCOPE[scope], service_client, publish_version)
+    resolved_version = payload.get("publish_version") or publish_version
+    rows = [
+        _normalize_row(item, fields)
+        for item in payload.get(payload_key, [])
+        if isinstance(item, dict)
+    ]
+
+    rows_upserted = _upsert_rows(
+        session,
+        model,
+        rows,
+        conflict_columns,
+    )
+
+    return ScopeResult(
+        publish_version=resolved_version,
+        rows_fetched=len(rows),
+        rows_upserted=rows_upserted,
+    )
+
+
+def _sync_snapshot_groups(
+    session: Session,
+    base_url: str,
+    service_client: str,
+    publish_version: str | None,
+    fetcher: JsonFetcher,
+) -> ScopeResult:
+    return _sync_snapshot_rows(
+        session,
+        scope="snapshot-groups",
+        base_url=base_url,
+        service_client=service_client,
+        publish_version=publish_version,
+        fetcher=fetcher,
+        payload_key="groups",
+        fields=GROUP_FIELDS,
+        model=PublishedGroup,
+        conflict_columns=("publish_version", "group_code"),
+    )
+
+
+def _sync_snapshot_offers(
+    session: Session,
+    base_url: str,
+    service_client: str,
+    publish_version: str | None,
+    fetcher: JsonFetcher,
+) -> ScopeResult:
+    return _sync_snapshot_rows(
+        session,
+        scope="snapshot-offers",
+        base_url=base_url,
+        service_client=service_client,
+        publish_version=publish_version,
+        fetcher=fetcher,
+        payload_key="offers",
+        fields=OFFER_FIELDS,
+        model=PublishedOffer,
+        conflict_columns=("publish_version", "offer_code"),
+    )
+
+
+def _sync_snapshot_offer_components(
+    session: Session,
+    base_url: str,
+    service_client: str,
+    publish_version: str | None,
+    fetcher: JsonFetcher,
+) -> ScopeResult:
+    return _sync_snapshot_rows(
+        session,
+        scope="snapshot-offer-components",
+        base_url=base_url,
+        service_client=service_client,
+        publish_version=publish_version,
+        fetcher=fetcher,
+        payload_key="components",
+        fields=OFFER_COMPONENT_FIELDS,
+        model=PublishedOfferComponent,
+        conflict_columns=("publish_version", "offer_code", "component_no"),
+    )
+
+
+def _sync_snapshot_offer_prices(
+    session: Session,
+    base_url: str,
+    service_client: str,
+    publish_version: str | None,
+    fetcher: JsonFetcher,
+) -> ScopeResult:
+    return _sync_snapshot_rows(
+        session,
+        scope="snapshot-offer-prices",
+        base_url=base_url,
+        service_client=service_client,
+        publish_version=publish_version,
+        fetcher=fetcher,
+        payload_key="prices",
+        fields=OFFER_PRICE_FIELDS,
+        model=PublishedOfferPrice,
+        conflict_columns=("publish_version", "price_code"),
+    )
+
+
+def _sync_snapshot_offer_positions(
+    session: Session,
+    base_url: str,
+    service_client: str,
+    publish_version: str | None,
+    fetcher: JsonFetcher,
+) -> ScopeResult:
+    return _sync_snapshot_rows(
+        session,
+        scope="snapshot-offer-positions",
+        base_url=base_url,
+        service_client=service_client,
+        publish_version=publish_version,
+        fetcher=fetcher,
+        payload_key="positions",
+        fields=OFFER_POSITION_FIELDS,
+        model=PublishedOfferPosition,
+        conflict_columns=("publish_version", "position_code"),
+    )
+
+
+def _sync_snapshot_promotion_rules(
+    session: Session,
+    base_url: str,
+    service_client: str,
+    publish_version: str | None,
+    fetcher: JsonFetcher,
+) -> ScopeResult:
+    return _sync_snapshot_rows(
+        session,
+        scope="snapshot-promotion-rules",
+        base_url=base_url,
+        service_client=service_client,
+        publish_version=publish_version,
+        fetcher=fetcher,
+        payload_key="promotion_rules",
+        fields=PROMOTION_RULE_FIELDS,
+        model=PublishedPromotionRule,
+        conflict_columns=("publish_version", "promotion_code"),
+    )
+
+
+def _sync_snapshot_promotion_targets(
+    session: Session,
+    base_url: str,
+    service_client: str,
+    publish_version: str | None,
+    fetcher: JsonFetcher,
+) -> ScopeResult:
+    return _sync_snapshot_rows(
+        session,
+        scope="snapshot-promotion-targets",
+        base_url=base_url,
+        service_client=service_client,
+        publish_version=publish_version,
+        fetcher=fetcher,
+        payload_key="promotion_targets",
+        fields=PROMOTION_TARGET_FIELDS,
+        model=PublishedPromotionTarget,
+        conflict_columns=(
+            "publish_version",
+            "promotion_code",
+            "target_type",
+            "target_code",
+            "target_id",
+        ),
+    )
+
+
+def _sync_snapshot_coupons(
+    session: Session,
+    base_url: str,
+    service_client: str,
+    publish_version: str | None,
+    fetcher: JsonFetcher,
+) -> ScopeResult:
+    return _sync_snapshot_rows(
+        session,
+        scope="snapshot-coupons",
+        base_url=base_url,
+        service_client=service_client,
+        publish_version=publish_version,
+        fetcher=fetcher,
+        payload_key="coupons",
+        fields=COUPON_FIELDS,
+        model=PublishedCoupon,
+        conflict_columns=("publish_version", "coupon_code"),
+    )
+
+
 def _sync_single_scope(
     session: Session,
     scope: str,
@@ -408,6 +766,48 @@ def _sync_single_scope(
         return _sync_promotions(session, base_url, service_client, publish_version, fetcher)
     if scope == "coupons":
         return _sync_coupons(session, base_url, service_client, publish_version, fetcher)
+    if scope == "snapshot-groups":
+        return _sync_snapshot_groups(session, base_url, service_client, publish_version, fetcher)
+    if scope == "snapshot-offers":
+        return _sync_snapshot_offers(session, base_url, service_client, publish_version, fetcher)
+    if scope == "snapshot-offer-components":
+        return _sync_snapshot_offer_components(
+            session,
+            base_url,
+            service_client,
+            publish_version,
+            fetcher,
+        )
+    if scope == "snapshot-offer-prices":
+        return _sync_snapshot_offer_prices(
+            session, base_url, service_client, publish_version, fetcher
+        )
+    if scope == "snapshot-offer-positions":
+        return _sync_snapshot_offer_positions(
+            session,
+            base_url,
+            service_client,
+            publish_version,
+            fetcher,
+        )
+    if scope == "snapshot-promotion-rules":
+        return _sync_snapshot_promotion_rules(
+            session,
+            base_url,
+            service_client,
+            publish_version,
+            fetcher,
+        )
+    if scope == "snapshot-promotion-targets":
+        return _sync_snapshot_promotion_targets(
+            session,
+            base_url,
+            service_client,
+            publish_version,
+            fetcher,
+        )
+    if scope == "snapshot-coupons":
+        return _sync_snapshot_coupons(session, base_url, service_client, publish_version, fetcher)
 
     raise ValueError(f"unsupported published sync scope: {scope}")
 
@@ -424,6 +824,23 @@ def _combine_results(scope: str, results: list[ScopeResult]) -> ScopeResult:
     )
 
 
+def _child_scopes(scope: str) -> tuple[str, ...]:
+    if scope == "all":
+        return ("catalog", "prices", "promotions", "coupons")
+    if scope == "snapshot-all":
+        return (
+            "snapshot-groups",
+            "snapshot-offers",
+            "snapshot-offer-components",
+            "snapshot-offer-prices",
+            "snapshot-offer-positions",
+            "snapshot-promotion-rules",
+            "snapshot-promotion-targets",
+            "snapshot-coupons",
+        )
+    return (scope,)
+
+
 def sync_published_scope(
     session: Session,
     *,
@@ -437,7 +854,7 @@ def sync_published_scope(
     if scope not in VALID_SCOPES:
         raise ValueError(f"unsupported published sync scope: {scope}")
 
-    source_endpoint = "multiple" if scope == "all" else ENDPOINT_BY_SCOPE[scope]
+    source_endpoint = "multiple" if scope in {"all", "snapshot-all"} else ENDPOINT_BY_SCOPE[scope]
     sync_run = PublishSyncRun(
         sync_scope=scope,
         source_service="d2c-backoffice-api",
@@ -455,28 +872,18 @@ def sync_published_scope(
     sync_run_id = sync_run.id
 
     try:
-        if scope == "all":
-            results = [
-                _sync_single_scope(
-                    session,
-                    child_scope,
-                    base_url,
-                    service_client,
-                    publish_version,
-                    fetcher,
-                )
-                for child_scope in ("catalog", "prices", "promotions", "coupons")
-            ]
-            result = _combine_results(scope, results)
-        else:
-            result = _sync_single_scope(
+        results = [
+            _sync_single_scope(
                 session,
-                scope,
+                child_scope,
                 base_url,
                 service_client,
                 publish_version,
                 fetcher,
             )
+            for child_scope in _child_scopes(scope)
+        ]
+        result = _combine_results(scope, results)
 
         sync_run.publish_version = result.publish_version
         sync_run.status = "success"

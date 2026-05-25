@@ -1098,21 +1098,104 @@
             "type": "string",
             "title": "Customer Coupon Code"
           },
-          "coupon_id": {
-            "type": "integer",
-            "title": "Coupon Id"
+          "publish_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publish Version"
           },
           "coupon_code": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Coupon Code"
           },
-          "promotion_id": {
-            "type": "integer",
-            "title": "Promotion Id"
+          "coupon_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coupon Name"
+          },
+          "coupon_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coupon Type"
           },
           "promotion_code": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Promotion Code"
+          },
+          "promotion_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Promotion Name"
+          },
+          "promotion_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Promotion Type"
+          },
+          "promotion_discount_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Promotion Discount Type"
+          },
+          "promotion_discount_value": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Promotion Discount Value"
           },
           "customer_id": {
             "type": "integer",
@@ -1157,6 +1240,17 @@
             ],
             "title": "Order Id"
           },
+          "order_no": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order No"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -1172,15 +1266,21 @@
         "required": [
           "id",
           "customer_coupon_code",
-          "coupon_id",
+          "publish_version",
           "coupon_code",
-          "promotion_id",
+          "coupon_name",
+          "coupon_type",
           "promotion_code",
+          "promotion_name",
+          "promotion_type",
+          "promotion_discount_type",
+          "promotion_discount_value",
           "customer_id",
           "status",
           "claimed_at",
           "used_at",
           "order_id",
+          "order_no",
           "created_at",
           "updated_at"
         ],
