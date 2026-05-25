@@ -19,6 +19,8 @@ from app.domains.published.models.published import (
     PublishedOfferPrice,
     PublishedPromotionRule,
     PublishedPromotionTarget,
+    PublishedStorefrontSection,
+    PublishedStorefrontSectionLayout,
     PublishSyncRun,
 )
 from scripts.published.sync_published import sync_published_scope
@@ -157,6 +159,52 @@ def _snapshot_payload(publish_version: str) -> dict[str, dict[str, Any]]:
                 }
             ],
         },
+        "/backoffice/read/v1/published/snapshot/storefront-sections": {
+            "publish_version": publish_version,
+            "count": 1,
+            "sections": [
+                {
+                    "publish_version": publish_version,
+                    "section_code": _code("SECTION"),
+                    "section_type": "offer_shelf",
+                    "group_code": group_code,
+                    "title": "猫粮精选",
+                    "subtitle": "精选主粮",
+                    "description": "pytest section",
+                    "sort_order": 10,
+                    "display_status": "visible",
+                    "is_active": True,
+                    "published_at": _published_at(),
+                    "source_section_id": 9,
+                    "raw_payload": {"source": "test"},
+                }
+            ],
+        },
+        "/backoffice/read/v1/published/snapshot/storefront-section-layouts": {
+            "publish_version": publish_version,
+            "count": 1,
+            "layouts": [
+                {
+                    "publish_version": publish_version,
+                    "section_code": _code("SECTION"),
+                    "display_type": "product_grid",
+                    "columns_desktop": 4,
+                    "columns_tablet": 2,
+                    "columns_mobile": 1,
+                    "card_size": "standard",
+                    "image_ratio": "1:1",
+                    "show_promotion_badge": True,
+                    "show_sales_summary": True,
+                    "show_review_summary": True,
+                    "show_compare_price": True,
+                    "show_quantity_stepper": True,
+                    "max_items": 12,
+                    "published_at": _published_at(),
+                    "source_layout_id": 10,
+                    "raw_payload": {"source": "test"},
+                }
+            ],
+        },
         "/backoffice/read/v1/published/snapshot/promotion-rules": {
             "publish_version": publish_version,
             "count": 1,
@@ -231,8 +279,12 @@ def test_snapshot_all_sync_pulls_terminal_runtime_rows(session: Session) -> None
     for model in (
         PublishedCoupon,
         PublishedPromotionTarget,
+        PublishedStorefrontSectionLayout,
+        PublishedStorefrontSection,
         PublishedPromotionRule,
         PublishedOfferPosition,
+        PublishedStorefrontSection,
+        PublishedStorefrontSectionLayout,
         PublishedOfferPrice,
         PublishedOfferComponent,
         PublishedOffer,
@@ -262,14 +314,16 @@ def test_snapshot_all_sync_pulls_terminal_runtime_rows(session: Session) -> None
 
     assert sync_run.status == "success"
     assert sync_run.publish_version == publish_version
-    assert sync_run.rows_fetched == 8
-    assert sync_run.rows_upserted == 8
+    assert sync_run.rows_fetched == 10
+    assert sync_run.rows_upserted == 10
 
     assert session.scalar(select(PublishedGroup)) is not None
     assert session.scalar(select(PublishedOffer)) is not None
     assert session.scalar(select(PublishedOfferComponent)) is not None
     assert session.scalar(select(PublishedOfferPrice)) is not None
     assert session.scalar(select(PublishedOfferPosition)) is not None
+    assert session.scalar(select(PublishedStorefrontSectionLayout)) is not None
+    assert session.scalar(select(PublishedStorefrontSection)) is not None
     assert session.scalar(select(PublishedPromotionRule)) is not None
     assert session.scalar(select(PublishedPromotionTarget)) is not None
     assert session.scalar(select(PublishedCoupon)) is not None

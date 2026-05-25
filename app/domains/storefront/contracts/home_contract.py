@@ -1,8 +1,8 @@
 """Storefront home API contracts.
 
-This is the terminal customer-facing home contract. It is intentionally separate
-from the older /catalog list contract. The frontend should render Group /
-Position / Offer layout from this endpoint instead of rebuilding layout itself.
+This is the terminal customer-facing home contract. The frontend should render
+Group / Section / Layout / Position / Offer data from this endpoint instead of
+rebuilding storefront layout itself.
 """
 
 from typing import Literal
@@ -11,6 +11,15 @@ from pydantic import BaseModel, Field
 
 StorefrontHomeDataSource = Literal["d2c_published_storefront_snapshot"]
 StorefrontDisplayStyle = Literal["grid", "list", "ranking", "banner"]
+StorefrontDisplayType = Literal[
+    "product_grid",
+    "featured_grid",
+    "ranking_list",
+    "horizontal_scroll",
+    "banner",
+    "promo_strip",
+]
+StorefrontCardSize = Literal["compact", "standard", "large"]
 StorefrontStockStatus = Literal["in_stock", "low_stock", "out_of_stock"]
 
 
@@ -21,6 +30,21 @@ class StorefrontHomeGroup(BaseModel):
     description: str | None = None
     image_url: str | None = None
     sort_order: int
+
+
+class StorefrontHomeSectionLayout(BaseModel):
+    display_type: StorefrontDisplayType
+    columns_desktop: int = Field(..., ge=1)
+    columns_tablet: int = Field(..., ge=1)
+    columns_mobile: int = Field(..., ge=1)
+    card_size: StorefrontCardSize
+    image_ratio: str
+    show_promotion_badge: bool
+    show_sales_summary: bool
+    show_review_summary: bool
+    show_compare_price: bool
+    show_quantity_stepper: bool
+    max_items: int | None = Field(default=None, ge=1)
 
 
 class StorefrontHomeOfferCard(BaseModel):
@@ -55,11 +79,15 @@ class StorefrontHomeOfferCard(BaseModel):
 
 class StorefrontHomeSection(BaseModel):
     section_code: str
-    group_code: str
-    group_name: str
+    section_type: str
+    group_code: str | None
+    group_name: str | None
     title: str
+    subtitle: str | None = None
+    description: str | None = None
     display_style: StorefrontDisplayStyle
     sort_order: int
+    layout: StorefrontHomeSectionLayout
     offers: list[StorefrontHomeOfferCard]
 
 

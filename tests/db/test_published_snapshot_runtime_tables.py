@@ -18,6 +18,8 @@ def test_terminal_published_snapshot_runtime_tables_exist() -> None:
             "d2c_published_offer_components",
             "d2c_published_offer_prices",
             "d2c_published_offer_positions",
+            "d2c_published_storefront_sections",
+            "d2c_published_storefront_section_layouts",
             "d2c_published_promotion_rules",
             "d2c_published_promotion_targets",
         }.issubset(table_names)
@@ -43,6 +45,13 @@ def test_terminal_published_snapshot_runtime_columns_exist() -> None:
         position_columns = {
             column["name"] for column in inspector.get_columns("d2c_published_offer_positions")
         }
+        section_columns = {
+            column["name"] for column in inspector.get_columns("d2c_published_storefront_sections")
+        }
+        layout_columns = {
+            column["name"]
+            for column in inspector.get_columns("d2c_published_storefront_section_layouts")
+        }
         rule_columns = {
             column["name"] for column in inspector.get_columns("d2c_published_promotion_rules")
         }
@@ -66,6 +75,19 @@ def test_terminal_published_snapshot_runtime_columns_exist() -> None:
         assert {"publish_version", "position_code", "group_code", "offer_code"}.issubset(
             position_columns
         )
+        assert {"publish_version", "section_code", "section_type", "group_code", "title"}.issubset(
+            section_columns
+        )
+        assert {
+            "publish_version",
+            "section_code",
+            "display_type",
+            "columns_desktop",
+            "columns_tablet",
+            "columns_mobile",
+            "card_size",
+            "image_ratio",
+        }.issubset(layout_columns)
         assert {
             "publish_version",
             "promotion_code",

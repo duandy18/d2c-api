@@ -26,6 +26,8 @@ from app.domains.published.models.published import (
     PublishedOfferPrice,
     PublishedPromotionRule,
     PublishedPromotionTarget,
+    PublishedStorefrontSection,
+    PublishedStorefrontSectionLayout,
     PublishSyncRun,
 )
 
@@ -36,6 +38,8 @@ SNAPSHOT_SCOPES = {
     "snapshot-offer-components",
     "snapshot-offer-prices",
     "snapshot-offer-positions",
+    "snapshot-storefront-sections",
+    "snapshot-storefront-section-layouts",
     "snapshot-promotion-rules",
     "snapshot-promotion-targets",
     "snapshot-coupons",
@@ -49,6 +53,10 @@ ENDPOINT_BY_SCOPE = {
     "snapshot-offer-components": "/backoffice/read/v1/published/snapshot/offer-components",
     "snapshot-offer-prices": "/backoffice/read/v1/published/snapshot/offer-prices",
     "snapshot-offer-positions": "/backoffice/read/v1/published/snapshot/offer-positions",
+    "snapshot-storefront-sections": "/backoffice/read/v1/published/snapshot/storefront-sections",
+    "snapshot-storefront-section-layouts": (
+        "/backoffice/read/v1/published/snapshot/storefront-section-layouts"
+    ),
     "snapshot-promotion-rules": "/backoffice/read/v1/published/snapshot/promotion-rules",
     "snapshot-promotion-targets": "/backoffice/read/v1/published/snapshot/promotion-targets",
     "snapshot-coupons": "/backoffice/read/v1/published/snapshot/coupons",
@@ -154,6 +162,42 @@ OFFER_POSITION_FIELDS = (
     "is_active",
     "published_at",
     "source_position_id",
+    "raw_payload",
+)
+
+STOREFRONT_SECTION_FIELDS = (
+    "publish_version",
+    "section_code",
+    "section_type",
+    "group_code",
+    "title",
+    "subtitle",
+    "description",
+    "sort_order",
+    "display_status",
+    "is_active",
+    "published_at",
+    "source_section_id",
+    "raw_payload",
+)
+
+STOREFRONT_SECTION_LAYOUT_FIELDS = (
+    "publish_version",
+    "section_code",
+    "display_type",
+    "columns_desktop",
+    "columns_tablet",
+    "columns_mobile",
+    "card_size",
+    "image_ratio",
+    "show_promotion_badge",
+    "show_sales_summary",
+    "show_review_summary",
+    "show_compare_price",
+    "show_quantity_stepper",
+    "max_items",
+    "published_at",
+    "source_layout_id",
     "raw_payload",
 )
 
@@ -492,6 +536,48 @@ def _sync_snapshot_offer_positions(
     )
 
 
+def _sync_snapshot_storefront_sections(
+    session: Session,
+    base_url: str,
+    service_client: str,
+    publish_version: str | None,
+    fetcher: JsonFetcher,
+) -> ScopeResult:
+    return _sync_snapshot_rows(
+        session,
+        scope="snapshot-storefront-sections",
+        base_url=base_url,
+        service_client=service_client,
+        publish_version=publish_version,
+        fetcher=fetcher,
+        payload_key="sections",
+        fields=STOREFRONT_SECTION_FIELDS,
+        model=PublishedStorefrontSection,
+        conflict_columns=("publish_version", "section_code"),
+    )
+
+
+def _sync_snapshot_storefront_section_layouts(
+    session: Session,
+    base_url: str,
+    service_client: str,
+    publish_version: str | None,
+    fetcher: JsonFetcher,
+) -> ScopeResult:
+    return _sync_snapshot_rows(
+        session,
+        scope="snapshot-storefront-section-layouts",
+        base_url=base_url,
+        service_client=service_client,
+        publish_version=publish_version,
+        fetcher=fetcher,
+        payload_key="layouts",
+        fields=STOREFRONT_SECTION_LAYOUT_FIELDS,
+        model=PublishedStorefrontSectionLayout,
+        conflict_columns=("publish_version", "section_code"),
+    )
+
+
 def _sync_snapshot_promotion_rules(
     session: Session,
     base_url: str,
@@ -595,6 +681,22 @@ def _sync_single_scope(
             publish_version,
             fetcher,
         )
+    if scope == "snapshot-storefront-sections":
+        return _sync_snapshot_storefront_sections(
+            session,
+            base_url,
+            service_client,
+            publish_version,
+            fetcher,
+        )
+    if scope == "snapshot-storefront-section-layouts":
+        return _sync_snapshot_storefront_section_layouts(
+            session,
+            base_url,
+            service_client,
+            publish_version,
+            fetcher,
+        )
     if scope == "snapshot-promotion-rules":
         return _sync_snapshot_promotion_rules(
             session,
@@ -639,6 +741,8 @@ def _child_scopes(scope: str) -> tuple[str, ...]:
             "snapshot-offer-components",
             "snapshot-offer-prices",
             "snapshot-offer-positions",
+            "snapshot-storefront-sections",
+            "snapshot-storefront-section-layouts",
             "snapshot-promotion-rules",
             "snapshot-promotion-targets",
             "snapshot-coupons",

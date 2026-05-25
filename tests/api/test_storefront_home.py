@@ -12,6 +12,8 @@ from app.domains.published.models.published import (
     PublishedOffer,
     PublishedOfferPosition,
     PublishedOfferPrice,
+    PublishedStorefrontSection,
+    PublishedStorefrontSectionLayout,
 )
 from app.main import app
 
@@ -41,6 +43,12 @@ def _seed_home_offer(
     price_cents: int = 1099,
     compare_at_price_cents: int | None = 1399,
     price_is_active: bool = True,
+    seed_section: bool = False,
+    section_code: str | None = None,
+    section_title: str = "猫砂主推",
+    section_type: str = "offer_shelf",
+    layout_display_type: str = "featured_grid",
+    layout_columns_desktop: int = 2,
 ) -> dict[str, str | int | None]:
     settings = load_settings()
     session_factory = get_session_factory(settings.database_url)
@@ -50,6 +58,7 @@ def _seed_home_offer(
     resolved_offer_code = offer_code or _code("offer")
     resolved_position_code = position_code or _code("pos")
     resolved_price_code = price_code or _code("price")
+    resolved_section_code = section_code or _code("section")
     now = datetime.now(UTC)
 
     with session_factory() as session:
@@ -120,6 +129,45 @@ def _seed_home_offer(
                 published_at=now,
             )
         )
+        if seed_section:
+            session.add(
+                PublishedStorefrontSection(
+                    publish_version=resolved_publish_version,
+                    section_code=resolved_section_code,
+                    section_type=section_type,
+                    group_code=resolved_group_code,
+                    title=section_title,
+                    subtitle="section subtitle",
+                    description="section description",
+                    sort_order=5,
+                    display_status="visible",
+                    is_active=True,
+                    source_section_id=5,
+                    raw_payload={"source": "pytest"},
+                    published_at=now,
+                )
+            )
+            session.add(
+                PublishedStorefrontSectionLayout(
+                    publish_version=resolved_publish_version,
+                    section_code=resolved_section_code,
+                    display_type=layout_display_type,
+                    columns_desktop=layout_columns_desktop,
+                    columns_tablet=2,
+                    columns_mobile=1,
+                    card_size="large",
+                    image_ratio="4:3",
+                    show_promotion_badge=True,
+                    show_sales_summary=True,
+                    show_review_summary=True,
+                    show_compare_price=True,
+                    show_quantity_stepper=True,
+                    max_items=8,
+                    source_layout_id=6,
+                    raw_payload={"source": "pytest"},
+                    published_at=now,
+                )
+            )
         session.commit()
 
     return {
@@ -128,6 +176,7 @@ def _seed_home_offer(
         "offer_code": resolved_offer_code,
         "position_code": resolved_position_code,
         "price_code": resolved_price_code,
+        "section_code": resolved_section_code,
         "price_cents": price_cents,
         "compare_at_price_cents": compare_at_price_cents,
     }
@@ -157,6 +206,8 @@ def test_storefront_home_returns_group_sections_and_offer_cards() -> None:
     assert section["section_code"] == values["group_code"]
     assert section["title"] == "猫砂"
     assert section["display_style"] == "grid"
+    assert section["layout"]["display_type"] == "product_grid"
+    assert section["layout"]["columns_desktop"] == 4
 
     offer_by_code = {offer["offer_code"]: offer for offer in section["offers"]}
     offer = offer_by_code[values["offer_code"]]
@@ -254,6 +305,48 @@ def test_storefront_home_ignores_hidden_or_inactive_rows() -> None:
     assert hidden_group["offer_code"] not in all_offer_codes
     assert inactive_position["offer_code"] not in all_offer_codes
     assert inactive_price["offer_code"] not in all_offer_codes
+
+
+def test_storefront_home_uses_published_sections_and_layouts() -> None:
+    values = _seed_home_offer(
+        seed_section=True,
+        section_title="猫砂主推",
+        layout_display_type="featured_grid",
+        layout_columns_desktop=2,
+    )
+    client = TestClient(app)
+
+    response = client.get("/storefront/home")
+
+    assert response.status_code == 200
+
+    payload = response.json()
+    sections_by_code = {section["section_code"]: section for section in payload["sections"]}
+    section = sections_by_code[values["section_code"]]
+
+    assert section["section_type"] == "offer_shelf"
+    assert section["group_code"] == values["group_code"]
+    assert section["title"] == "猫砂主推"
+    assert section["subtitle"] == "section subtitle"
+    assert section["description"] == "section description"
+    assert section["display_style"] == "grid"
+    assert section["layout"]["display_type"] == "featured_grid"
+    assert section["layout"]["columns_desktop"] == 2
+    assert section["layout"] == {
+        "display_type": "featured_grid",
+        "columns_desktop": 2,
+        "columns_tablet": 2,
+        "columns_mobile": 1,
+        "card_size": "large",
+        "image_ratio": "4:3",
+        "show_promotion_badge": True,
+        "show_sales_summary": True,
+        "show_review_summary": True,
+        "show_compare_price": True,
+        "show_quantity_stepper": True,
+        "max_items": 8,
+    }
+    assert section["offers"][0]["offer_code"] == values["offer_code"]
 
 
 def test_storefront_home_route_is_registered() -> None:
