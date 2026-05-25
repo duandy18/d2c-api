@@ -15,7 +15,8 @@ from app.domains.published.models.published import (
     PublishedOfferComponent,
     PublishedOfferPosition,
     PublishedOfferPrice,
-    PublishedPromotion,
+    PublishedPromotionRule,
+    PublishedPromotionTarget,
 )
 
 
@@ -218,15 +219,15 @@ def seed_published_promotion(
 
     with session_factory() as session:
         session.add(
-            PublishedPromotion(
+            PublishedPromotionRule(
                 publish_version=resolved_publish_version,
                 promotion_code=promotion_code,
                 promotion_name=promotion_name,
+                description=None,
                 promotion_type=promotion_type,
                 discount_type=discount_type,
                 discount_value=discount_value,
-                scope_type=scope_type,
-                min_order_amount_cents=min_order_amount_cents,
+                threshold_amount_cents=min_order_amount_cents,
                 max_discount_cents=max_discount_cents,
                 currency=currency,
                 starts_at=None,
@@ -234,10 +235,22 @@ def seed_published_promotion(
                 priority=10,
                 stackable=False,
                 is_active=is_active,
-                published_at=now,
-                source_promotion_id=None,
-                source_updated_at=now,
+                display_badge=None,
+                source_promotion_rule_id=None,
                 raw_payload={"source": "pytest"},
+                published_at=now,
+            )
+        )
+        session.add(
+            PublishedPromotionTarget(
+                publish_version=resolved_publish_version,
+                promotion_code=promotion_code,
+                target_type=scope_type,
+                target_id=None,
+                target_code=None,
+                source_target_id=None,
+                raw_payload={"source": "pytest"},
+                published_at=now,
             )
         )
         session.commit()

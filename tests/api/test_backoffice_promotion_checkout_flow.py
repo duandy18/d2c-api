@@ -16,6 +16,8 @@ def reset_promotions_for_checkout_flow() -> None:
     try:
         with engine.begin() as connection:
             connection.execute(text("DELETE FROM d2c_published_coupons"))
+            connection.execute(text("DELETE FROM d2c_published_promotion_targets"))
+            connection.execute(text("DELETE FROM d2c_published_promotion_rules"))
             connection.execute(text("DELETE FROM d2c_published_promotions"))
     finally:
         engine.dispose()
@@ -112,7 +114,7 @@ def set_published_promotion_active(
             connection.execute(
                 text(
                     """
-                    UPDATE d2c_published_promotions
+                    UPDATE d2c_published_promotion_rules
                     SET is_active = :is_active,
                         updated_at = now()
                     WHERE publish_version = :publish_version
