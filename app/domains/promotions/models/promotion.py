@@ -23,7 +23,7 @@ from app.core.orm import Base
 class CustomerCoupon(Base):
     """Customer coupon usage fact written by checkout.
 
-    Promotion and coupon configuration owner tables live in d2c-backoffice-api.
+    Promotion and coupon runtime facts live in d2c-api.
     d2c-api stores only runtime usage facts and published snapshots.
     """
 
