@@ -55,6 +55,264 @@
         }
       }
     },
+    "/backoffice/site-config/pages/home": {
+      "get": {
+        "tags": [
+          "backoffice-site-config"
+        ],
+        "summary": "Get Home Config",
+        "operationId": "get_home_config_backoffice_site_config_pages_home_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackofficeHomeConfigResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "backoffice-site-config"
+        ],
+        "summary": "Patch Home Config",
+        "operationId": "patch_home_config_backoffice_site_config_pages_home_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackofficeHomePagePatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackofficeHomeConfigResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/backoffice/site-config/pages/home/slots/{slot_code}": {
+      "patch": {
+        "tags": [
+          "backoffice-site-config"
+        ],
+        "summary": "Patch Home Slot Config",
+        "operationId": "patch_home_slot_config_backoffice_site_config_pages_home_slots__slot_code__patch",
+        "parameters": [
+          {
+            "name": "slot_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slot Code"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackofficeSlotPatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackofficeHomeConfigResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/backoffice/site-config/pages/home/slots/{slot_code}/items": {
+      "put": {
+        "tags": [
+          "backoffice-site-config"
+        ],
+        "summary": "Put Home Slot Items",
+        "operationId": "put_home_slot_items_backoffice_site_config_pages_home_slots__slot_code__items_put",
+        "parameters": [
+          {
+            "name": "slot_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slot Code"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackofficeSlotItemsPutRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackofficeHomeConfigResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/backoffice/site-config/pages/home/slots/{slot_code}/offer-positions": {
+      "put": {
+        "tags": [
+          "backoffice-site-config"
+        ],
+        "summary": "Put Home Slot Offer Positions",
+        "operationId": "put_home_slot_offer_positions_backoffice_site_config_pages_home_slots__slot_code__offer_positions_put",
+        "parameters": [
+          {
+            "name": "slot_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Slot Code"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackofficeSlotOfferPositionsPutRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackofficeHomeConfigResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/backoffice/site-config/offers/{offer_code}/resolve": {
+      "get": {
+        "tags": [
+          "backoffice-site-config"
+        ],
+        "summary": "Resolve Home Offer",
+        "operationId": "resolve_home_offer_backoffice_site_config_offers__offer_code__resolve_get",
+        "parameters": [
+          {
+            "name": "offer_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Offer Code"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackofficeOfferResolveResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/analytics/health": {
       "get": {
         "tags": [
@@ -1132,6 +1390,718 @@
           "customer_coupons"
         ],
         "title": "BackofficeCustomerCouponsResponse"
+      },
+      "BackofficeHomeConfigResponse": {
+        "properties": {
+          "site": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StorefrontSiteSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "page": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BackofficeHomePage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "validation_issues": {
+            "items": {
+              "$ref": "#/components/schemas/BackofficeValidationIssue"
+            },
+            "type": "array",
+            "title": "Validation Issues"
+          }
+        },
+        "type": "object",
+        "title": "BackofficeHomeConfigResponse"
+      },
+      "BackofficeHomePage": {
+        "properties": {
+          "page_code": {
+            "type": "string",
+            "title": "Page Code"
+          },
+          "page_type": {
+            "type": "string",
+            "title": "Page Type"
+          },
+          "route_path": {
+            "type": "string",
+            "title": "Route Path"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "seo_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seo Title"
+          },
+          "seo_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seo Description"
+          },
+          "slots": {
+            "items": {
+              "$ref": "#/components/schemas/BackofficePageSlot"
+            },
+            "type": "array",
+            "title": "Slots"
+          }
+        },
+        "type": "object",
+        "required": [
+          "page_code",
+          "page_type",
+          "route_path",
+          "title",
+          "status"
+        ],
+        "title": "BackofficeHomePage"
+      },
+      "BackofficeHomePagePatchRequest": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "active",
+                  "disabled"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "seo_title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 180
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seo Title"
+          },
+          "seo_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seo Description"
+          }
+        },
+        "type": "object",
+        "title": "BackofficeHomePagePatchRequest"
+      },
+      "BackofficeOfferResolveResponse": {
+        "properties": {
+          "offer": {
+            "$ref": "#/components/schemas/StorefrontHomeOffer"
+          },
+          "raw": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Raw"
+          }
+        },
+        "type": "object",
+        "required": [
+          "offer"
+        ],
+        "title": "BackofficeOfferResolveResponse"
+      },
+      "BackofficePageSlot": {
+        "properties": {
+          "slot_code": {
+            "type": "string",
+            "title": "Slot Code"
+          },
+          "slot_type": {
+            "type": "string",
+            "title": "Slot Type"
+          },
+          "slot_group": {
+            "type": "string",
+            "title": "Slot Group"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subtitle"
+          },
+          "content": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Content"
+          },
+          "presentation": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Presentation"
+          },
+          "sort_order": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Sort Order"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          },
+          "supports_items": {
+            "type": "boolean",
+            "title": "Supports Items"
+          },
+          "supports_offers": {
+            "type": "boolean",
+            "title": "Supports Offers"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/StorefrontHomeSlotItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "offer_positions": {
+            "items": {
+              "$ref": "#/components/schemas/BackofficeSlotOfferPosition"
+            },
+            "type": "array",
+            "title": "Offer Positions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slot_code",
+          "slot_type",
+          "slot_group",
+          "title",
+          "sort_order",
+          "supports_items",
+          "supports_offers"
+        ],
+        "title": "BackofficePageSlot"
+      },
+      "BackofficeSlotItemPut": {
+        "properties": {
+          "item_code": {
+            "type": "string",
+            "maxLength": 96,
+            "minLength": 1,
+            "title": "Item Code"
+          },
+          "item_type": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Item Type"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Label"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 240
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subtitle"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Icon"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "link_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Link Type"
+          },
+          "link_value": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 240
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Link Value"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload"
+          },
+          "sort_order": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Sort Order"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "item_code",
+          "item_type",
+          "label",
+          "sort_order"
+        ],
+        "title": "BackofficeSlotItemPut"
+      },
+      "BackofficeSlotItemsPutRequest": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BackofficeSlotItemPut"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "title": "BackofficeSlotItemsPutRequest"
+      },
+      "BackofficeSlotOfferPosition": {
+        "properties": {
+          "position_code": {
+            "type": "string",
+            "title": "Position Code"
+          },
+          "offer_code": {
+            "type": "string",
+            "title": "Offer Code"
+          },
+          "position_type": {
+            "type": "string",
+            "title": "Position Type",
+            "default": "manual"
+          },
+          "is_featured": {
+            "type": "boolean",
+            "title": "Is Featured",
+            "default": false
+          },
+          "sort_order": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Sort Order"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          },
+          "visible_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visible From"
+          },
+          "visible_until": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visible Until"
+          },
+          "offer": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StorefrontHomeOffer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "validation_issues": {
+            "items": {
+              "$ref": "#/components/schemas/BackofficeValidationIssue"
+            },
+            "type": "array",
+            "title": "Validation Issues"
+          }
+        },
+        "type": "object",
+        "required": [
+          "position_code",
+          "offer_code",
+          "sort_order"
+        ],
+        "title": "BackofficeSlotOfferPosition"
+      },
+      "BackofficeSlotOfferPositionPut": {
+        "properties": {
+          "position_code": {
+            "type": "string",
+            "maxLength": 96,
+            "minLength": 1,
+            "title": "Position Code"
+          },
+          "offer_code": {
+            "type": "string",
+            "maxLength": 96,
+            "minLength": 1,
+            "title": "Offer Code"
+          },
+          "position_type": {
+            "type": "string",
+            "maxLength": 64,
+            "title": "Position Type",
+            "default": "manual"
+          },
+          "is_featured": {
+            "type": "boolean",
+            "title": "Is Featured",
+            "default": false
+          },
+          "sort_order": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Sort Order"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          },
+          "visible_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visible From"
+          },
+          "visible_until": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visible Until"
+          }
+        },
+        "type": "object",
+        "required": [
+          "position_code",
+          "offer_code",
+          "sort_order"
+        ],
+        "title": "BackofficeSlotOfferPositionPut"
+      },
+      "BackofficeSlotOfferPositionsPutRequest": {
+        "properties": {
+          "offer_positions": {
+            "items": {
+              "$ref": "#/components/schemas/BackofficeSlotOfferPositionPut"
+            },
+            "type": "array",
+            "title": "Offer Positions"
+          }
+        },
+        "type": "object",
+        "title": "BackofficeSlotOfferPositionsPutRequest"
+      },
+      "BackofficeSlotPatchRequest": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 160
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 240
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subtitle"
+          },
+          "content": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content"
+          },
+          "presentation": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Presentation"
+          },
+          "sort_order": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sort Order"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "title": "BackofficeSlotPatchRequest"
+      },
+      "BackofficeValidationIssue": {
+        "properties": {
+          "level": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning"
+            ],
+            "title": "Level"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "slot_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slot Code"
+          },
+          "field_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Field Key"
+          },
+          "offer_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offer Code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "level",
+          "code",
+          "message"
+        ],
+        "title": "BackofficeValidationIssue"
       },
       "BehaviorEventRequest": {
         "properties": {
@@ -2676,210 +3646,6 @@
         ],
         "title": "PublishedHealthResponse"
       },
-      "StorefrontHomeBlock": {
-        "properties": {
-          "block_code": {
-            "type": "string",
-            "title": "Block Code"
-          },
-          "block_type": {
-            "type": "string",
-            "title": "Block Type"
-          },
-          "title": {
-            "type": "string",
-            "title": "Title"
-          },
-          "subtitle": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Subtitle"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "sort_order": {
-            "type": "integer",
-            "title": "Sort Order"
-          },
-          "layout": {
-            "$ref": "#/components/schemas/StorefrontHomeBlockLayout"
-          },
-          "data_binding_codes": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Data Binding Codes"
-          },
-          "visibility_rule_codes": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Visibility Rule Codes"
-          },
-          "action_policy_codes": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Action Policy Codes"
-          },
-          "tracking_policy_codes": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Tracking Policy Codes"
-          },
-          "positions": {
-            "items": {
-              "$ref": "#/components/schemas/StorefrontHomeBlockPosition"
-            },
-            "type": "array",
-            "title": "Positions"
-          }
-        },
-        "type": "object",
-        "required": [
-          "block_code",
-          "block_type",
-          "title",
-          "sort_order",
-          "layout"
-        ],
-        "title": "StorefrontHomeBlock"
-      },
-      "StorefrontHomeBlockLayout": {
-        "properties": {
-          "display_type": {
-            "type": "string",
-            "title": "Display Type"
-          },
-          "columns_desktop": {
-            "type": "integer",
-            "minimum": 1.0,
-            "title": "Columns Desktop"
-          },
-          "columns_tablet": {
-            "type": "integer",
-            "minimum": 1.0,
-            "title": "Columns Tablet"
-          },
-          "columns_mobile": {
-            "type": "integer",
-            "minimum": 1.0,
-            "title": "Columns Mobile"
-          },
-          "card_size": {
-            "type": "string",
-            "title": "Card Size"
-          },
-          "image_ratio": {
-            "type": "string",
-            "title": "Image Ratio"
-          },
-          "show_promotion_badge": {
-            "type": "boolean",
-            "title": "Show Promotion Badge"
-          },
-          "show_sales_summary": {
-            "type": "boolean",
-            "title": "Show Sales Summary"
-          },
-          "show_review_summary": {
-            "type": "boolean",
-            "title": "Show Review Summary"
-          },
-          "show_compare_price": {
-            "type": "boolean",
-            "title": "Show Compare Price"
-          },
-          "show_quantity_stepper": {
-            "type": "boolean",
-            "title": "Show Quantity Stepper"
-          },
-          "max_items": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "minimum": 1.0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Max Items"
-          }
-        },
-        "type": "object",
-        "required": [
-          "display_type",
-          "columns_desktop",
-          "columns_tablet",
-          "columns_mobile",
-          "card_size",
-          "image_ratio",
-          "show_promotion_badge",
-          "show_sales_summary",
-          "show_review_summary",
-          "show_compare_price",
-          "show_quantity_stepper"
-        ],
-        "title": "StorefrontHomeBlockLayout"
-      },
-      "StorefrontHomeBlockPosition": {
-        "properties": {
-          "position_code": {
-            "type": "string",
-            "title": "Position Code"
-          },
-          "offer_code": {
-            "type": "string",
-            "title": "Offer Code"
-          },
-          "sort_order": {
-            "type": "integer",
-            "title": "Sort Order"
-          },
-          "position_type": {
-            "type": "string",
-            "title": "Position Type"
-          },
-          "is_featured": {
-            "type": "boolean",
-            "title": "Is Featured"
-          },
-          "offer": {
-            "$ref": "#/components/schemas/StorefrontHomeOffer"
-          }
-        },
-        "type": "object",
-        "required": [
-          "position_code",
-          "offer_code",
-          "sort_order",
-          "position_type",
-          "is_featured",
-          "offer"
-        ],
-        "title": "StorefrontHomeBlockPosition"
-      },
       "StorefrontHomeOffer": {
         "properties": {
           "offer_code": {
@@ -3033,6 +3799,10 @@
             ],
             "title": "Stock Status",
             "default": "in_stock"
+          },
+          "sell_status": {
+            "type": "string",
+            "title": "Sell Status"
           }
         },
         "type": "object",
@@ -3042,9 +3812,47 @@
           "title",
           "price_code",
           "price_cents",
-          "currency"
+          "currency",
+          "sell_status"
         ],
         "title": "StorefrontHomeOffer"
+      },
+      "StorefrontHomeOfferPosition": {
+        "properties": {
+          "position_code": {
+            "type": "string",
+            "title": "Position Code"
+          },
+          "offer_code": {
+            "type": "string",
+            "title": "Offer Code"
+          },
+          "position_type": {
+            "type": "string",
+            "title": "Position Type"
+          },
+          "is_featured": {
+            "type": "boolean",
+            "title": "Is Featured"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
+          },
+          "offer": {
+            "$ref": "#/components/schemas/StorefrontHomeOffer"
+          }
+        },
+        "type": "object",
+        "required": [
+          "position_code",
+          "offer_code",
+          "position_type",
+          "is_featured",
+          "sort_order",
+          "offer"
+        ],
+        "title": "StorefrontHomeOfferPosition"
       },
       "StorefrontHomePage": {
         "properties": {
@@ -3075,12 +3883,34 @@
             ],
             "title": "Description"
           },
-          "regions": {
+          "seo_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seo Title"
+          },
+          "seo_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seo Description"
+          },
+          "slots": {
             "items": {
-              "$ref": "#/components/schemas/StorefrontHomeRegion"
+              "$ref": "#/components/schemas/StorefrontHomeSlot"
             },
             "type": "array",
-            "title": "Regions"
+            "title": "Slots"
           }
         },
         "type": "object",
@@ -3092,19 +3922,161 @@
         ],
         "title": "StorefrontHomePage"
       },
-      "StorefrontHomeRegion": {
+      "StorefrontHomeResponse": {
         "properties": {
-          "region_code": {
+          "data_source": {
             "type": "string",
-            "title": "Region Code"
+            "const": "d2c_storefront_site_config",
+            "title": "Data Source",
+            "default": "d2c_storefront_site_config"
           },
-          "region_type": {
+          "site": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StorefrontSiteSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "page": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StorefrontHomePage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "slot_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Slot Count"
+          },
+          "item_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Item Count"
+          },
+          "offer_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Offer Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slot_count",
+          "item_count",
+          "offer_count"
+        ],
+        "title": "StorefrontHomeResponse"
+      },
+      "StorefrontHomeSlot": {
+        "properties": {
+          "slot_code": {
             "type": "string",
-            "title": "Region Type"
+            "title": "Slot Code"
+          },
+          "slot_type": {
+            "type": "string",
+            "title": "Slot Type"
+          },
+          "slot_group": {
+            "type": "string",
+            "title": "Slot Group"
           },
           "title": {
             "type": "string",
             "title": "Title"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subtitle"
+          },
+          "content": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Content"
+          },
+          "presentation": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Presentation"
+          },
+          "sort_order": {
+            "type": "integer",
+            "title": "Sort Order"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/StorefrontHomeSlotItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "offers": {
+            "items": {
+              "$ref": "#/components/schemas/StorefrontHomeOfferPosition"
+            },
+            "type": "array",
+            "title": "Offers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slot_code",
+          "slot_type",
+          "slot_group",
+          "title",
+          "sort_order"
+        ],
+        "title": "StorefrontHomeSlot"
+      },
+      "StorefrontHomeSlotItem": {
+        "properties": {
+          "item_code": {
+            "type": "string",
+            "title": "Item Code"
+          },
+          "item_type": {
+            "type": "string",
+            "title": "Item Type"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subtitle"
           },
           "description": {
             "anyOf": [
@@ -3117,43 +4089,84 @@
             ],
             "title": "Description"
           },
+          "icon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Icon"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "link_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Link Type"
+          },
+          "link_value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Link Value"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Payload"
+          },
           "sort_order": {
             "type": "integer",
             "title": "Sort Order"
-          },
-          "allowed_block_types": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Allowed Block Types"
-          },
-          "blocks": {
-            "items": {
-              "$ref": "#/components/schemas/StorefrontHomeBlock"
-            },
-            "type": "array",
-            "title": "Blocks"
           }
         },
         "type": "object",
         "required": [
-          "region_code",
-          "region_type",
-          "title",
+          "item_code",
+          "item_type",
+          "label",
           "sort_order"
         ],
-        "title": "StorefrontHomeRegion"
+        "title": "StorefrontHomeSlotItem"
       },
-      "StorefrontHomeResponse": {
+      "StorefrontSiteSummary": {
         "properties": {
-          "data_source": {
+          "site_code": {
             "type": "string",
-            "const": "d2c_published_client_presentation_snapshot",
-            "title": "Data Source",
-            "default": "d2c_published_client_presentation_snapshot"
+            "title": "Site Code"
           },
-          "publish_version": {
+          "site_name": {
+            "type": "string",
+            "title": "Site Name"
+          },
+          "brand_name": {
+            "type": "string",
+            "title": "Brand Name"
+          },
+          "logo_url": {
             "anyOf": [
               {
                 "type": "string"
@@ -3162,43 +4175,16 @@
                 "type": "null"
               }
             ],
-            "title": "Publish Version"
+            "title": "Logo Url"
           },
-          "page_code": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Page Code"
-          },
-          "surface_code": {
+          "default_currency": {
             "type": "string",
-            "title": "Surface Code",
-            "default": "web_desktop"
+            "title": "Default Currency"
           },
-          "region_count": {
-            "type": "integer",
-            "minimum": 0.0,
-            "title": "Region Count"
-          },
-          "block_count": {
-            "type": "integer",
-            "minimum": 0.0,
-            "title": "Block Count"
-          },
-          "offer_count": {
-            "type": "integer",
-            "minimum": 0.0,
-            "title": "Offer Count"
-          },
-          "page": {
+          "theme": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/StorefrontHomePage"
+                "$ref": "#/components/schemas/StorefrontTheme"
               },
               {
                 "type": "null"
@@ -3208,12 +4194,66 @@
         },
         "type": "object",
         "required": [
-          "publish_version",
-          "region_count",
-          "block_count",
-          "offer_count"
+          "site_code",
+          "site_name",
+          "brand_name",
+          "default_currency"
         ],
-        "title": "StorefrontHomeResponse"
+        "title": "StorefrontSiteSummary"
+      },
+      "StorefrontTheme": {
+        "properties": {
+          "theme_code": {
+            "type": "string",
+            "title": "Theme Code"
+          },
+          "primary_color": {
+            "type": "string",
+            "title": "Primary Color"
+          },
+          "secondary_color": {
+            "type": "string",
+            "title": "Secondary Color"
+          },
+          "background_color": {
+            "type": "string",
+            "title": "Background Color"
+          },
+          "text_color": {
+            "type": "string",
+            "title": "Text Color"
+          },
+          "font_family": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Font Family"
+          },
+          "corner_radius": {
+            "type": "string",
+            "title": "Corner Radius"
+          },
+          "button_style": {
+            "type": "string",
+            "title": "Button Style"
+          }
+        },
+        "type": "object",
+        "required": [
+          "theme_code",
+          "primary_color",
+          "secondary_color",
+          "background_color",
+          "text_color",
+          "corner_radius",
+          "button_style"
+        ],
+        "title": "StorefrontTheme"
       },
       "ValidationError": {
         "properties": {

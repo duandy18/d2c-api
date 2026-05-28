@@ -5,6 +5,7 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 
 import app.domains.published.models.published  # noqa: F401
+import app.domains.site_config.models  # noqa: F401
 from alembic import context
 from app.core.config import load_settings
 from app.core.orm import Base
