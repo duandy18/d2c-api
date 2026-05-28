@@ -23,6 +23,7 @@ from app.domains.customers.repos.customer_repo import (
     create_customer_session,
     create_password_credential,
     get_customer_by_email,
+    get_customer_by_phone,
     get_password_credential,
 )
 from app.security.passwords import (
@@ -47,6 +48,14 @@ def normalize_email(email: str) -> str:
     return email.strip().lower()
 
 
+def normalize_phone(phone: str | None) -> str | None:
+    if phone is None:
+        return None
+
+    normalized_phone = phone.strip()
+    return normalized_phone or None
+
+
 def build_customer_profile(customer: Customer) -> CustomerProfile:
     return CustomerProfile(
         customer_code=customer.customer_code,
@@ -64,9 +73,13 @@ def register_customer(
     payload: CustomerRegisterRequest,
 ) -> CustomerAuthResponse:
     email = normalize_email(payload.email)
+    phone = normalize_phone(payload.phone)
 
     if get_customer_by_email(session, email) is not None:
         raise CustomerConflictError("customer_email_already_registered")
+
+    if phone is not None and get_customer_by_phone(session, phone) is not None:
+        raise CustomerConflictError("customer_phone_already_registered")
 
     now = datetime.now(UTC)
     customer = create_customer(
@@ -74,7 +87,7 @@ def register_customer(
         Customer(
             customer_code=f"CUST-{uuid4().hex[:12].upper()}",
             email=email,
-            phone=payload.phone,
+            phone=phone,
             display_name=payload.display_name,
             status="active",
             registered_at=now,

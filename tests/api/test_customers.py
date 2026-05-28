@@ -79,6 +79,30 @@ def test_customer_register_rejects_duplicate_email() -> None:
     assert second_response.json() == {"detail": "customer_email_already_registered"}
 
 
+def test_customer_register_rejects_duplicate_phone() -> None:
+    client = TestClient(app)
+    phone = f"phone-{uuid4().hex[:20]}"
+    first_payload = {
+        "email": unique_email(),
+        "password": "StrongPass123",
+        "display_name": "First Customer",
+        "phone": phone,
+    }
+    second_payload = {
+        "email": unique_email(),
+        "password": "StrongPass123",
+        "display_name": "Second Customer",
+        "phone": phone,
+    }
+
+    first_response = client.post("/customers/register", json=first_payload)
+    second_response = client.post("/customers/register", json=second_payload)
+
+    assert first_response.status_code == 201
+    assert second_response.status_code == 409
+    assert second_response.json() == {"detail": "customer_phone_already_registered"}
+
+
 def test_customer_login_rejects_wrong_password() -> None:
     client = TestClient(app)
     email = unique_email()
