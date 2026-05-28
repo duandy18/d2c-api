@@ -6,8 +6,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.database import get_session
-from app.domains.storefront.contracts.home_contract import StorefrontHomeResponse
-from app.domains.storefront.services.home_service import get_storefront_home
+from app.domains.site_config.contracts.storefront_home_contract import StorefrontHomeResponse
+from app.domains.site_config.services.storefront_home_service import get_storefront_home
 
 router = APIRouter(prefix="/storefront", tags=["storefront"])
 SessionDep = Annotated[Session, Depends(get_session)]
