@@ -22,8 +22,8 @@ def _code(prefix: str) -> str:
     return f"{prefix}-{uuid4().hex[:12].lower()}"
 
 
-def _future_now() -> datetime:
-    return datetime(2099, 1, 1, 0, 0, 0, tzinfo=UTC)
+def _published_at() -> datetime:
+    return datetime.now(UTC)
 
 
 def _session_factory():
@@ -52,7 +52,7 @@ def _replace_product_grid_positions(*, offers: list[dict[str, object]]) -> list[
     session_factory = _session_factory()
     slot_id = _home_product_grid_slot_id()
     publish_version = _code("pub")
-    now = _future_now()
+    now = _published_at()
     seeded: list[dict[str, object]] = []
 
     with session_factory() as session:
