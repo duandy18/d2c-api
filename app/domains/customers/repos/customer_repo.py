@@ -17,6 +17,11 @@ def get_customer_by_email(session: Session, email: str) -> Customer | None:
     return session.scalar(statement)
 
 
+def get_customer_by_phone(session: Session, phone: str) -> Customer | None:
+    statement = select(Customer).where(Customer.phone == phone)
+    return session.scalar(statement)
+
+
 def create_customer(session: Session, customer: Customer) -> Customer:
     session.add(customer)
     session.flush()
