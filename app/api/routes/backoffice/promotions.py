@@ -1,6 +1,6 @@
 """Backoffice promotion usage routes retained in d2c-api.
 
-Promotion/coupon configuration owner APIs moved to d2c-backoffice-api.
+Promotion/coupon runtime read APIs are served by d2c-api.
 d2c-api keeps customer coupon usage facts because checkout runtime still writes them.
 """
 

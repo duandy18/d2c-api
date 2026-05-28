@@ -1,7 +1,7 @@
 """Runtime published model tables.
 
-These tables are the customer-facing runtime read model. They are populated
-from d2c-backoffice-api published exports in a later sync step.
+These tables are the customer-facing runtime read model. They are now
+owned by d2c-api as part of the single-backend D2C architecture.
 """
 
 from __future__ import annotations
@@ -119,8 +119,8 @@ class PublishSyncRun(Base):
     source_service: Mapped[str] = mapped_column(
         String(64),
         nullable=False,
-        default="d2c-backoffice-api",
-        server_default="d2c-backoffice-api",
+        default="d2c-api",
+        server_default="d2c-api",
     )
     source_base_url: Mapped[str | None] = mapped_column(String(240), nullable=True)
     source_endpoint: Mapped[str | None] = mapped_column(String(240), nullable=True)
