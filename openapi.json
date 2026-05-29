@@ -2815,10 +2815,29 @@
       "CustomerLoginRequest": {
         "properties": {
           "email": {
-            "type": "string",
-            "maxLength": 255,
-            "minLength": 3,
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Email"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
           },
           "password": {
             "type": "string",
@@ -2829,7 +2848,6 @@
         },
         "type": "object",
         "required": [
-          "email",
           "password"
         ],
         "title": "CustomerLoginRequest"
@@ -2903,9 +2921,16 @@
       "CustomerRegisterRequest": {
         "properties": {
           "email": {
-            "type": "string",
-            "maxLength": 255,
-            "minLength": 3,
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Email"
           },
           "password": {
@@ -2915,9 +2940,15 @@
             "title": "Password"
           },
           "display_name": {
-            "type": "string",
-            "maxLength": 120,
-            "minLength": 1,
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Display Name"
           },
           "phone": {
@@ -2935,9 +2966,7 @@
         },
         "type": "object",
         "required": [
-          "email",
-          "password",
-          "display_name"
+          "password"
         ],
         "title": "CustomerRegisterRequest"
       },
@@ -2979,7 +3008,7 @@
             "maxLength": 64,
             "minLength": 1,
             "title": "Shipping Country",
-            "default": "US"
+            "default": "CN"
           },
           "shipping_province": {
             "type": "string",

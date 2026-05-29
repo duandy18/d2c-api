@@ -410,3 +410,20 @@ def test_mock_payment_marks_order_paid() -> None:
     assert payload["payment"]["paid_at"] is not None
     assert payload["payment"]["provider_payment_id"].startswith("MOCK-")
     assert payload["payment"]["provider_trade_no"].startswith("MOCK-TRADE-")
+
+
+def test_checkout_payload_default_country_is_cn() -> None:
+    from app.domains.orders.contracts.storefront_order_contract import OrderCheckoutRequest
+
+    payload = OrderCheckoutRequest(
+        cart_code="CART-TEST",
+        recipient_name="Andy",
+        recipient_phone="18800001111",
+        shipping_province="广东省",
+        shipping_city="深圳市",
+        shipping_address_line1="南山区测试路 1 号",
+        payment_provider="mock",
+        payment_method="mock",
+    )
+
+    assert payload.shipping_country == "CN"

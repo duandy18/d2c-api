@@ -9,6 +9,10 @@ def unique_email() -> str:
     return f"customer-{uuid4().hex}@example.com"
 
 
+def unique_phone() -> str:
+    return f"188{uuid4().hex[:8]}"
+
+
 def test_customers_health() -> None:
     client = TestClient(app)
 
@@ -129,3 +133,74 @@ def test_customer_login_rejects_wrong_password() -> None:
 
     assert login_response.status_code == 401
     assert login_response.json() == {"detail": "invalid_customer_credentials"}
+
+
+def test_customer_register_and_login_with_phone_password() -> None:
+    client = TestClient(app)
+    phone = unique_phone()
+
+    register_response = client.post(
+        "/customers/register",
+        json={
+            "email": None,
+            "password": "StrongPass123",
+            "display_name": "Phone Customer",
+            "phone": phone,
+        },
+    )
+
+    assert register_response.status_code == 201
+
+    register_payload = register_response.json()
+    assert register_payload["token_type"] == "Bearer"
+    assert register_payload["access_token"]
+    assert register_payload["customer"]["email"] is None
+    assert register_payload["customer"]["phone"] == phone
+    assert register_payload["customer"]["display_name"] == "Phone Customer"
+
+    login_response = client.post(
+        "/customers/login",
+        json={
+            "phone": phone,
+            "password": "StrongPass123",
+        },
+    )
+
+    assert login_response.status_code == 200
+
+    login_payload = login_response.json()
+    assert login_payload["token_type"] == "Bearer"
+    assert login_payload["access_token"]
+    assert login_payload["customer"]["phone"] == phone
+    assert login_payload["customer"]["last_login_at"] is not None
+
+
+def test_customer_login_rejects_unknown_phone() -> None:
+    client = TestClient(app)
+
+    login_response = client.post(
+        "/customers/login",
+        json={
+            "phone": unique_phone(),
+            "password": "StrongPass123",
+        },
+    )
+
+    assert login_response.status_code == 401
+    assert login_response.json() == {"detail": "invalid_customer_credentials"}
+
+
+def test_customer_register_requires_email_or_phone() -> None:
+    client = TestClient(app)
+
+    register_response = client.post(
+        "/customers/register",
+        json={
+            "email": None,
+            "phone": None,
+            "password": "StrongPass123",
+            "display_name": "Missing Identifier",
+        },
+    )
+
+    assert register_response.status_code == 422

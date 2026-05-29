@@ -44,8 +44,12 @@ class CustomerAuthError(Exception):
     pass
 
 
-def normalize_email(email: str) -> str:
-    return email.strip().lower()
+def normalize_email(email: str | None) -> str | None:
+    if email is None:
+        return None
+
+    normalized_email = email.strip().lower()
+    return normalized_email or None
 
 
 def normalize_phone(phone: str | None) -> str | None:
@@ -75,7 +79,10 @@ def register_customer(
     email = normalize_email(payload.email)
     phone = normalize_phone(payload.phone)
 
-    if get_customer_by_email(session, email) is not None:
+    if email is None and phone is None:
+        raise CustomerConflictError("customer_email_or_phone_required")
+
+    if email is not None and get_customer_by_email(session, email) is not None:
         raise CustomerConflictError("customer_email_already_registered")
 
     if phone is not None and get_customer_by_phone(session, phone) is not None:
@@ -117,7 +124,14 @@ def login_customer(
     payload: CustomerLoginRequest,
 ) -> CustomerAuthResponse:
     email = normalize_email(payload.email)
-    customer = get_customer_by_email(session, email)
+    phone = normalize_phone(payload.phone)
+
+    if email is not None:
+        customer = get_customer_by_email(session, email)
+    elif phone is not None:
+        customer = get_customer_by_phone(session, phone)
+    else:
+        customer = None
 
     if customer is None or customer.status != "active":
         raise CustomerAuthError("invalid_customer_credentials")
