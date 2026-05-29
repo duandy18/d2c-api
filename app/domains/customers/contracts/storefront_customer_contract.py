@@ -45,3 +45,7 @@ class CustomerAuthResponse(BaseModel):
     token_type: str = "Bearer"
     expires_at: datetime
     customer: CustomerProfile
+
+
+class CustomerLogoutResponse(BaseModel):
+    status: str = "ok"

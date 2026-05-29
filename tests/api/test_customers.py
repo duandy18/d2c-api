@@ -204,3 +204,85 @@ def test_customer_register_requires_email_or_phone() -> None:
     )
 
     assert register_response.status_code == 422
+
+
+def auth_headers(access_token: str) -> dict[str, str]:
+    return {"Authorization": f"Bearer {access_token}"}
+
+
+def test_customer_me_returns_current_customer() -> None:
+    client = TestClient(app)
+    email = unique_email()
+
+    register_response = client.post(
+        "/customers/register",
+        json={
+            "email": email,
+            "password": "StrongPass123",
+            "display_name": "Me Customer",
+            "phone": None,
+        },
+    )
+
+    assert register_response.status_code == 201
+
+    access_token = register_response.json()["access_token"]
+
+    me_response = client.get("/customers/me", headers=auth_headers(access_token))
+
+    assert me_response.status_code == 200
+    assert me_response.json()["email"] == email
+    assert me_response.json()["display_name"] == "Me Customer"
+
+
+def test_customer_me_requires_valid_session() -> None:
+    client = TestClient(app)
+
+    missing_response = client.get("/customers/me")
+    invalid_response = client.get("/customers/me", headers=auth_headers("invalid-token"))
+
+    assert missing_response.status_code == 401
+    assert missing_response.json() == {"detail": "customer_auth_required"}
+    assert invalid_response.status_code == 401
+    assert invalid_response.json() == {"detail": "customer_auth_required"}
+
+
+def test_customer_logout_revokes_current_session() -> None:
+    client = TestClient(app)
+    email = unique_email()
+
+    register_response = client.post(
+        "/customers/register",
+        json={
+            "email": email,
+            "password": "StrongPass123",
+            "display_name": "Logout Customer",
+            "phone": None,
+        },
+    )
+
+    assert register_response.status_code == 201
+
+    access_token = register_response.json()["access_token"]
+
+    before_logout_response = client.get("/customers/me", headers=auth_headers(access_token))
+    logout_response = client.post("/customers/logout", headers=auth_headers(access_token))
+    after_logout_response = client.get("/customers/me", headers=auth_headers(access_token))
+
+    assert before_logout_response.status_code == 200
+    assert logout_response.status_code == 200
+    assert logout_response.json() == {"status": "ok"}
+    assert after_logout_response.status_code == 401
+    assert after_logout_response.json() == {"detail": "customer_auth_required"}
+
+
+def test_customer_logout_requires_valid_session() -> None:
+    client = TestClient(app)
+
+    missing_response = client.post("/customers/logout")
+    invalid_response = client.post("/customers/logout", headers=auth_headers("invalid-token"))
+
+    assert missing_response.status_code == 401
+    assert missing_response.json() == {"detail": "customer_auth_required"}
+    assert invalid_response.status_code == 401
+    assert invalid_response.json() == {"detail": "customer_auth_required"}

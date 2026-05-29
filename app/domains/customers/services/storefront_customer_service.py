@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from app.domains.customers.contracts.storefront_customer_contract import (
     CustomerAuthResponse,
     CustomerLoginRequest,
+    CustomerLogoutResponse,
     CustomerProfile,
     CustomerRegisterRequest,
 )
@@ -22,9 +23,12 @@ from app.domains.customers.repos.customer_repo import (
     create_customer,
     create_customer_session,
     create_password_credential,
+    get_active_customer_by_session_token_hash,
+    get_active_customer_session_by_token_hash,
     get_customer_by_email,
     get_customer_by_phone,
     get_password_credential,
+    revoke_customer_session,
 )
 from app.security.passwords import (
     generate_session_token,
@@ -172,3 +176,40 @@ def create_login_session(session: Session, customer: Customer) -> tuple[str, dat
     )
 
     return access_token, expires_at
+
+
+
+def get_current_customer(
+    session: Session,
+    access_token: str,
+) -> CustomerProfile:
+    customer = get_active_customer_by_session_token_hash(
+        session,
+        hash_session_token(access_token),
+        datetime.now(UTC),
+    )
+
+    if customer is None:
+        raise CustomerAuthError("customer_auth_required")
+
+    return build_customer_profile(customer)
+
+
+def logout_customer(
+    session: Session,
+    access_token: str,
+) -> CustomerLogoutResponse:
+    now = datetime.now(UTC)
+    customer_session = get_active_customer_session_by_token_hash(
+        session,
+        hash_session_token(access_token),
+        now,
+    )
+
+    if customer_session is None:
+        raise CustomerAuthError("customer_auth_required")
+
+    revoke_customer_session(session, customer_session, now)
+    session.commit()
+
+    return CustomerLogoutResponse()

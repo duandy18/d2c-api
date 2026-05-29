@@ -71,3 +71,32 @@ def get_active_customer_by_session_token_hash(
         .order_by(CustomerSession.id.desc())
     )
     return session.scalar(statement)
+
+
+
+def get_active_customer_session_by_token_hash(
+    session: Session,
+    session_token_hash: str,
+    now: datetime,
+) -> CustomerSession | None:
+    statement = (
+        select(CustomerSession)
+        .join(Customer, Customer.id == CustomerSession.customer_id)
+        .where(CustomerSession.session_token_hash == session_token_hash)
+        .where(CustomerSession.revoked_at.is_(None))
+        .where(CustomerSession.expires_at > now)
+        .where(Customer.status == "active")
+        .order_by(CustomerSession.id.desc())
+    )
+    return session.scalar(statement)
+
+
+
+def revoke_customer_session(
+    session: Session,
+    customer_session: CustomerSession,
+    revoked_at: datetime,
+) -> CustomerSession:
+    customer_session.revoked_at = revoked_at
+    session.flush()
+    return customer_session
