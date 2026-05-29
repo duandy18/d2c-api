@@ -45,3 +45,17 @@ def test_storefront_payment_result_page_migration_seeds_result_page() -> None:
         "sort_order",
     ):
         assert token in text
+
+
+
+def test_storefront_account_security_page_migration_seeds_security_page() -> None:
+    text = Path("alembic/versions/0035_acct_sec.py").read_text(encoding="utf-8")
+
+    for token in (
+        "account_security",
+        "/account/security",
+        "账户安全",
+        "auth_required",
+        "sort_order",
+    ):
+        assert token in text

@@ -286,3 +286,167 @@ def test_customer_logout_requires_valid_session() -> None:
     assert missing_response.json() == {"detail": "customer_auth_required"}
     assert invalid_response.status_code == 401
     assert invalid_response.json() == {"detail": "customer_auth_required"}
+
+
+def test_customer_change_password_updates_login_password() -> None:
+    client = TestClient(app)
+    email = unique_email()
+
+    register_response = client.post(
+        "/customers/register",
+        json={
+            "email": email,
+            "password": "StrongPass123",
+            "display_name": "Password Customer",
+            "phone": None,
+        },
+    )
+    assert register_response.status_code == 201
+
+    access_token = register_response.json()["access_token"]
+
+    change_response = client.post(
+        "/customers/change-password",
+        json={
+            "current_password": "StrongPass123",
+            "new_password": "NewStrongPass123",
+        },
+        headers=auth_headers(access_token),
+    )
+
+    assert change_response.status_code == 200
+    assert change_response.json() == {"status": "ok"}
+
+    old_login_response = client.post(
+        "/customers/login",
+        json={
+            "email": email,
+            "password": "StrongPass123",
+        },
+    )
+    new_login_response = client.post(
+        "/customers/login",
+        json={
+            "email": email,
+            "password": "NewStrongPass123",
+        },
+    )
+
+    assert old_login_response.status_code == 401
+    assert old_login_response.json() == {"detail": "invalid_customer_credentials"}
+    assert new_login_response.status_code == 200
+    assert new_login_response.json()["customer"]["email"] == email
+
+
+def test_customer_change_password_rejects_missing_or_invalid_session() -> None:
+    client = TestClient(app)
+
+    missing_response = client.post(
+        "/customers/change-password",
+        json={
+            "current_password": "StrongPass123",
+            "new_password": "NewStrongPass123",
+        },
+    )
+    invalid_response = client.post(
+        "/customers/change-password",
+        json={
+            "current_password": "StrongPass123",
+            "new_password": "NewStrongPass123",
+        },
+        headers=auth_headers("invalid-token"),
+    )
+
+    assert missing_response.status_code == 401
+    assert missing_response.json() == {"detail": "customer_auth_required"}
+    assert invalid_response.status_code == 401
+    assert invalid_response.json() == {"detail": "customer_auth_required"}
+
+
+def test_customer_change_password_rejects_wrong_current_password() -> None:
+    client = TestClient(app)
+    email = unique_email()
+
+    register_response = client.post(
+        "/customers/register",
+        json={
+            "email": email,
+            "password": "StrongPass123",
+            "display_name": "Wrong Current Password",
+            "phone": None,
+        },
+    )
+    assert register_response.status_code == 201
+
+    access_token = register_response.json()["access_token"]
+
+    response = client.post(
+        "/customers/change-password",
+        json={
+            "current_password": "WrongPass123",
+            "new_password": "NewStrongPass123",
+        },
+        headers=auth_headers(access_token),
+    )
+
+    assert response.status_code == 409
+    assert response.json() == {"detail": "customer_current_password_invalid"}
+
+
+def test_customer_change_password_rejects_same_password() -> None:
+    client = TestClient(app)
+    email = unique_email()
+
+    register_response = client.post(
+        "/customers/register",
+        json={
+            "email": email,
+            "password": "StrongPass123",
+            "display_name": "Same Password",
+            "phone": None,
+        },
+    )
+    assert register_response.status_code == 201
+
+    access_token = register_response.json()["access_token"]
+
+    response = client.post(
+        "/customers/change-password",
+        json={
+            "current_password": "StrongPass123",
+            "new_password": "StrongPass123",
+        },
+        headers=auth_headers(access_token),
+    )
+
+    assert response.status_code == 409
+    assert response.json() == {"detail": "customer_password_same_as_old"}
+
+
+def test_customer_change_password_rejects_short_new_password() -> None:
+    client = TestClient(app)
+    email = unique_email()
+
+    register_response = client.post(
+        "/customers/register",
+        json={
+            "email": email,
+            "password": "StrongPass123",
+            "display_name": "Short Password",
+            "phone": None,
+        },
+    )
+    assert register_response.status_code == 201
+
+    access_token = register_response.json()["access_token"]
+
+    response = client.post(
+        "/customers/change-password",
+        json={
+            "current_password": "StrongPass123",
+            "new_password": "short",
+        },
+        headers=auth_headers(access_token),
+    )
+
+    assert response.status_code == 422

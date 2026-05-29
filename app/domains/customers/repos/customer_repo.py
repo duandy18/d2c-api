@@ -100,3 +100,20 @@ def revoke_customer_session(
     customer_session.revoked_at = revoked_at
     session.flush()
     return customer_session
+
+
+
+def update_password_credential(
+    session: Session,
+    credential: CustomerPasswordCredential,
+    *,
+    password_hash: str,
+    updated_at: datetime,
+) -> CustomerPasswordCredential:
+    credential.password_hash = password_hash
+    credential.password_updated_at = updated_at
+    credential.updated_at = updated_at
+    credential.failed_login_count = 0
+    credential.locked_until = None
+    session.flush()
+    return credential

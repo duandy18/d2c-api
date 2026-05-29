@@ -8,6 +8,8 @@ from sqlalchemy.orm import Session
 from app.core.database import get_session
 from app.domains.customers.contracts.storefront_customer_contract import (
     CustomerAuthResponse,
+    CustomerChangePasswordRequest,
+    CustomerChangePasswordResponse,
     CustomerLoginRequest,
     CustomerLogoutResponse,
     CustomerProfile,
@@ -16,6 +18,8 @@ from app.domains.customers.contracts.storefront_customer_contract import (
 from app.domains.customers.services.storefront_customer_service import (
     CustomerAuthError,
     CustomerConflictError,
+    CustomerPasswordChangeError,
+    change_customer_password,
     get_current_customer,
     login_customer,
     logout_customer,
@@ -112,5 +116,28 @@ def customers_logout(
     except CustomerAuthError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(exc),
+        ) from exc
+
+
+
+@router.post("/change-password", response_model=CustomerChangePasswordResponse)
+def customers_change_password(
+    payload: CustomerChangePasswordRequest,
+    session: SessionDep,
+    authorization: Annotated[str | None, Header(alias="Authorization")] = None,
+) -> CustomerChangePasswordResponse:
+    access_token = _extract_access_token(authorization)
+
+    try:
+        return change_customer_password(session, access_token, payload)
+    except CustomerAuthError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(exc),
+        ) from exc
+    except CustomerPasswordChangeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
             detail=str(exc),
         ) from exc
