@@ -12,7 +12,7 @@ def test_storefront_pages_returns_independent_page_surface() -> None:
 
     payload = response.json()
     assert payload["data_source"] == "d2c_storefront_pages"
-    assert payload["count"] >= 5
+    assert payload["count"] >= 6
 
     pages = {page["page_code"]: page for page in payload["pages"]}
 
@@ -31,6 +31,10 @@ def test_storefront_pages_returns_independent_page_surface() -> None:
 
     assert pages["checkout"]["route_path"] == "/checkout"
     assert pages["checkout"]["auth_required"] is True
+
+    assert pages["payment_result"]["route_path"] == "/payment-result"
+    assert pages["payment_result"]["auth_required"] is True
+    assert pages["payment_result"]["navigation_label"] == "支付结果"
 
     sort_orders = [page["sort_order"] for page in payload["pages"]]
     assert sort_orders == sorted(sort_orders)
