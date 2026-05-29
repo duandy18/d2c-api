@@ -1,4 +1,4 @@
-"""SQLAlchemy models for storefront and backoffice customer support."""
+"""SQLAlchemy models for storefront, live, and backoffice customer support."""
 
 from __future__ import annotations
 
@@ -12,6 +12,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Index,
+    Integer,
     String,
     Text,
     UniqueConstraint,
@@ -116,6 +117,16 @@ class SupportAgentProfile(Base):
     assigned_conversations: Mapped[list[SupportConversation]] = relationship(
         back_populates="assigned_agent",
         foreign_keys="SupportConversation.assigned_agent_id",
+    )
+    presence: Mapped[SupportAgentPresence | None] = relationship(
+        back_populates="agent",
+        cascade="all, delete-orphan",
+        uselist=False,
+        foreign_keys="SupportAgentPresence.agent_id",
+    )
+    live_sessions: Mapped[list[SupportLiveSession]] = relationship(
+        back_populates="assigned_agent",
+        foreign_keys="SupportLiveSession.assigned_agent_id",
     )
 
 
@@ -230,6 +241,10 @@ class SupportConversation(Base):
         cascade="all, delete-orphan",
     )
     events: Mapped[list[SupportConversationEvent]] = relationship(
+        back_populates="conversation",
+        cascade="all, delete-orphan",
+    )
+    live_sessions: Mapped[list[SupportLiveSession]] = relationship(
         back_populates="conversation",
         cascade="all, delete-orphan",
     )
@@ -404,4 +419,152 @@ class SupportConversationEvent(Base):
     message: Mapped[SupportMessage | None] = relationship(foreign_keys=[message_id])
     assignment: Mapped[SupportConversationAssignment | None] = relationship(
         foreign_keys=[assignment_id],
+    )
+
+
+class SupportLiveSession(Base):
+    """Live chat session opened from the storefront floating widget."""
+
+    __tablename__ = "d2c_support_live_sessions"
+    __table_args__ = (
+        UniqueConstraint("session_code", name="uq_d2c_supp_live_sess_code"),
+        UniqueConstraint("session_token_hash", name="uq_d2c_supp_live_sess_hash"),
+        CheckConstraint(
+            "status IN ('waiting', 'active', 'ended', 'missed')",
+            name="ck_d2c_supp_live_status",
+        ),
+        CheckConstraint("source IN ('storefront_widget')", name="ck_d2c_supp_live_source"),
+        Index("ix_d2c_supp_live_conv", "conversation_id"),
+        Index("ix_d2c_supp_live_customer", "customer_id"),
+        Index("ix_d2c_supp_live_agent", "assigned_agent_id"),
+        Index("ix_d2c_supp_live_anon", "anonymous_id"),
+        Index("ix_d2c_supp_live_status", "status"),
+        Index("ix_d2c_supp_live_started", "started_at"),
+        Index("ix_d2c_supp_live_last_msg", "last_message_at"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    session_code: Mapped[str] = mapped_column(String(64), nullable=False)
+    conversation_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("d2c_support_conversations.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    customer_id: Mapped[int | None] = mapped_column(
+        BigInteger,
+        ForeignKey("d2c_customers.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    anonymous_id: Mapped[str | None] = mapped_column(String(96), nullable=True)
+    visitor_session_code: Mapped[str | None] = mapped_column(String(96), nullable=True)
+    assigned_agent_id: Mapped[int | None] = mapped_column(
+        BigInteger,
+        ForeignKey("d2c_support_agent_profiles.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    status: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        default="waiting",
+        server_default="waiting",
+    )
+    source: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        default="storefront_widget",
+        server_default="storefront_widget",
+    )
+    session_token_hash: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_customer_seen_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+    last_agent_seen_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+    last_message_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+
+    conversation: Mapped[SupportConversation] = relationship(back_populates="live_sessions")
+    assigned_agent: Mapped[SupportAgentProfile | None] = relationship(
+        back_populates="live_sessions",
+        foreign_keys=[assigned_agent_id],
+    )
+
+
+class SupportAgentPresence(Base):
+    """Agent live chat presence state."""
+
+    __tablename__ = "d2c_support_agent_presence"
+    __table_args__ = (
+        UniqueConstraint("agent_id", name="uq_d2c_supp_pres_agent"),
+        UniqueConstraint("agent_code", name="uq_d2c_supp_pres_code"),
+        CheckConstraint(
+            "presence_status IN ('online', 'away', 'offline')",
+            name="ck_d2c_supp_pres_status",
+        ),
+        CheckConstraint(
+            "max_active_sessions >= 1 AND active_session_count >= 0",
+            name="ck_d2c_supp_pres_counts",
+        ),
+        Index("ix_d2c_supp_pres_status", "presence_status"),
+        Index("ix_d2c_supp_pres_heartbeat", "last_heartbeat_at"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    agent_id: Mapped[int] = mapped_column(
+        BigInteger,
+        ForeignKey("d2c_support_agent_profiles.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    agent_code: Mapped[str] = mapped_column(String(64), nullable=False)
+    presence_status: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        default="offline",
+        server_default="offline",
+    )
+    max_active_sessions: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=3,
+        server_default="3",
+    )
+    active_session_count: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
+    last_heartbeat_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+
+    agent: Mapped[SupportAgentProfile] = relationship(
+        back_populates="presence",
+        foreign_keys=[agent_id],
     )

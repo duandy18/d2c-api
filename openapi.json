@@ -1032,6 +1032,506 @@
         }
       }
     },
+    "/backoffice/support/agents/presence": {
+      "get": {
+        "tags": [
+          "backoffice-support-live"
+        ],
+        "summary": "Backoffice Support Agent Presence List",
+        "operationId": "backoffice_support_agent_presence_list_backoffice_support_agents_presence_get",
+        "parameters": [
+          {
+            "name": "X-Backoffice-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Backoffice-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackofficeSupportLivePresenceListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/backoffice/support/agents/{agent_code}/presence": {
+      "post": {
+        "tags": [
+          "backoffice-support-live"
+        ],
+        "summary": "Backoffice Support Agent Presence Update",
+        "operationId": "backoffice_support_agent_presence_update_backoffice_support_agents__agent_code__presence_post",
+        "parameters": [
+          {
+            "name": "agent_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent Code"
+            }
+          },
+          {
+            "name": "X-Backoffice-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Backoffice-Client"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackofficeSupportAgentPresenceUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackofficeSupportAgentPresenceResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/backoffice/support/live/sessions": {
+      "get": {
+        "tags": [
+          "backoffice-support-live"
+        ],
+        "summary": "Backoffice Support Live Sessions List",
+        "operationId": "backoffice_support_live_sessions_list_backoffice_support_live_sessions_get",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(waiting|active|ended|missed)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "assigned_agent_code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Assigned Agent Code"
+            }
+          },
+          {
+            "name": "X-Backoffice-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Backoffice-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackofficeSupportLiveSessionsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/backoffice/support/live/sessions/{session_code}": {
+      "get": {
+        "tags": [
+          "backoffice-support-live"
+        ],
+        "summary": "Backoffice Support Live Session Detail",
+        "operationId": "backoffice_support_live_session_detail_backoffice_support_live_sessions__session_code__get",
+        "parameters": [
+          {
+            "name": "session_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Code"
+            }
+          },
+          {
+            "name": "X-Backoffice-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Backoffice-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackofficeSupportLiveSessionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/backoffice/support/live/sessions/{session_code}/accept": {
+      "post": {
+        "tags": [
+          "backoffice-support-live"
+        ],
+        "summary": "Backoffice Support Live Session Accept",
+        "operationId": "backoffice_support_live_session_accept_backoffice_support_live_sessions__session_code__accept_post",
+        "parameters": [
+          {
+            "name": "session_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Code"
+            }
+          },
+          {
+            "name": "X-Support-Agent-Code",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Support-Agent-Code"
+            }
+          },
+          {
+            "name": "X-Backoffice-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Backoffice-Client"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackofficeSupportLiveSessionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/backoffice/support/live/sessions/{session_code}/messages": {
+      "post": {
+        "tags": [
+          "backoffice-support-live"
+        ],
+        "summary": "Backoffice Support Live Session Messages Create",
+        "operationId": "backoffice_support_live_session_messages_create_backoffice_support_live_sessions__session_code__messages_post",
+        "parameters": [
+          {
+            "name": "session_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Code"
+            }
+          },
+          {
+            "name": "X-Support-Agent-Code",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Support-Agent-Code"
+            }
+          },
+          {
+            "name": "X-Backoffice-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Backoffice-Client"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackofficeSupportLiveMessageCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackofficeSupportLiveSessionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/backoffice/support/live/sessions/{session_code}/end": {
+      "post": {
+        "tags": [
+          "backoffice-support-live"
+        ],
+        "summary": "Backoffice Support Live Session End",
+        "operationId": "backoffice_support_live_session_end_backoffice_support_live_sessions__session_code__end_post",
+        "parameters": [
+          {
+            "name": "session_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Code"
+            }
+          },
+          {
+            "name": "X-Support-Agent-Code",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Support-Agent-Code"
+            }
+          },
+          {
+            "name": "X-Backoffice-Client",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Backoffice-Client"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackofficeSupportLiveEndRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackofficeSupportLiveSessionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/analytics/health": {
       "get": {
         "tags": [
@@ -2242,6 +2742,298 @@
         }
       }
     },
+    "/support/live/availability": {
+      "get": {
+        "tags": [
+          "support-live"
+        ],
+        "summary": "Support Live Availability",
+        "operationId": "support_live_availability_support_live_availability_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportLiveAvailabilityResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/support/live/sessions": {
+      "post": {
+        "tags": [
+          "support-live"
+        ],
+        "summary": "Support Live Sessions Create",
+        "operationId": "support_live_sessions_create_support_live_sessions_post",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupportLiveSessionCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportLiveSessionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/support/live/sessions/{session_code}": {
+      "get": {
+        "tags": [
+          "support-live"
+        ],
+        "summary": "Support Live Session Detail",
+        "operationId": "support_live_session_detail_support_live_sessions__session_code__get",
+        "parameters": [
+          {
+            "name": "session_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Code"
+            }
+          },
+          {
+            "name": "session_token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 16,
+                  "maxLength": 256
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session Token"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportLiveSessionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/support/live/sessions/{session_code}/messages": {
+      "post": {
+        "tags": [
+          "support-live"
+        ],
+        "summary": "Support Live Session Messages Create",
+        "operationId": "support_live_session_messages_create_support_live_sessions__session_code__messages_post",
+        "parameters": [
+          {
+            "name": "session_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Code"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupportLiveMessageCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportLiveSessionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/support/live/sessions/{session_code}/end": {
+      "post": {
+        "tags": [
+          "support-live"
+        ],
+        "summary": "Support Live Session End",
+        "operationId": "support_live_session_end_support_live_sessions__session_code__end_post",
+        "parameters": [
+          {
+            "name": "session_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Code"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupportLiveEndRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportLiveSessionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/published/health": {
       "get": {
         "tags": [
@@ -3415,6 +4207,88 @@
         ],
         "title": "BackofficeSupportAgentCreateRequest"
       },
+      "BackofficeSupportAgentPresenceResponse": {
+        "properties": {
+          "agent_code": {
+            "type": "string",
+            "title": "Agent Code"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          },
+          "presence_status": {
+            "type": "string",
+            "enum": [
+              "online",
+              "away",
+              "offline"
+            ],
+            "title": "Presence Status"
+          },
+          "max_active_sessions": {
+            "type": "integer",
+            "title": "Max Active Sessions"
+          },
+          "active_session_count": {
+            "type": "integer",
+            "title": "Active Session Count"
+          },
+          "last_heartbeat_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Heartbeat At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "agent_code",
+          "display_name",
+          "presence_status",
+          "max_active_sessions",
+          "active_session_count",
+          "last_heartbeat_at",
+          "updated_at"
+        ],
+        "title": "BackofficeSupportAgentPresenceResponse"
+      },
+      "BackofficeSupportAgentPresenceUpdateRequest": {
+        "properties": {
+          "presence_status": {
+            "type": "string",
+            "enum": [
+              "online",
+              "away",
+              "offline"
+            ],
+            "title": "Presence Status"
+          },
+          "max_active_sessions": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Max Active Sessions",
+            "default": 3
+          }
+        },
+        "type": "object",
+        "required": [
+          "presence_status"
+        ],
+        "title": "BackofficeSupportAgentPresenceUpdateRequest"
+      },
       "BackofficeSupportAgentsResponse": {
         "properties": {
           "agents": {
@@ -4099,6 +4973,497 @@
           "count"
         ],
         "title": "BackofficeSupportEventsResponse"
+      },
+      "BackofficeSupportLiveEndRequest": {
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "title": "BackofficeSupportLiveEndRequest"
+      },
+      "BackofficeSupportLiveMessage": {
+        "properties": {
+          "message_code": {
+            "type": "string",
+            "title": "Message Code"
+          },
+          "sender_type": {
+            "type": "string",
+            "title": "Sender Type"
+          },
+          "agent_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Code"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message_code",
+          "sender_type",
+          "agent_code",
+          "body",
+          "created_at"
+        ],
+        "title": "BackofficeSupportLiveMessage"
+      },
+      "BackofficeSupportLiveMessageCreateRequest": {
+        "properties": {
+          "body": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Body"
+          }
+        },
+        "type": "object",
+        "required": [
+          "body"
+        ],
+        "title": "BackofficeSupportLiveMessageCreateRequest"
+      },
+      "BackofficeSupportLivePresenceListResponse": {
+        "properties": {
+          "agents": {
+            "items": {
+              "$ref": "#/components/schemas/BackofficeSupportAgentPresenceResponse"
+            },
+            "type": "array",
+            "title": "Agents"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count"
+        ],
+        "title": "BackofficeSupportLivePresenceListResponse"
+      },
+      "BackofficeSupportLiveSessionResponse": {
+        "properties": {
+          "session_code": {
+            "type": "string",
+            "title": "Session Code"
+          },
+          "conversation_code": {
+            "type": "string",
+            "title": "Conversation Code"
+          },
+          "customer_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Id"
+          },
+          "anonymous_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anonymous Id"
+          },
+          "contact_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Name"
+          },
+          "contact_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Email"
+          },
+          "contact_phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Phone"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "waiting",
+              "active",
+              "ended",
+              "missed"
+            ],
+            "title": "Status"
+          },
+          "assigned_agent_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned Agent Code"
+          },
+          "assigned_agent_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned Agent Name"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Started At"
+          },
+          "accepted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accepted At"
+          },
+          "ended_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ended At"
+          },
+          "last_customer_seen_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Customer Seen At"
+          },
+          "last_agent_seen_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Agent Seen At"
+          },
+          "last_message_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Message At"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/BackofficeSupportLiveMessage"
+            },
+            "type": "array",
+            "title": "Messages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session_code",
+          "conversation_code",
+          "customer_id",
+          "anonymous_id",
+          "contact_name",
+          "contact_email",
+          "contact_phone",
+          "status",
+          "assigned_agent_code",
+          "assigned_agent_name",
+          "started_at",
+          "accepted_at",
+          "ended_at",
+          "last_customer_seen_at",
+          "last_agent_seen_at",
+          "last_message_at"
+        ],
+        "title": "BackofficeSupportLiveSessionResponse"
+      },
+      "BackofficeSupportLiveSessionSummary": {
+        "properties": {
+          "session_code": {
+            "type": "string",
+            "title": "Session Code"
+          },
+          "conversation_code": {
+            "type": "string",
+            "title": "Conversation Code"
+          },
+          "customer_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Id"
+          },
+          "anonymous_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anonymous Id"
+          },
+          "contact_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Name"
+          },
+          "contact_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Email"
+          },
+          "contact_phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Phone"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "waiting",
+              "active",
+              "ended",
+              "missed"
+            ],
+            "title": "Status"
+          },
+          "assigned_agent_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned Agent Code"
+          },
+          "assigned_agent_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigned Agent Name"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Started At"
+          },
+          "accepted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accepted At"
+          },
+          "ended_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ended At"
+          },
+          "last_customer_seen_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Customer Seen At"
+          },
+          "last_agent_seen_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Agent Seen At"
+          },
+          "last_message_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Message At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session_code",
+          "conversation_code",
+          "customer_id",
+          "anonymous_id",
+          "contact_name",
+          "contact_email",
+          "contact_phone",
+          "status",
+          "assigned_agent_code",
+          "assigned_agent_name",
+          "started_at",
+          "accepted_at",
+          "ended_at",
+          "last_customer_seen_at",
+          "last_agent_seen_at",
+          "last_message_at"
+        ],
+        "title": "BackofficeSupportLiveSessionSummary"
+      },
+      "BackofficeSupportLiveSessionsResponse": {
+        "properties": {
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/BackofficeSupportLiveSessionSummary"
+            },
+            "type": "array",
+            "title": "Sessions"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count"
+        ],
+        "title": "BackofficeSupportLiveSessionsResponse"
       },
       "BackofficeSupportMessage": {
         "properties": {
@@ -7025,6 +8390,348 @@
           "closed_at"
         ],
         "title": "SupportConversationSummary"
+      },
+      "SupportLiveAgentSummary": {
+        "properties": {
+          "agent_code": {
+            "type": "string",
+            "title": "Agent Code"
+          },
+          "display_name": {
+            "type": "string",
+            "title": "Display Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "agent_code",
+          "display_name"
+        ],
+        "title": "SupportLiveAgentSummary"
+      },
+      "SupportLiveAvailabilityResponse": {
+        "properties": {
+          "availability_status": {
+            "type": "string",
+            "enum": [
+              "online",
+              "offline"
+            ],
+            "title": "Availability Status"
+          },
+          "available_agent_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Available Agent Count"
+          },
+          "waiting_session_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Waiting Session Count"
+          },
+          "active_session_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Active Session Count"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "availability_status",
+          "available_agent_count",
+          "waiting_session_count",
+          "active_session_count",
+          "message"
+        ],
+        "title": "SupportLiveAvailabilityResponse"
+      },
+      "SupportLiveEndRequest": {
+        "properties": {
+          "session_token": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256,
+                "minLength": 16
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Token"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "type": "object",
+        "title": "SupportLiveEndRequest"
+      },
+      "SupportLiveMessageCreateRequest": {
+        "properties": {
+          "session_token": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256,
+                "minLength": 16
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Token"
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Body"
+          }
+        },
+        "type": "object",
+        "required": [
+          "body"
+        ],
+        "title": "SupportLiveMessageCreateRequest"
+      },
+      "SupportLiveMessageResponse": {
+        "properties": {
+          "message_code": {
+            "type": "string",
+            "title": "Message Code"
+          },
+          "sender_type": {
+            "type": "string",
+            "enum": [
+              "customer",
+              "agent",
+              "system"
+            ],
+            "title": "Sender Type"
+          },
+          "agent_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Code"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message_code",
+          "sender_type",
+          "body",
+          "created_at"
+        ],
+        "title": "SupportLiveMessageResponse"
+      },
+      "SupportLiveSessionCreateRequest": {
+        "properties": {
+          "anonymous_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 96,
+                "minLength": 8
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anonymous Id"
+          },
+          "session_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 96,
+                "minLength": 8
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Code"
+          },
+          "contact_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Name"
+          },
+          "contact_email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Email"
+          },
+          "contact_phone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Phone"
+          },
+          "opening_message": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Opening Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "opening_message"
+        ],
+        "title": "SupportLiveSessionCreateRequest"
+      },
+      "SupportLiveSessionResponse": {
+        "properties": {
+          "session_code": {
+            "type": "string",
+            "title": "Session Code"
+          },
+          "session_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Token"
+          },
+          "conversation_code": {
+            "type": "string",
+            "title": "Conversation Code"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "waiting",
+              "active",
+              "ended",
+              "missed"
+            ],
+            "title": "Status"
+          },
+          "assigned_agent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SupportLiveAgentSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Started At"
+          },
+          "accepted_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accepted At"
+          },
+          "ended_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ended At"
+          },
+          "last_message_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Message At"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/SupportLiveMessageResponse"
+            },
+            "type": "array",
+            "title": "Messages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session_code",
+          "conversation_code",
+          "status",
+          "started_at",
+          "accepted_at",
+          "ended_at",
+          "last_message_at"
+        ],
+        "title": "SupportLiveSessionResponse"
       },
       "SupportMessageCreateRequest": {
         "properties": {

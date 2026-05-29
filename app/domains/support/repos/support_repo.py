@@ -1,16 +1,20 @@
-"""Repositories for storefront and backoffice support conversations."""
+"""Repositories for storefront, live, and backoffice support conversations."""
 
 from __future__ import annotations
+
+from datetime import datetime
 
 from sqlalchemy import Select, func, select, update
 from sqlalchemy.orm import Session
 
 from app.domains.support.models.support import (
+    SupportAgentPresence,
     SupportAgentProfile,
     SupportContact,
     SupportConversation,
     SupportConversationAssignment,
     SupportConversationEvent,
+    SupportLiveSession,
     SupportMessage,
 )
 
@@ -125,7 +129,7 @@ def create_event(
 def replace_active_assignments(
     session: Session,
     conversation_id: int,
-    replaced_at: object,
+    replaced_at: datetime,
 ) -> None:
     session.execute(
         update(SupportConversationAssignment)
@@ -231,3 +235,109 @@ def list_backoffice_conversations(
 
     rows = session.execute(statement).all()
     return [(conversation, int(message_count or 0)) for conversation, message_count in rows]
+
+
+def create_live_session(
+    session: Session,
+    live_session: SupportLiveSession,
+) -> SupportLiveSession:
+    session.add(live_session)
+    session.flush()
+    return live_session
+
+
+def get_live_session_by_code(
+    session: Session,
+    session_code: str,
+) -> SupportLiveSession | None:
+    statement = select(SupportLiveSession).where(SupportLiveSession.session_code == session_code)
+    return session.scalar(statement)
+
+
+def list_live_sessions(
+    session: Session,
+    *,
+    status_filter: str | None = None,
+    assigned_agent_id: int | None = None,
+) -> list[SupportLiveSession]:
+    statement = select(SupportLiveSession).order_by(
+        SupportLiveSession.last_message_at.desc().nullslast(),
+        SupportLiveSession.started_at.desc(),
+        SupportLiveSession.id.desc(),
+    )
+
+    if status_filter is not None:
+        statement = statement.where(SupportLiveSession.status == status_filter)
+
+    if assigned_agent_id is not None:
+        statement = statement.where(SupportLiveSession.assigned_agent_id == assigned_agent_id)
+
+    return list(session.scalars(statement).all())
+
+
+def count_live_sessions_by_status(session: Session, status_filter: str) -> int:
+    statement = select(func.count(SupportLiveSession.id)).where(
+        SupportLiveSession.status == status_filter
+    )
+    return int(session.scalar(statement) or 0)
+
+
+def count_active_live_sessions_for_agent(session: Session, agent_id: int) -> int:
+    statement = (
+        select(func.count(SupportLiveSession.id))
+        .where(SupportLiveSession.assigned_agent_id == agent_id)
+        .where(SupportLiveSession.status == "active")
+    )
+    return int(session.scalar(statement) or 0)
+
+
+def create_agent_presence(
+    session: Session,
+    presence: SupportAgentPresence,
+) -> SupportAgentPresence:
+    session.add(presence)
+    session.flush()
+    return presence
+
+
+def get_agent_presence_by_agent_id(
+    session: Session,
+    agent_id: int,
+) -> SupportAgentPresence | None:
+    statement = select(SupportAgentPresence).where(SupportAgentPresence.agent_id == agent_id)
+    return session.scalar(statement)
+
+
+def get_agent_presence_by_agent_code(
+    session: Session,
+    agent_code: str,
+) -> SupportAgentPresence | None:
+    statement = select(SupportAgentPresence).where(SupportAgentPresence.agent_code == agent_code)
+    return session.scalar(statement)
+
+
+def list_agent_presence(session: Session) -> list[SupportAgentPresence]:
+    statement = select(SupportAgentPresence).order_by(
+        SupportAgentPresence.presence_status,
+        SupportAgentPresence.updated_at.desc(),
+        SupportAgentPresence.id,
+    )
+    return list(session.scalars(statement).all())
+
+
+def list_available_agent_presence(
+    session: Session,
+    heartbeat_cutoff: datetime,
+) -> list[SupportAgentPresence]:
+    statement = (
+        select(SupportAgentPresence)
+        .where(SupportAgentPresence.presence_status == "online")
+        .where(SupportAgentPresence.last_heartbeat_at >= heartbeat_cutoff)
+        .where(SupportAgentPresence.active_session_count < SupportAgentPresence.max_active_sessions)
+        .order_by(
+            SupportAgentPresence.active_session_count,
+            SupportAgentPresence.last_heartbeat_at.desc(),
+            SupportAgentPresence.id,
+        )
+    )
+    return list(session.scalars(statement).all())
