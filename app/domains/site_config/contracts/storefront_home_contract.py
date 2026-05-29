@@ -45,8 +45,9 @@ class StorefrontHomeOffer(BaseModel):
     currency: str
 
     promotion_badge: str | None = None
-    sold_quantity: int | None = None
-    paid_customer_count: int | None = None
+    sold_quantity: int = Field(default=0, ge=0)
+    paid_customer_count: int = Field(default=0, ge=0)
+    display_stock_quantity: int = Field(default=0, ge=0)
     rating_score: float | None = None
     review_count: int | None = None
     review_summary: str | None = None

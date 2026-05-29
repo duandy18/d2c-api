@@ -6,6 +6,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
 from app.domains.site_config.models import (
+    OfferDisplayMetric,
     StorefrontPage,
     StorefrontPageSlot,
     StorefrontSite,
@@ -121,3 +122,39 @@ def delete_slot_offer_positions(session: Session, slot_id: int) -> None:
     session.execute(
         delete(StorefrontSlotOfferPosition).where(StorefrontSlotOfferPosition.slot_id == slot_id)
     )
+
+def list_offer_display_metrics_by_offer_codes(
+    session: Session,
+    offer_codes: list[str],
+) -> dict[str, OfferDisplayMetric]:
+    if not offer_codes:
+        return {}
+
+    unique_offer_codes = list(dict.fromkeys(offer_codes))
+    statement = (
+        select(OfferDisplayMetric)
+        .where(OfferDisplayMetric.offer_code.in_(unique_offer_codes))
+        .where(OfferDisplayMetric.is_active.is_(True))
+    )
+
+    return {
+        metric.offer_code: metric
+        for metric in session.scalars(statement).all()
+    }
+
+
+def get_offer_display_metric(
+    session: Session,
+    offer_code: str,
+) -> OfferDisplayMetric | None:
+    statement = select(OfferDisplayMetric).where(OfferDisplayMetric.offer_code == offer_code)
+    return session.scalar(statement)
+
+
+def upsert_offer_display_metric(
+    session: Session,
+    metric: OfferDisplayMetric,
+) -> OfferDisplayMetric:
+    session.add(metric)
+    session.flush()
+    return metric

@@ -10,6 +10,7 @@ from app.core.config import load_settings
 from app.core.database import get_session_factory
 from app.domains.published.models.published import PublishedOffer, PublishedOfferPrice
 from app.domains.site_config.models import (
+    OfferDisplayMetric,
     StorefrontPage,
     StorefrontPageSlot,
     StorefrontSite,
@@ -74,6 +75,9 @@ def _replace_product_grid_positions(*, offers: list[dict[str, object]]) -> list[
             offer_sell_status = str(offer.get("offer_sell_status") or "sellable")
             price_is_active = bool(offer.get("price_is_active", True))
             price_code = str(offer.get("price_code") or _code("price"))
+            display_sold_quantity = offer.get("display_sold_quantity")
+            display_paid_customer_count = offer.get("display_paid_customer_count")
+            display_stock_quantity = offer.get("display_stock_quantity")
 
             session.add(
                 PublishedOffer(
@@ -127,6 +131,33 @@ def _replace_product_grid_positions(*, offers: list[dict[str, object]]) -> list[
                 )
             )
 
+            if (
+                display_sold_quantity is not None
+                or display_paid_customer_count is not None
+                or display_stock_quantity is not None
+            ):
+                session.add(
+                    OfferDisplayMetric(
+                        offer_code=offer_code,
+                        display_sold_quantity=(
+                            int(display_sold_quantity)
+                            if display_sold_quantity is not None
+                            else None
+                        ),
+                        display_paid_customer_count=(
+                            int(display_paid_customer_count)
+                            if display_paid_customer_count is not None
+                            else None
+                        ),
+                        display_stock_quantity=(
+                            int(display_stock_quantity)
+                            if display_stock_quantity is not None
+                            else None
+                        ),
+                        is_active=bool(offer.get("display_metrics_is_active", True)),
+                    )
+                )
+
             seeded.append(
                 {
                     "publish_version": publish_version,
@@ -168,6 +199,9 @@ def test_storefront_home_returns_slot_first_page_slot_offer_protocol() -> None:
                 "title": "豆腐猫砂 6L",
                 "price_cents": 1099,
                 "compare_at_price_cents": 1399,
+                "display_sold_quantity": 238,
+                "display_paid_customer_count": 86,
+                "display_stock_quantity": 12,
                 "position_code": _code("home-pos"),
             }
         ]
@@ -220,6 +254,9 @@ def test_storefront_home_returns_slot_first_page_slot_offer_protocol() -> None:
     assert offer["price_cents"] == 1099
     assert offer["compare_at_price_cents"] == 1399
     assert offer["currency"] == "USD"
+    assert offer["sold_quantity"] == 238
+    assert offer["paid_customer_count"] == 86
+    assert offer["display_stock_quantity"] == 12
     assert offer["stock_status"] == "in_stock"
     assert offer["sell_status"] == "sellable"
 
