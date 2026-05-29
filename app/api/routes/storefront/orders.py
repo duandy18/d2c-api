@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_session
 from app.domains.orders.contracts.storefront_order_contract import (
     OrderCheckoutRequest,
+    OrderListResponse,
     OrderResponse,
 )
 from app.domains.orders.services.storefront_order_service import (
@@ -21,10 +22,11 @@ from app.domains.orders.services.storefront_order_service import (
     PaymentInvalidStateError,
     checkout_order,
     get_customer_order,
+    list_customer_orders,
     mark_mock_payment_succeeded,
 )
 
-router = APIRouter(prefix="/orders", tags=["orders"])
+router = APIRouter(tags=["orders"])
 SessionDep = Annotated[Session, Depends(get_session)]
 
 
@@ -44,7 +46,7 @@ def _extract_access_token(authorization: str | None) -> str:
     return access_token
 
 
-@router.get("/health")
+@router.get("/orders/health")
 def orders_health() -> dict[str, str]:
     return {
         "status": "ok",
@@ -54,8 +56,24 @@ def orders_health() -> dict[str, str]:
     }
 
 
+@router.get("/orders", response_model=OrderListResponse)
+def orders_list(
+    session: SessionDep,
+    authorization: Annotated[str | None, Header(alias="Authorization")] = None,
+) -> OrderListResponse:
+    access_token = _extract_access_token(authorization)
+
+    try:
+        return list_customer_orders(session, access_token)
+    except OrderAuthError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=str(exc),
+        ) from exc
+
+
 @router.post(
-    "/checkout",
+    "/orders/checkout",
     response_model=OrderResponse,
     status_code=status.HTTP_201_CREATED,
 )
@@ -90,7 +108,7 @@ def orders_checkout(
         ) from exc
 
 
-@router.get("/{order_no}", response_model=OrderResponse)
+@router.get("/orders/{order_no}", response_model=OrderResponse)
 def orders_detail(
     order_no: str,
     session: SessionDep,
@@ -112,7 +130,7 @@ def orders_detail(
         ) from exc
 
 
-@router.post("/{order_no}/pay/mock", response_model=OrderResponse)
+@router.post("/orders/{order_no}/pay/mock", response_model=OrderResponse)
 def orders_mock_pay(
     order_no: str,
     session: SessionDep,

@@ -13,7 +13,9 @@ from app.domains.customers.repos.customer_repo import get_active_customer_by_ses
 from app.domains.orders.contracts.storefront_order_contract import (
     OrderCheckoutRequest,
     OrderLineResponse,
+    OrderListResponse,
     OrderResponse,
+    OrderSummaryResponse,
     PaymentResponse,
 )
 from app.domains.orders.models.order import D2COrder, D2COrderLine, D2CPayment
@@ -26,6 +28,7 @@ from app.domains.orders.repos.order_repo import (
     get_order_by_no_for_customer,
     list_cart_lines_for_checkout,
     list_order_lines,
+    list_orders_by_customer,
 )
 from app.domains.promotions.models.promotion import CustomerCoupon
 from app.domains.promotions.repos.checkout_promotion_repo import (
@@ -224,6 +227,39 @@ def build_order_response(
         lines=[_build_line_response(line) for line in lines],
         payment=_build_payment_response(payment) if payment is not None else None,
     )
+
+
+
+def _build_order_summary_response(
+    session: Session,
+    order: D2COrder,
+) -> OrderSummaryResponse:
+    payment = get_latest_payment_by_order_id(session, order.id)
+
+    return OrderSummaryResponse(
+        order_no=order.order_no,
+        status=order.status,
+        payment_status=payment.status if payment is not None else None,
+        currency=order.currency,
+        item_count=order.item_count,
+        subtotal_cents=order.subtotal_cents,
+        discount_cents=order.discount_cents,
+        payable_cents=order.payable_cents,
+        paid_at=order.paid_at,
+        created_at=order.created_at,
+    )
+
+
+def list_customer_orders(
+    session: Session,
+    access_token: str,
+) -> OrderListResponse:
+    customer = authenticate_customer(session, access_token)
+    orders = list_orders_by_customer(session, customer.id)
+
+    summaries = [_build_order_summary_response(session, order) for order in orders]
+
+    return OrderListResponse(orders=summaries, count=len(summaries))
 
 
 def checkout_order(

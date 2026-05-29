@@ -1116,6 +1116,55 @@
         }
       }
     },
+    "/orders": {
+      "get": {
+        "tags": [
+          "orders"
+        ],
+        "summary": "Orders List",
+        "operationId": "orders_list_orders_get",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/orders/checkout": {
       "post": {
         "tags": [
@@ -3433,6 +3482,27 @@
         ],
         "title": "OrderLineResponse"
       },
+      "OrderListResponse": {
+        "properties": {
+          "orders": {
+            "items": {
+              "$ref": "#/components/schemas/OrderSummaryResponse"
+            },
+            "type": "array",
+            "title": "Orders"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count"
+        ],
+        "title": "OrderListResponse"
+      },
       "OrderResponse": {
         "properties": {
           "order_no": {
@@ -3608,6 +3678,80 @@
           "payment"
         ],
         "title": "OrderResponse"
+      },
+      "OrderSummaryResponse": {
+        "properties": {
+          "order_no": {
+            "type": "string",
+            "title": "Order No"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "payment_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Payment Status"
+          },
+          "currency": {
+            "type": "string",
+            "title": "Currency"
+          },
+          "item_count": {
+            "type": "integer",
+            "title": "Item Count"
+          },
+          "subtotal_cents": {
+            "type": "integer",
+            "title": "Subtotal Cents"
+          },
+          "discount_cents": {
+            "type": "integer",
+            "title": "Discount Cents"
+          },
+          "payable_cents": {
+            "type": "integer",
+            "title": "Payable Cents"
+          },
+          "paid_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Paid At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "order_no",
+          "status",
+          "payment_status",
+          "currency",
+          "item_count",
+          "subtotal_cents",
+          "discount_cents",
+          "payable_cents",
+          "paid_at",
+          "created_at"
+        ],
+        "title": "OrderSummaryResponse"
       },
       "PaymentResponse": {
         "properties": {

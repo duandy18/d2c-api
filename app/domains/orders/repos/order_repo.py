@@ -81,3 +81,19 @@ def get_latest_payment_by_order_id(
         select(D2CPayment).where(D2CPayment.order_id == order_id).order_by(D2CPayment.id.desc())
     )
     return session.scalar(statement)
+
+
+
+def list_orders_by_customer(
+    session: Session,
+    customer_id: int,
+    *,
+    limit: int = 50,
+) -> list[D2COrder]:
+    statement = (
+        select(D2COrder)
+        .where(D2COrder.customer_id == customer_id)
+        .order_by(D2COrder.created_at.desc(), D2COrder.id.desc())
+        .limit(limit)
+    )
+    return list(session.scalars(statement).all())
