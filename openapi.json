@@ -1011,6 +1011,27 @@
         }
       }
     },
+    "/storefront/pages": {
+      "get": {
+        "tags": [
+          "storefront"
+        ],
+        "summary": "Storefront Pages",
+        "operationId": "storefront_pages_storefront_pages_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorefrontPagesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/orders/health": {
       "get": {
         "tags": [
@@ -4441,6 +4462,104 @@
           "sort_order"
         ],
         "title": "StorefrontHomeSlotItem"
+      },
+      "StorefrontPageRoute": {
+        "properties": {
+          "page_code": {
+            "type": "string",
+            "title": "Page Code"
+          },
+          "page_type": {
+            "type": "string",
+            "title": "Page Type"
+          },
+          "route_path": {
+            "type": "string",
+            "title": "Route Path"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "auth_required": {
+            "type": "boolean",
+            "title": "Auth Required"
+          },
+          "navigation_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Navigation Label"
+          },
+          "navigation_group": {
+            "type": "string",
+            "title": "Navigation Group"
+          },
+          "sort_order": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Sort Order"
+          }
+        },
+        "type": "object",
+        "required": [
+          "page_code",
+          "page_type",
+          "route_path",
+          "title",
+          "status",
+          "auth_required",
+          "navigation_group",
+          "sort_order"
+        ],
+        "title": "StorefrontPageRoute"
+      },
+      "StorefrontPagesResponse": {
+        "properties": {
+          "data_source": {
+            "type": "string",
+            "const": "d2c_storefront_pages",
+            "title": "Data Source",
+            "default": "d2c_storefront_pages"
+          },
+          "pages": {
+            "items": {
+              "$ref": "#/components/schemas/StorefrontPageRoute"
+            },
+            "type": "array",
+            "title": "Pages"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count"
+        ],
+        "title": "StorefrontPagesResponse"
       },
       "StorefrontSiteSummary": {
         "properties": {
