@@ -17,10 +17,20 @@ from app.domains.support.contracts.storefront_support_contract import (
     SupportMessageCreateRequest,
     SupportMessageResponse,
 )
-from app.domains.support.models.support import SupportConversation, SupportMessage
+from app.domains.support.models.support import (
+    SupportContact,
+    SupportConversation,
+    SupportConversationEvent,
+    SupportMessage,
+)
 from app.domains.support.repos.support_repo import (
+    create_contact,
     create_conversation,
+    create_event,
     create_message,
+    get_contact_by_customer_id,
+    get_contact_by_email,
+    get_contact_by_phone,
     get_conversation_by_code,
     list_conversations_by_customer,
     list_messages_for_conversation,
@@ -46,14 +56,25 @@ class SupportConflictError(Exception):
     pass
 
 
-def _new_conversation_code() -> str:
+def _new_code(prefix: str) -> str:
     date_part = datetime.now(UTC).strftime("%Y%m%d")
-    return f"SUP-{date_part}-{uuid4().hex[:12].upper()}"
+    return f"{prefix}-{date_part}-{uuid4().hex[:12].upper()}"
+
+
+def _new_conversation_code() -> str:
+    return _new_code("SUP")
 
 
 def _new_message_code() -> str:
-    date_part = datetime.now(UTC).strftime("%Y%m%d")
-    return f"SUPMSG-{date_part}-{uuid4().hex[:12].upper()}"
+    return _new_code("SUPMSG")
+
+
+def _new_contact_code() -> str:
+    return _new_code("SUPCT")
+
+
+def _new_event_code() -> str:
+    return _new_code("SUPEVT")
 
 
 def _normalize_text(value: str | None) -> str | None:
@@ -61,6 +82,11 @@ def _normalize_text(value: str | None) -> str | None:
         return None
     normalized = value.strip()
     return normalized or None
+
+
+def _normalize_email(value: str | None) -> str | None:
+    normalized = _normalize_text(value)
+    return normalized.lower() if normalized is not None else None
 
 
 def _normalize_body(value: str) -> str:
@@ -85,6 +111,101 @@ def _authenticate_optional_customer(
     if customer is None:
         raise SupportAuthError("customer_auth_required")
     return customer
+
+
+def _create_event(
+    session: Session,
+    *,
+    conversation: SupportConversation,
+    event_type: str,
+    actor_type: str,
+    message: SupportMessage | None = None,
+    from_status: str | None = None,
+    to_status: str | None = None,
+    payload: dict[str, object] | None = None,
+) -> SupportConversationEvent:
+    return create_event(
+        session,
+        SupportConversationEvent(
+            event_code=_new_event_code(),
+            conversation_id=conversation.id,
+            actor_type=actor_type,
+            event_type=event_type,
+            message_id=message.id if message is not None else None,
+            from_status=from_status,
+            to_status=to_status,
+            payload_json=payload or {},
+        ),
+    )
+
+
+def _resolve_contact(
+    session: Session,
+    *,
+    customer: Customer | None,
+    anonymous_id: str | None,
+    contact_name: str | None,
+    contact_email: str | None,
+    contact_phone: str | None,
+    now: datetime,
+) -> SupportContact:
+    if customer is not None:
+        contact = get_contact_by_customer_id(session, customer.id)
+        if contact is None:
+            contact = create_contact(
+                session,
+                SupportContact(
+                    contact_code=_new_contact_code(),
+                    customer_id=customer.id,
+                    anonymous_id=anonymous_id,
+                    contact_name=contact_name or customer.display_name,
+                    contact_email=contact_email or customer.email,
+                    contact_phone=contact_phone or customer.phone,
+                    source="storefront",
+                    first_seen_at=now,
+                    last_seen_at=now,
+                ),
+            )
+        else:
+            contact.anonymous_id = anonymous_id or contact.anonymous_id
+            contact.contact_name = contact_name or customer.display_name or contact.contact_name
+            contact.contact_email = contact_email or customer.email or contact.contact_email
+            contact.contact_phone = contact_phone or customer.phone or contact.contact_phone
+            contact.last_seen_at = now
+            contact.updated_at = now
+            session.flush()
+        return contact
+
+    contact = None
+    if contact_email is not None:
+        contact = get_contact_by_email(session, contact_email)
+    if contact is None and contact_phone is not None:
+        contact = get_contact_by_phone(session, contact_phone)
+
+    if contact is None:
+        return create_contact(
+            session,
+            SupportContact(
+                contact_code=_new_contact_code(),
+                customer_id=None,
+                anonymous_id=anonymous_id,
+                contact_name=contact_name,
+                contact_email=contact_email,
+                contact_phone=contact_phone,
+                source="storefront",
+                first_seen_at=now,
+                last_seen_at=now,
+            ),
+        )
+
+    contact.anonymous_id = anonymous_id or contact.anonymous_id
+    contact.contact_name = contact_name or contact.contact_name
+    contact.contact_email = contact_email or contact.contact_email
+    contact.contact_phone = contact_phone or contact.contact_phone
+    contact.last_seen_at = now
+    contact.updated_at = now
+    session.flush()
+    return contact
 
 
 def _build_message_response(message: SupportMessage) -> SupportMessageResponse:
@@ -123,7 +244,11 @@ def _build_conversation_response(
     *,
     conversation_token: str | None = None,
 ) -> SupportConversationResponse:
-    messages = list_messages_for_conversation(session, conversation.id)
+    messages = [
+        message
+        for message in list_messages_for_conversation(session, conversation.id)
+        if message.visibility == "public"
+    ]
     return SupportConversationResponse(
         conversation_code=conversation.conversation_code,
         topic=conversation.topic,
@@ -142,7 +267,7 @@ def _build_conversation_response(
 
 
 def _assert_anonymous_contact(payload: SupportConversationCreateRequest) -> None:
-    contact_email = _normalize_text(payload.contact_email)
+    contact_email = _normalize_email(payload.contact_email)
     contact_phone = _normalize_text(payload.contact_phone)
     if contact_email is None and contact_phone is None:
         raise SupportValidationError("support_contact_email_or_phone_required")
@@ -165,56 +290,101 @@ def create_support_conversation(
         conversation_token_hash = hash_session_token(conversation_token)
 
     now = datetime.now(UTC)
+    contact_name = _normalize_text(payload.contact_name) or (
+        customer.display_name if customer is not None else None
+    )
+    contact_email = _normalize_email(payload.contact_email) or (
+        customer.email if customer is not None else None
+    )
+    contact_phone = _normalize_text(payload.contact_phone) or (
+        customer.phone if customer is not None else None
+    )
+    anonymous_id = _normalize_text(payload.anonymous_id)
+
+    contact = _resolve_contact(
+        session,
+        customer=customer,
+        anonymous_id=anonymous_id,
+        contact_name=contact_name,
+        contact_email=contact_email,
+        contact_phone=contact_phone,
+        now=now,
+    )
+
     conversation = create_conversation(
         session,
         SupportConversation(
             conversation_code=_new_conversation_code(),
             customer_id=customer.id if customer is not None else None,
-            anonymous_id=_normalize_text(payload.anonymous_id),
+            contact_id=contact.id,
+            anonymous_id=anonymous_id,
             session_code=_normalize_text(payload.session_code),
-            contact_name=(
-                _normalize_text(payload.contact_name)
-                or (customer.display_name if customer is not None else None)
-            ),
-            contact_email=(
-                _normalize_text(payload.contact_email)
-                or (customer.email if customer is not None else None)
-            ),
-            contact_phone=(
-                _normalize_text(payload.contact_phone)
-                or (customer.phone if customer is not None else None)
-            ),
+            contact_name=contact_name,
+            contact_email=contact_email,
+            contact_phone=contact_phone,
             topic=payload.topic,
             related_order_no=_normalize_text(payload.related_order_no),
-            status="open",
+            status="pending_agent",
+            priority="normal",
             source="storefront",
             conversation_token_hash=conversation_token_hash,
+            last_message_at=now,
+            last_customer_message_at=now,
+            last_system_message_at=now,
             created_at=now,
             updated_at=now,
         ),
     )
 
-    create_message(
+    _create_event(
+        session,
+        conversation=conversation,
+        event_type="conversation_created",
+        actor_type="customer" if customer is not None else "system",
+        from_status=None,
+        to_status=conversation.status,
+    )
+
+    customer_message = create_message(
         session,
         SupportMessage(
             conversation_id=conversation.id,
             message_code=_new_message_code(),
             sender_type="customer",
+            message_kind="text",
             body=message_body,
             visibility="public",
             created_at=now,
         ),
     )
-    create_message(
+    _create_event(
+        session,
+        conversation=conversation,
+        event_type="customer_message",
+        actor_type="customer",
+        message=customer_message,
+        to_status=conversation.status,
+    )
+
+    system_message = create_message(
         session,
         SupportMessage(
             conversation_id=conversation.id,
             message_code=_new_message_code(),
             sender_type="system",
+            message_kind="text",
             body=SYSTEM_CONFIRMATION_MESSAGE,
             visibility="public",
             created_at=now,
         ),
+    )
+    _create_event(
+        session,
+        conversation=conversation,
+        event_type="system_message",
+        actor_type="system",
+        message=system_message,
+        to_status=conversation.status,
     )
 
     session.commit()
@@ -236,8 +406,7 @@ def list_support_conversations(
 
     rows = list_conversations_by_customer(session, customer.id)
     conversations = [
-        _build_summary_response(conversation, message_count)
-        for conversation, message_count in rows
+        _build_summary_response(conversation, message_count) for conversation, message_count in rows
     ]
     return SupportConversationListResponse(
         conversations=conversations,
@@ -297,23 +466,39 @@ def add_support_conversation_message(
 
     _authorize_conversation_access(conversation, customer, payload.conversation_token)
 
-    if conversation.status != "open":
+    if conversation.status == "closed":
         raise SupportConflictError("support_conversation_closed")
 
     message_body = _normalize_body(payload.body)
     now = datetime.now(UTC)
-    create_message(
+    from_status = conversation.status
+
+    message = create_message(
         session,
         SupportMessage(
             conversation_id=conversation.id,
             message_code=_new_message_code(),
             sender_type="customer",
+            message_kind="text",
             body=message_body,
             visibility="public",
             created_at=now,
         ),
     )
+    conversation.status = "pending_agent"
+    conversation.last_message_at = now
+    conversation.last_customer_message_at = now
     conversation.updated_at = now
+
+    _create_event(
+        session,
+        conversation=conversation,
+        event_type="customer_message",
+        actor_type="customer",
+        message=message,
+        from_status=from_status,
+        to_status=conversation.status,
+    )
 
     session.commit()
     return _build_conversation_response(session, conversation)
