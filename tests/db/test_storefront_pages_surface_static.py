@@ -31,3 +31,17 @@ def test_storefront_pages_surface_migration_seeds_independent_pages() -> None:
         "/checkout",
     ):
         assert token in text
+
+
+
+def test_storefront_payment_result_page_migration_seeds_result_page() -> None:
+    text = Path("alembic/versions/0034_pay_result.py").read_text(encoding="utf-8")
+
+    for token in (
+        "payment_result",
+        "/payment-result",
+        "支付结果",
+        "auth_required",
+        "sort_order",
+    ):
+        assert token in text
