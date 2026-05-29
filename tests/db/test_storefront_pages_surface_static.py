@@ -59,3 +59,23 @@ def test_storefront_account_security_page_migration_seeds_security_page() -> Non
         "sort_order",
     ):
         assert token in text
+
+
+
+def test_storefront_my_center_page_migration_replaces_account_security() -> None:
+    text = Path("alembic/versions/0036_my_center.py").read_text(encoding="utf-8")
+
+    for token in (
+        "account_security",
+        "my_home",
+        "my_orders",
+        "my_account",
+        "my_security",
+        "/my",
+        "/my/orders",
+        "/my/account",
+        "/my/security",
+        "我的购买记录",
+        "我的账号",
+    ):
+        assert token in text

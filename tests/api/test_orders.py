@@ -427,3 +427,63 @@ def test_checkout_payload_default_country_is_cn() -> None:
     )
 
     assert payload.shipping_country == "CN"
+
+
+def test_list_orders_requires_customer_auth() -> None:
+    client = TestClient(app)
+
+    missing_response = client.get("/orders")
+    invalid_response = client.get("/orders", headers=auth_headers("invalid-token"))
+
+    assert missing_response.status_code == 401
+    assert missing_response.json() == {"detail": "customer_auth_required"}
+    assert invalid_response.status_code == 401
+    assert invalid_response.json() == {"detail": "customer_auth_required"}
+
+
+def test_list_orders_returns_only_current_customer_orders() -> None:
+    client = TestClient(app)
+
+    first_token = register_customer(client)
+    first_cart_code = create_cart_with_item(client)
+    first_checkout_response = client.post(
+        "/orders/checkout",
+        json=checkout_payload(first_cart_code),
+        headers=auth_headers(first_token),
+    )
+    assert first_checkout_response.status_code == 201
+    first_order_no = first_checkout_response.json()["order_no"]
+
+    first_pay_response = client.post(
+        f"/orders/{first_order_no}/pay/mock",
+        headers=auth_headers(first_token),
+    )
+    assert first_pay_response.status_code == 200
+
+    second_token = register_customer(client)
+    second_cart_code = create_cart_with_item(client)
+    second_checkout_response = client.post(
+        "/orders/checkout",
+        json=checkout_payload(second_cart_code),
+        headers=auth_headers(second_token),
+    )
+    assert second_checkout_response.status_code == 201
+    second_order_no = second_checkout_response.json()["order_no"]
+
+    response = client.get("/orders", headers=auth_headers(first_token))
+
+    assert response.status_code == 200
+
+    payload = response.json()
+    assert payload["count"] >= 1
+
+    order_nos = [order["order_no"] for order in payload["orders"]]
+    assert first_order_no in order_nos
+    assert second_order_no not in order_nos
+
+    first_order = next(order for order in payload["orders"] if order["order_no"] == first_order_no)
+    assert first_order["status"] == "paid"
+    assert first_order["payment_status"] == "succeeded"
+    assert first_order["item_count"] == 2
+    assert first_order["payable_cents"] == 3798
+    assert first_order["paid_at"] is not None

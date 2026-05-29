@@ -12,7 +12,7 @@ def test_storefront_pages_returns_independent_page_surface() -> None:
 
     payload = response.json()
     assert payload["data_source"] == "d2c_storefront_pages"
-    assert payload["count"] >= 7
+    assert payload["count"] >= 10
 
     pages = {page["page_code"]: page for page in payload["pages"]}
 
@@ -36,9 +36,23 @@ def test_storefront_pages_returns_independent_page_surface() -> None:
     assert pages["payment_result"]["auth_required"] is True
     assert pages["payment_result"]["navigation_label"] == "支付结果"
 
-    assert pages["account_security"]["route_path"] == "/account/security"
-    assert pages["account_security"]["auth_required"] is True
-    assert pages["account_security"]["navigation_label"] == "账户安全"
+    assert "account_security" not in pages
+
+    assert pages["my_home"]["route_path"] == "/my"
+    assert pages["my_home"]["auth_required"] is True
+    assert pages["my_home"]["navigation_label"] == "我的"
+
+    assert pages["my_orders"]["route_path"] == "/my/orders"
+    assert pages["my_orders"]["auth_required"] is True
+    assert pages["my_orders"]["navigation_label"] == "我的购买记录"
+
+    assert pages["my_account"]["route_path"] == "/my/account"
+    assert pages["my_account"]["auth_required"] is True
+    assert pages["my_account"]["navigation_label"] == "我的账号"
+
+    assert pages["my_security"]["route_path"] == "/my/security"
+    assert pages["my_security"]["auth_required"] is True
+    assert pages["my_security"]["navigation_label"] == "账户安全"
 
     sort_orders = [page["sort_order"] for page in payload["pages"]]
     assert sort_orders == sorted(sort_orders)

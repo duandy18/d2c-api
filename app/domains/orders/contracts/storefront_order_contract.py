@@ -75,3 +75,22 @@ class OrderResponse(BaseModel):
     created_at: datetime
     lines: list[OrderLineResponse]
     payment: PaymentResponse | None
+
+
+
+class OrderSummaryResponse(BaseModel):
+    order_no: str
+    status: str
+    payment_status: str | None
+    currency: str
+    item_count: int
+    subtotal_cents: int
+    discount_cents: int
+    payable_cents: int
+    paid_at: datetime | None
+    created_at: datetime
+
+
+class OrderListResponse(BaseModel):
+    orders: list[OrderSummaryResponse] = Field(default_factory=list)
+    count: int = Field(..., ge=0)
