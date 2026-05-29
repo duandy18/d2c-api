@@ -79,3 +79,16 @@ def test_storefront_my_center_page_migration_replaces_account_security() -> None
         "我的账号",
     ):
         assert token in text
+
+
+
+def test_storefront_my_single_page_migration_retires_sub_pages() -> None:
+    text = Path("alembic/versions/0037_my_single.py").read_text(encoding="utf-8")
+
+    for token in (
+        "my_orders",
+        "my_account",
+        "my_security",
+        "DELETE FROM d2c_storefront_pages",
+    ):
+        assert token in text
