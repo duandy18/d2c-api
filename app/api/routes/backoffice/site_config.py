@@ -9,6 +9,8 @@ from app.core.database import get_session
 from app.domains.site_config.contracts.backoffice_site_config_contract import (
     BackofficeHomeConfigResponse,
     BackofficeHomePagePatchRequest,
+    BackofficeOfferDisplayMetricsRequest,
+    BackofficeOfferDisplayMetricsResponse,
     BackofficeOfferResolveResponse,
     BackofficeSlotItemsPutRequest,
     BackofficeSlotOfferPositionsPutRequest,
@@ -16,11 +18,13 @@ from app.domains.site_config.contracts.backoffice_site_config_contract import (
 )
 from app.domains.site_config.services.backoffice_site_config_service import (
     get_backoffice_home_config,
+    get_offer_display_metrics,
     patch_home_page,
     patch_home_slot,
     replace_slot_items,
     replace_slot_offer_positions,
     resolve_offer_for_site_config,
+    update_offer_display_metrics,
 )
 
 router = APIRouter(prefix="/backoffice/site-config", tags=["backoffice-site-config"])
@@ -76,3 +80,25 @@ def resolve_home_offer(
     session: SessionDep,
 ) -> BackofficeOfferResolveResponse:
     return resolve_offer_for_site_config(session, offer_code)
+
+@router.get(
+    "/offers/{offer_code}/display-metrics",
+    response_model=BackofficeOfferDisplayMetricsResponse,
+)
+def get_offer_display_metrics_route(
+    offer_code: str,
+    session: SessionDep,
+) -> BackofficeOfferDisplayMetricsResponse:
+    return get_offer_display_metrics(session, offer_code)
+
+
+@router.patch(
+    "/offers/{offer_code}/display-metrics",
+    response_model=BackofficeOfferDisplayMetricsResponse,
+)
+def patch_offer_display_metrics_route(
+    offer_code: str,
+    payload: BackofficeOfferDisplayMetricsRequest,
+    session: SessionDep,
+) -> BackofficeOfferDisplayMetricsResponse:
+    return update_offer_display_metrics(session, offer_code, payload)

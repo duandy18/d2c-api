@@ -20,6 +20,7 @@ from app.domains.site_config.contracts.storefront_home_contract import (
     StorefrontTheme,
 )
 from app.domains.site_config.models import (
+    OfferDisplayMetric,
     StorefrontPage,
     StorefrontPageSlot,
     StorefrontSite,
@@ -35,6 +36,7 @@ from app.domains.site_config.repos.storefront_site_config_repo import (
     get_page,
     get_site,
     list_items_by_slot_ids,
+    list_offer_display_metrics_by_offer_codes,
     list_offer_positions_by_slot_ids,
     list_slots,
 )
@@ -111,7 +113,24 @@ def _offer_tags(value: Any) -> list[str]:
     return []
 
 
-def _offer_schema(offer: PublishedOffer, price: PublishedOfferPrice) -> StorefrontHomeOffer:
+def _display_stock_status(
+    display_metric: OfferDisplayMetric | None,
+    fallback: str,
+) -> str:
+    if display_metric is None or not display_metric.is_active:
+        return "out_of_stock"
+
+    if display_metric.display_stock_quantity <= 0:
+        return "out_of_stock"
+
+    return fallback or "in_stock"
+
+
+def _offer_schema(
+    offer: PublishedOffer,
+    price: PublishedOfferPrice,
+    display_metric: OfferDisplayMetric | None,
+) -> StorefrontHomeOffer:
     return StorefrontHomeOffer(
         offer_code=offer.offer_code,
         offer_type=getattr(offer, "offer_type", "single"),
@@ -124,13 +143,29 @@ def _offer_schema(offer: PublishedOffer, price: PublishedOfferPrice) -> Storefro
         compare_at_price_cents=_optional_int(getattr(price, "compare_at_price_cents", None)),
         currency=price.currency,
         promotion_badge=getattr(offer, "promotion_badge", None),
-        sold_quantity=_optional_int(getattr(offer, "sold_quantity", None)),
-        paid_customer_count=_optional_int(getattr(offer, "paid_customer_count", None)),
+        sold_quantity=(
+            display_metric.display_sold_quantity
+            if display_metric is not None and display_metric.is_active
+            else 0
+        ),
+        paid_customer_count=(
+            display_metric.display_paid_customer_count
+            if display_metric is not None and display_metric.is_active
+            else 0
+        ),
+        display_stock_quantity=(
+            display_metric.display_stock_quantity
+            if display_metric is not None and display_metric.is_active
+            else 0
+        ),
         rating_score=_optional_float(getattr(offer, "rating_score", None)),
         review_count=_optional_int(getattr(offer, "review_count", None)),
         review_summary=getattr(offer, "review_summary", None),
         tags=_offer_tags(getattr(offer, "tags", None)),
-        stock_status=getattr(offer, "stock_status", "in_stock") or "in_stock",
+        stock_status=_display_stock_status(
+            display_metric,
+            getattr(offer, "stock_status", "in_stock"),
+        ),
         sell_status=offer.sell_status,
     )
 
@@ -185,6 +220,7 @@ def _slot_schema(
     items: list[StorefrontSlotItem],
     positions: list[StorefrontSlotOfferPosition],
     hydrated_offers: dict[str, tuple[PublishedOffer, PublishedOfferPrice]],
+    display_metrics: dict[str, OfferDisplayMetric],
 ) -> StorefrontHomeSlot:
     active_items = [item for item in items if item.is_active]
     offer_positions: list[StorefrontHomeOfferPosition] = []
@@ -198,7 +234,12 @@ def _slot_schema(
             continue
 
         offer, price = row
-        offer_positions.append(_position_schema(position, _offer_schema(offer, price)))
+        offer_positions.append(
+            _position_schema(
+                position,
+                _offer_schema(offer, price, display_metrics.get(position.offer_code)),
+            )
+        )
 
     return StorefrontHomeSlot(
         slot_code=slot.slot_code,
@@ -240,6 +281,7 @@ def get_storefront_home(session: Session) -> StorefrontHomeResponse:
         if _position_visible(position)
     ]
     hydrated_offers = list_active_offers_by_code(session, offer_codes)
+    display_metrics = list_offer_display_metrics_by_offer_codes(session, offer_codes)
 
     slot_schemas = [
         _slot_schema(
@@ -247,6 +289,7 @@ def get_storefront_home(session: Session) -> StorefrontHomeResponse:
             items=items_by_slot.get(slot.id, []),
             positions=positions_by_slot.get(slot.id, []),
             hydrated_offers=hydrated_offers,
+            display_metrics=display_metrics,
         )
         for slot in slots
     ]

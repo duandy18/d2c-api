@@ -36,6 +36,9 @@ DEMO_OFFERS = [
         "source_offer_id": 501,
         "source_price_id": 701,
         "source_position_id": 801,
+        "display_sold_quantity": 238,
+        "display_paid_customer_count": 86,
+        "display_stock_quantity": 12,
         "pms_item_id": 1001,
         "pms_sku_code_id": 2001,
         "pms_item_uom_id": 3001,
@@ -57,6 +60,9 @@ DEMO_OFFERS = [
         "source_offer_id": 502,
         "source_price_id": 702,
         "source_position_id": 802,
+        "display_sold_quantity": 156,
+        "display_paid_customer_count": 64,
+        "display_stock_quantity": 28,
         "pms_item_id": 1002,
         "pms_sku_code_id": 2002,
         "pms_item_uom_id": 3002,
@@ -354,6 +360,39 @@ def _seed_published_catalog(connection: Connection) -> None:
                 "source_component_id": 900 + index,
                 "raw_payload": _json({"source": "demo_seed"}),
                 "published_at": DEMO_PUBLISHED_AT,
+            },
+        )
+
+        connection.execute(
+            text(
+                """
+                INSERT INTO d2c_offer_display_metrics (
+                  offer_code,
+                  display_sold_quantity,
+                  display_paid_customer_count,
+                  display_stock_quantity,
+                  is_active
+                )
+                VALUES (
+                  :offer_code,
+                  :display_sold_quantity,
+                  :display_paid_customer_count,
+                  :display_stock_quantity,
+                  TRUE
+                )
+                ON CONFLICT (offer_code) DO UPDATE SET
+                  display_sold_quantity = EXCLUDED.display_sold_quantity,
+                  display_paid_customer_count = EXCLUDED.display_paid_customer_count,
+                  display_stock_quantity = EXCLUDED.display_stock_quantity,
+                  is_active = EXCLUDED.is_active,
+                  updated_at = now()
+                """
+            ),
+            {
+                "offer_code": offer["offer_code"],
+                "display_sold_quantity": offer["display_sold_quantity"],
+                "display_paid_customer_count": offer["display_paid_customer_count"],
+                "display_stock_quantity": offer["display_stock_quantity"],
             },
         )
 

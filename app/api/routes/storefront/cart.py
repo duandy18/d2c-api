@@ -12,7 +12,9 @@ from app.domains.cart.contracts.storefront_cart_contract import (
     CartResponse,
 )
 from app.domains.cart.services.storefront_cart_service import (
+    CartOfferDisplayStockUnavailableError,
     CartOfferNotFoundError,
+    CartOfferQuantityExceedsDisplayStockError,
     clear_cart,
     get_cart,
     upsert_cart_item,
@@ -56,6 +58,14 @@ def cart_items_upsert(
     except CartOfferNotFoundError as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        ) from exc
+    except (
+        CartOfferDisplayStockUnavailableError,
+        CartOfferQuantityExceedsDisplayStockError,
+    ) as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
             detail=str(exc),
         ) from exc
 

@@ -313,6 +313,98 @@
         }
       }
     },
+    "/backoffice/site-config/offers/{offer_code}/display-metrics": {
+      "get": {
+        "tags": [
+          "backoffice-site-config"
+        ],
+        "summary": "Get Offer Display Metrics Route",
+        "operationId": "get_offer_display_metrics_route_backoffice_site_config_offers__offer_code__display_metrics_get",
+        "parameters": [
+          {
+            "name": "offer_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Offer Code"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackofficeOfferDisplayMetricsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "backoffice-site-config"
+        ],
+        "summary": "Patch Offer Display Metrics Route",
+        "operationId": "patch_offer_display_metrics_route_backoffice_site_config_offers__offer_code__display_metrics_patch",
+        "parameters": [
+          {
+            "name": "offer_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Offer Code"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackofficeOfferDisplayMetricsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackofficeOfferDisplayMetricsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/analytics/health": {
       "get": {
         "tags": [
@@ -1563,6 +1655,70 @@
         },
         "type": "object",
         "title": "BackofficeHomePagePatchRequest"
+      },
+      "BackofficeOfferDisplayMetricsRequest": {
+        "properties": {
+          "display_sold_quantity": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Display Sold Quantity"
+          },
+          "display_paid_customer_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Display Paid Customer Count"
+          },
+          "display_stock_quantity": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Display Stock Quantity"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "display_sold_quantity",
+          "display_paid_customer_count",
+          "display_stock_quantity"
+        ],
+        "title": "BackofficeOfferDisplayMetricsRequest"
+      },
+      "BackofficeOfferDisplayMetricsResponse": {
+        "properties": {
+          "offer_code": {
+            "type": "string",
+            "title": "Offer Code"
+          },
+          "display_sold_quantity": {
+            "type": "integer",
+            "title": "Display Sold Quantity"
+          },
+          "display_paid_customer_count": {
+            "type": "integer",
+            "title": "Display Paid Customer Count"
+          },
+          "display_stock_quantity": {
+            "type": "integer",
+            "title": "Display Stock Quantity"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "offer_code",
+          "display_sold_quantity",
+          "display_paid_customer_count",
+          "display_stock_quantity"
+        ],
+        "title": "BackofficeOfferDisplayMetricsResponse"
       },
       "BackofficeOfferResolveResponse": {
         "properties": {
@@ -3729,26 +3885,22 @@
             "title": "Promotion Badge"
           },
           "sold_quantity": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sold Quantity"
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Sold Quantity",
+            "default": 0
           },
           "paid_customer_count": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Paid Customer Count"
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Paid Customer Count",
+            "default": 0
+          },
+          "display_stock_quantity": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Display Stock Quantity",
+            "default": 0
           },
           "rating_score": {
             "anyOf": [

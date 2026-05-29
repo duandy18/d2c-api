@@ -6,6 +6,8 @@ from datetime import UTC, datetime
 from decimal import Decimal
 from uuid import uuid4
 
+from sqlalchemy import text
+
 from app.core.config import load_settings
 from app.core.database import get_session_factory
 from app.domains.published.models.published import (
@@ -39,6 +41,10 @@ def seed_published_offer_catalog_item(
     price_code: str | None = None,
     price_cents: int = 1899,
     compare_at_price_cents: int | None = 2299,
+    display_sold_quantity: int = 238,
+    display_paid_customer_count: int = 86,
+    display_stock_quantity: int = 99,
+    publish_version: str | None = None,
     currency: str = "USD",
     price_is_active: bool = True,
     position_is_active: bool = True,
@@ -50,7 +56,7 @@ def seed_published_offer_catalog_item(
     settings = load_settings()
     session_factory = get_session_factory(settings.database_url)
 
-    publish_version = _publish_version()
+    resolved_publish_version = publish_version or _publish_version()
     now = datetime.now(UTC)
     resolved_price_code = price_code or f"price-{offer_code}"
     position_code = f"pos-{offer_code}-{uuid4().hex[:8]}"
@@ -58,7 +64,7 @@ def seed_published_offer_catalog_item(
     with session_factory() as session:
         session.add(
             PublishedGroup(
-                publish_version=publish_version,
+                publish_version=resolved_publish_version,
                 group_code=group_code,
                 group_name=group_name,
                 group_kind="category",
@@ -74,7 +80,7 @@ def seed_published_offer_catalog_item(
         )
         session.add(
             PublishedOffer(
-                publish_version=publish_version,
+                publish_version=resolved_publish_version,
                 offer_code=offer_code,
                 offer_type="single",
                 title=display_name,
@@ -90,7 +96,7 @@ def seed_published_offer_catalog_item(
         )
         session.add(
             PublishedOfferComponent(
-                publish_version=publish_version,
+                publish_version=resolved_publish_version,
                 offer_code=offer_code,
                 component_no=1,
                 pms_item_id=pms_item_id or 0,
@@ -113,7 +119,7 @@ def seed_published_offer_catalog_item(
         )
         session.add(
             PublishedOfferPrice(
-                publish_version=publish_version,
+                publish_version=resolved_publish_version,
                 offer_code=offer_code,
                 price_code=resolved_price_code,
                 channel="storefront",
@@ -129,9 +135,41 @@ def seed_published_offer_catalog_item(
                 published_at=now,
             )
         )
+        session.execute(
+            text(
+                """
+                INSERT INTO d2c_offer_display_metrics (
+                  offer_code,
+                  display_sold_quantity,
+                  display_paid_customer_count,
+                  display_stock_quantity,
+                  is_active
+                )
+                VALUES (
+                  :offer_code,
+                  :display_sold_quantity,
+                  :display_paid_customer_count,
+                  :display_stock_quantity,
+                  TRUE
+                )
+                ON CONFLICT (offer_code) DO UPDATE SET
+                  display_sold_quantity = EXCLUDED.display_sold_quantity,
+                  display_paid_customer_count = EXCLUDED.display_paid_customer_count,
+                  display_stock_quantity = EXCLUDED.display_stock_quantity,
+                  is_active = EXCLUDED.is_active,
+                  updated_at = now()
+                """
+            ),
+            {
+                "offer_code": offer_code,
+                "display_sold_quantity": display_sold_quantity,
+                "display_paid_customer_count": display_paid_customer_count,
+                "display_stock_quantity": display_stock_quantity,
+            },
+        )
         session.add(
             PublishedOfferPosition(
-                publish_version=publish_version,
+                publish_version=resolved_publish_version,
                 position_code=position_code,
                 group_code=group_code,
                 offer_code=offer_code,
@@ -149,7 +187,7 @@ def seed_published_offer_catalog_item(
         session.commit()
 
     return {
-        "publish_version": publish_version,
+        "publish_version": resolved_publish_version,
         "offer_code": offer_code,
         "sku_code": sku_code,
         "display_name": display_name,
@@ -163,6 +201,9 @@ def seed_published_offer_catalog_item(
         "price_code": resolved_price_code,
         "price_cents": price_cents,
         "compare_at_price_cents": compare_at_price_cents,
+        "display_sold_quantity": display_sold_quantity,
+        "display_paid_customer_count": display_paid_customer_count,
+        "display_stock_quantity": display_stock_quantity,
         "source_offer_id": source_offer_id,
         "source_component_id": source_component_id,
         "source_price_id": source_price_id,
@@ -171,11 +212,17 @@ def seed_published_offer_catalog_item(
 
 
 def seed_default_published_catalog() -> None:
+    publish_version = _publish_version()
+
     seed_published_offer_catalog_item(
         offer_code="offer-cat-food-salmon-001",
         sku_code="CAT-FOOD-SALMON-1KG",
         display_name="三文鱼成猫粮 1kg",
         price_cents=1899,
+        display_sold_quantity=238,
+        display_paid_customer_count=86,
+        display_stock_quantity=99,
+        publish_version=publish_version,
     )
     seed_published_offer_catalog_item(
         offer_code="offer-cat-litter-tofu-001",
@@ -190,6 +237,10 @@ def seed_default_published_catalog() -> None:
         barcode="6900000000001",
         price_cents=1099,
         compare_at_price_cents=1399,
+        display_sold_quantity=156,
+        display_paid_customer_count=64,
+        display_stock_quantity=88,
+        publish_version=publish_version,
         source_offer_id=502,
         source_component_id=602,
         source_price_id=702,

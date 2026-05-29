@@ -217,3 +217,66 @@ class StorefrontSlotOfferPosition(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
+
+class OfferDisplayMetric(Base):
+    """Merchant-maintained display-only metrics for customer-facing offer cards.
+
+    These numbers are not order facts and are not warehouse stock. They are
+    storefront presentation data maintained from the backoffice.
+    """
+
+    __tablename__ = "d2c_offer_display_metrics"
+    __table_args__ = (
+        UniqueConstraint("offer_code", name="uq_d2c_offer_disp_metrics_offer"),
+        CheckConstraint(
+            "display_sold_quantity >= 0",
+            name="ck_d2c_offer_disp_sold_non_negative",
+        ),
+        CheckConstraint(
+            "display_paid_customer_count >= 0",
+            name="ck_d2c_offer_disp_paid_non_negative",
+        ),
+        CheckConstraint(
+            "display_stock_quantity >= 0",
+            name="ck_d2c_offer_disp_stock_non_negative",
+        ),
+        Index("ix_d2c_offer_disp_metrics_offer", "offer_code"),
+        Index("ix_d2c_offer_disp_metrics_active", "is_active"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    offer_code: Mapped[str] = mapped_column(String(96), nullable=False)
+    display_sold_quantity: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
+    display_paid_customer_count: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
+    display_stock_quantity: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
+    is_active: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default="true",
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    )

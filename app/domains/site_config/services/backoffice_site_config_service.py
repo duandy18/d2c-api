@@ -9,6 +9,8 @@ from app.domains.site_config.contracts.backoffice_site_config_contract import (
     BackofficeHomeConfigResponse,
     BackofficeHomePage,
     BackofficeHomePagePatchRequest,
+    BackofficeOfferDisplayMetricsRequest,
+    BackofficeOfferDisplayMetricsResponse,
     BackofficeOfferResolveResponse,
     BackofficePageSlot,
     BackofficeSlotItemPut,
@@ -24,6 +26,7 @@ from app.domains.site_config.contracts.storefront_home_contract import (
     StorefrontHomeSlotItem,
 )
 from app.domains.site_config.models import (
+    OfferDisplayMetric,
     StorefrontPage,
     StorefrontPageSlot,
     StorefrontSlotItem,
@@ -37,12 +40,15 @@ from app.domains.site_config.repos.storefront_site_config_repo import (
     delete_slot_items,
     delete_slot_offer_positions,
     get_active_theme,
+    get_offer_display_metric,
     get_page,
     get_site,
     get_slot,
     list_items_by_slot_ids,
+    list_offer_display_metrics_by_offer_codes,
     list_offer_positions_by_slot_ids,
     list_slots,
+    upsert_offer_display_metric,
 )
 from app.domains.site_config.services.slot_registry import (
     get_home_slot_spec,
@@ -199,8 +205,13 @@ def get_backoffice_home_config(session: Session) -> BackofficeHomeConfigResponse
         for position in slot_positions
     ]
     hydrated_rows = list_active_offers_by_code(session, offer_codes)
+    display_metrics = list_offer_display_metrics_by_offer_codes(session, offer_codes)
     hydrated_offers = {
-        offer_code: _offer_schema(offer, price)
+        offer_code: _offer_schema(
+            offer,
+            price,
+            display_metrics.get(offer_code),
+        )
         for offer_code, (offer, price) in hydrated_rows.items()
     }
 
@@ -383,3 +394,53 @@ def resolve_offer_for_site_config(
         offer=_offer_schema(offer, price),
         raw={"offer_code": offer_code},
     )
+
+def _display_metrics_response(
+    offer_code: str,
+    metric: OfferDisplayMetric | None,
+) -> BackofficeOfferDisplayMetricsResponse:
+    return BackofficeOfferDisplayMetricsResponse(
+        offer_code=offer_code,
+        display_sold_quantity=metric.display_sold_quantity if metric is not None else 0,
+        display_paid_customer_count=(
+            metric.display_paid_customer_count if metric is not None else 0
+        ),
+        display_stock_quantity=metric.display_stock_quantity if metric is not None else 0,
+        is_active=metric.is_active if metric is not None else True,
+    )
+
+
+def get_offer_display_metrics(
+    session: Session,
+    offer_code: str,
+) -> BackofficeOfferDisplayMetricsResponse:
+    if resolve_active_offer(session, offer_code) is None:
+        raise HTTPException(status_code=404, detail="site_config_offer_not_found")
+
+    return _display_metrics_response(
+        offer_code,
+        get_offer_display_metric(session, offer_code),
+    )
+
+
+def update_offer_display_metrics(
+    session: Session,
+    offer_code: str,
+    request: BackofficeOfferDisplayMetricsRequest,
+) -> BackofficeOfferDisplayMetricsResponse:
+    if resolve_active_offer(session, offer_code) is None:
+        raise HTTPException(status_code=404, detail="site_config_offer_not_found")
+
+    metric = get_offer_display_metric(session, offer_code)
+    if metric is None:
+        metric = OfferDisplayMetric(offer_code=offer_code)
+
+    metric.display_sold_quantity = request.display_sold_quantity
+    metric.display_paid_customer_count = request.display_paid_customer_count
+    metric.display_stock_quantity = request.display_stock_quantity
+    metric.is_active = request.is_active
+
+    saved = upsert_offer_display_metric(session, metric)
+    session.commit()
+
+    return _display_metrics_response(offer_code, saved)

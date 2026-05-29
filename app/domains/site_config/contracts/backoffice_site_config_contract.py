@@ -126,3 +126,17 @@ class BackofficeSlotOfferPositionsPutRequest(BaseModel):
 class BackofficeOfferResolveResponse(BaseModel):
     offer: StorefrontHomeOffer
     raw: dict[str, Any] = Field(default_factory=dict)
+
+class BackofficeOfferDisplayMetricsRequest(BaseModel):
+    display_sold_quantity: int = Field(..., ge=0)
+    display_paid_customer_count: int = Field(..., ge=0)
+    display_stock_quantity: int = Field(..., ge=0)
+    is_active: bool = True
+
+
+class BackofficeOfferDisplayMetricsResponse(BaseModel):
+    offer_code: str
+    display_sold_quantity: int
+    display_paid_customer_count: int
+    display_stock_quantity: int
+    is_active: bool = True

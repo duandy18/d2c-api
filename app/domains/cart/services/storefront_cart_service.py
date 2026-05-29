@@ -22,9 +22,18 @@ from app.domains.cart.repos.cart_repo import (
     get_published_item_for_cart,
     list_cart_lines,
 )
+from app.domains.site_config.repos.storefront_site_config_repo import get_offer_display_metric
 
 
 class CartOfferNotFoundError(Exception):
+    pass
+
+
+class CartOfferDisplayStockUnavailableError(Exception):
+    pass
+
+
+class CartOfferQuantityExceedsDisplayStockError(Exception):
     pass
 
 
@@ -116,6 +125,29 @@ def _legacy_sku_code(published_item: PublishedCartItem) -> str:
     return component.sku_code if component is not None else offer.offer_code
 
 
+def _ensure_display_stock_quantity_allowed(
+    session: Session,
+    *,
+    offer_code: str,
+    quantity: int,
+) -> None:
+    if quantity <= 0:
+        return
+
+    metric = get_offer_display_metric(session, offer_code)
+
+    if metric is None or not metric.is_active:
+        raise CartOfferDisplayStockUnavailableError("cart_offer_display_stock_unavailable")
+
+    if metric.display_stock_quantity <= 0:
+        raise CartOfferDisplayStockUnavailableError("cart_offer_display_stock_unavailable")
+
+    if quantity > metric.display_stock_quantity:
+        raise CartOfferQuantityExceedsDisplayStockError(
+            "cart_offer_quantity_exceeds_display_stock"
+        )
+
+
 def _apply_published_snapshot(
     cart_line: CartLine,
     published_item: PublishedCartItem,
@@ -178,6 +210,12 @@ def upsert_cart_item(
         raise CartOfferNotFoundError("cart_offer_not_found")
 
     offer, price, _component, _group, _position = published_item
+    _ensure_display_stock_quantity_allowed(
+        session,
+        offer_code=offer.offer_code,
+        quantity=payload.quantity,
+    )
+
     existing_line = get_cart_line_by_published_offer(
         session,
         cart.id,
