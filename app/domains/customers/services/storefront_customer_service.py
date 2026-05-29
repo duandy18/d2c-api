@@ -9,6 +9,8 @@ from sqlalchemy.orm import Session
 
 from app.domains.customers.contracts.storefront_customer_contract import (
     CustomerAuthResponse,
+    CustomerChangePasswordRequest,
+    CustomerChangePasswordResponse,
     CustomerLoginRequest,
     CustomerLogoutResponse,
     CustomerProfile,
@@ -29,6 +31,7 @@ from app.domains.customers.repos.customer_repo import (
     get_customer_by_phone,
     get_password_credential,
     revoke_customer_session,
+    update_password_credential,
 )
 from app.security.passwords import (
     generate_session_token,
@@ -45,6 +48,10 @@ class CustomerConflictError(Exception):
 
 
 class CustomerAuthError(Exception):
+    pass
+
+
+class CustomerPasswordChangeError(Exception):
     pass
 
 
@@ -213,3 +220,41 @@ def logout_customer(
     session.commit()
 
     return CustomerLogoutResponse()
+
+
+
+def change_customer_password(
+    session: Session,
+    access_token: str,
+    payload: CustomerChangePasswordRequest,
+) -> CustomerChangePasswordResponse:
+    now = datetime.now(UTC)
+    customer = get_active_customer_by_session_token_hash(
+        session,
+        hash_session_token(access_token),
+        now,
+    )
+
+    if customer is None:
+        raise CustomerAuthError("customer_auth_required")
+
+    credential = get_password_credential(session, customer.id)
+
+    if credential is None or not verify_password(
+        payload.current_password,
+        credential.password_hash,
+    ):
+        raise CustomerPasswordChangeError("customer_current_password_invalid")
+
+    if verify_password(payload.new_password, credential.password_hash):
+        raise CustomerPasswordChangeError("customer_password_same_as_old")
+
+    update_password_credential(
+        session,
+        credential,
+        password_hash=hash_password(payload.new_password),
+        updated_at=now,
+    )
+    session.commit()
+
+    return CustomerChangePasswordResponse()
