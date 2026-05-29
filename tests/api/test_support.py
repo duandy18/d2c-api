@@ -166,7 +166,7 @@ def test_anonymous_support_conversation_creates_customer_and_system_messages() -
     assert payload["conversation_code"].startswith("SUP-")
     assert payload["conversation_token"]
     assert payload["topic"] == "product_question"
-    assert payload["status"] == "open"
+    assert payload["status"] == "pending_agent"
     assert payload["source"] == "storefront"
     assert [message["sender_type"] for message in payload["messages"]] == ["customer", "system"]
     assert payload["messages"][0]["body"] == "这个商品适合幼猫吗？"

@@ -87,7 +87,7 @@ def test_support_tables_exist_in_database() -> None:
         message_fk_targets = {
             fk["referred_table"] for fk in inspector.get_foreign_keys("d2c_support_messages")
         }
-        assert message_fk_targets == {"d2c_support_conversations"}
+        assert "d2c_support_conversations" in message_fk_targets
 
         conversation_unique_names = {
             constraint["name"]

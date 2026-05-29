@@ -15,7 +15,7 @@ SupportTopic = Literal[
     "payment_issue",
     "other",
 ]
-SupportStatus = Literal["open", "closed"]
+SupportStatus = Literal["open", "pending_agent", "pending_customer", "closed"]
 SupportSenderType = Literal["customer", "agent", "system"]
 SupportVisibility = Literal["public"]
 
