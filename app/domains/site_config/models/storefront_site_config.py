@@ -83,7 +83,10 @@ class StorefrontPage(Base):
     __table_args__ = (
         UniqueConstraint("site_id", "page_code", name="uq_d2c_sf_pages_code"),
         CheckConstraint("status IN ('active', 'disabled')", name="ck_d2c_sf_pages_status"),
+        CheckConstraint("route_path LIKE '/%'", name="ck_d2c_sf_pages_route_abs"),
         Index("ix_d2c_sf_pages_status", "site_id", "status"),
+        Index("ix_d2c_sf_pages_route", "site_id", "route_path"),
+        Index("ix_d2c_sf_pages_nav", "site_id", "navigation_group", "sort_order"),
     )
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
@@ -98,6 +101,25 @@ class StorefrontPage(Base):
     title: Mapped[str] = mapped_column(String(160), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[str] = mapped_column(String(32), nullable=False, server_default="active")
+    auth_required: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default=text("false"),
+    )
+    navigation_label: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    navigation_group: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        default="main",
+        server_default=text("'main'"),
+    )
+    sort_order: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
     seo_title: Mapped[str | None] = mapped_column(String(180), nullable=True)
     seo_description: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(

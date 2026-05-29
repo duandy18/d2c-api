@@ -48,6 +48,25 @@ def get_page(
     return session.scalar(statement)
 
 
+def list_pages(
+    session: Session,
+    site_id: int,
+    *,
+    active_only: bool = True,
+) -> list[StorefrontPage]:
+    statement = select(StorefrontPage).where(StorefrontPage.site_id == site_id)
+
+    if active_only:
+        statement = statement.where(StorefrontPage.status == "active")
+
+    statement = statement.order_by(
+        StorefrontPage.sort_order,
+        StorefrontPage.id,
+    )
+
+    return list(session.scalars(statement).all())
+
+
 def list_slots(
     session: Session,
     page_id: int,
