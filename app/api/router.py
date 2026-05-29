@@ -10,6 +10,7 @@ from app.api.routes.storefront.home import router as storefront_home_router
 from app.api.routes.storefront.orders import router as storefront_orders_router
 from app.api.routes.storefront.pages import router as storefront_pages_router
 from app.api.routes.storefront.published import router as storefront_published_router
+from app.api.routes.storefront.support import router as storefront_support_router
 from app.api.routes.system.health import router as system_health_router
 
 api_router = APIRouter()
@@ -23,4 +24,5 @@ api_router.include_router(storefront_customers_router)
 api_router.include_router(storefront_home_router)
 api_router.include_router(storefront_pages_router)
 api_router.include_router(storefront_orders_router)
+api_router.include_router(storefront_support_router)
 api_router.include_router(storefront_published_router)

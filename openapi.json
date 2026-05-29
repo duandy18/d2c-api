@@ -1340,6 +1340,281 @@
         }
       }
     },
+    "/support/health": {
+      "get": {
+        "tags": [
+          "support"
+        ],
+        "summary": "Support Health",
+        "operationId": "support_health_support_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Support Health Support Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/support/conversations": {
+      "post": {
+        "tags": [
+          "support"
+        ],
+        "summary": "Support Conversations Create",
+        "operationId": "support_conversations_create_support_conversations_post",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupportConversationCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportConversationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "support"
+        ],
+        "summary": "Support Conversations List",
+        "operationId": "support_conversations_list_support_conversations_get",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportConversationListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/support/conversations/{conversation_code}": {
+      "get": {
+        "tags": [
+          "support"
+        ],
+        "summary": "Support Conversation Detail",
+        "operationId": "support_conversation_detail_support_conversations__conversation_code__get",
+        "parameters": [
+          {
+            "name": "conversation_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Conversation Code"
+            }
+          },
+          {
+            "name": "conversation_token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 16,
+                  "maxLength": 256
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Conversation Token"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportConversationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/support/conversations/{conversation_code}/messages": {
+      "post": {
+        "tags": [
+          "support"
+        ],
+        "summary": "Support Conversation Messages Create",
+        "operationId": "support_conversation_messages_create_support_conversations__conversation_code__messages_post",
+        "parameters": [
+          {
+            "name": "conversation_code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Conversation Code"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupportMessageCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportConversationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/published/health": {
       "get": {
         "tags": [
@@ -4899,6 +5174,448 @@
           "button_style"
         ],
         "title": "StorefrontTheme"
+      },
+      "SupportConversationCreateRequest": {
+        "properties": {
+          "anonymous_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 96,
+                "minLength": 8
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anonymous Id"
+          },
+          "session_code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 96,
+                "minLength": 8
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Code"
+          },
+          "contact_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Name"
+          },
+          "contact_email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255,
+                "minLength": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Email"
+          },
+          "contact_phone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Phone"
+          },
+          "topic": {
+            "type": "string",
+            "enum": [
+              "order_status",
+              "shipping",
+              "returns_after_sales",
+              "product_question",
+              "payment_issue",
+              "other"
+            ],
+            "title": "Topic"
+          },
+          "related_order_no": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 32
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Related Order No"
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "topic",
+          "message"
+        ],
+        "title": "SupportConversationCreateRequest"
+      },
+      "SupportConversationListResponse": {
+        "properties": {
+          "conversations": {
+            "items": {
+              "$ref": "#/components/schemas/SupportConversationSummary"
+            },
+            "type": "array",
+            "title": "Conversations"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "count"
+        ],
+        "title": "SupportConversationListResponse"
+      },
+      "SupportConversationResponse": {
+        "properties": {
+          "conversation_code": {
+            "type": "string",
+            "title": "Conversation Code"
+          },
+          "topic": {
+            "type": "string",
+            "enum": [
+              "order_status",
+              "shipping",
+              "returns_after_sales",
+              "product_question",
+              "payment_issue",
+              "other"
+            ],
+            "title": "Topic"
+          },
+          "related_order_no": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Related Order No"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "closed"
+            ],
+            "title": "Status"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "contact_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Name"
+          },
+          "contact_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Email"
+          },
+          "contact_phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Phone"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed At"
+          },
+          "conversation_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversation Token"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/SupportMessageResponse"
+            },
+            "type": "array",
+            "title": "Messages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "conversation_code",
+          "topic",
+          "related_order_no",
+          "status",
+          "source",
+          "contact_name",
+          "contact_email",
+          "contact_phone",
+          "created_at",
+          "updated_at",
+          "closed_at"
+        ],
+        "title": "SupportConversationResponse"
+      },
+      "SupportConversationSummary": {
+        "properties": {
+          "conversation_code": {
+            "type": "string",
+            "title": "Conversation Code"
+          },
+          "topic": {
+            "type": "string",
+            "enum": [
+              "order_status",
+              "shipping",
+              "returns_after_sales",
+              "product_question",
+              "payment_issue",
+              "other"
+            ],
+            "title": "Topic"
+          },
+          "related_order_no": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Related Order No"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "closed"
+            ],
+            "title": "Status"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "contact_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Name"
+          },
+          "contact_email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Email"
+          },
+          "contact_phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Phone"
+          },
+          "message_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Message Count"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "closed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "conversation_code",
+          "topic",
+          "related_order_no",
+          "status",
+          "source",
+          "contact_name",
+          "contact_email",
+          "contact_phone",
+          "message_count",
+          "created_at",
+          "updated_at",
+          "closed_at"
+        ],
+        "title": "SupportConversationSummary"
+      },
+      "SupportMessageCreateRequest": {
+        "properties": {
+          "conversation_token": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256,
+                "minLength": 16
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversation Token"
+          },
+          "body": {
+            "type": "string",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Body"
+          }
+        },
+        "type": "object",
+        "required": [
+          "body"
+        ],
+        "title": "SupportMessageCreateRequest"
+      },
+      "SupportMessageResponse": {
+        "properties": {
+          "message_code": {
+            "type": "string",
+            "title": "Message Code"
+          },
+          "sender_type": {
+            "type": "string",
+            "enum": [
+              "customer",
+              "agent",
+              "system"
+            ],
+            "title": "Sender Type"
+          },
+          "body": {
+            "type": "string",
+            "title": "Body"
+          },
+          "visibility": {
+            "type": "string",
+            "const": "public",
+            "title": "Visibility"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message_code",
+          "sender_type",
+          "body",
+          "visibility",
+          "created_at"
+        ],
+        "title": "SupportMessageResponse"
       },
       "ValidationError": {
         "properties": {
