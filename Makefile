@@ -11,11 +11,13 @@ PORT ?= 8025
 PID_FILE ?= /tmp/d2c_api_8025.pid
 LOG_FILE ?= /tmp/d2c_api_8025.log
 HEALTH_URL ?= http://127.0.0.1:$(PORT)/health
+E2E_API_BASE_URL ?= http://127.0.0.1:$(PORT)
 
 DEV_ENV := D2C_ENVIRONMENT="$(D2C_ENV)" D2C_DATABASE_URL="$(DEV_DB_DSN)" D2C_TEST_DATABASE_URL="$(DEV_DB_DSN)" PYTHONPATH=.
 TEST_ENV := D2C_DATABASE_URL="$(DEV_TEST_DB_DSN)" D2C_TEST_DATABASE_URL="$(DEV_TEST_DB_DSN)" PYTHONPATH=.
 
 .PHONY: clean-pyc install lint test routes openapi check
+.PHONY: seed-demo clean-e2e e2e-smoke
 .PHONY: upgrade-dev alembic-check alembic-current alembic-history revision
 .PHONY: uvicorn uvicorn-up uvicorn-down uvicorn-restart uvicorn-status uvicorn-logs
 .PHONY: up down restart status logs
@@ -42,6 +44,15 @@ openapi:
 	$(PYTHON) scripts/export_openapi.py
 
 check: lint test routes openapi
+
+seed-demo: clean-pyc
+	$(DEV_ENV) $(PYTHON) scripts/dev/seed_demo_data.py
+
+clean-e2e: clean-pyc
+	$(DEV_ENV) $(PYTHON) scripts/dev/clean_e2e_data.py
+
+e2e-smoke: clean-pyc
+	D2C_API_BASE_URL="$(E2E_API_BASE_URL)" D2C_BACKOFFICE_CLIENT="d2c-backoffice" $(PYTHON) scripts/dev/e2e_smoke.py
 
 upgrade-dev:
 	@echo ">>> Alembic upgrade head on DEV_DB_DSN ($(DEV_DB_DSN))"
