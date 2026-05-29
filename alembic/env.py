@@ -15,6 +15,7 @@ from app.domains.customers.models import customer as customer_models  # noqa: F4
 from app.domains.orders.models import order as order_models  # noqa: F401
 from app.domains.promotions.models import promotion as promotion_models  # noqa: F401
 from app.domains.published.models import published as published_models  # noqa: F401
+from app.domains.support.models import support as support_models  # noqa: F401
 
 config = context.config
 
