@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class CustomerProfile(BaseModel):
@@ -16,15 +16,28 @@ class CustomerProfile(BaseModel):
 
 
 class CustomerRegisterRequest(BaseModel):
-    email: str = Field(..., min_length=3, max_length=255)
+    email: str | None = Field(default=None, min_length=3, max_length=255)
     password: str = Field(..., min_length=8, max_length=128)
-    display_name: str = Field(..., min_length=1, max_length=120)
+    display_name: str | None = Field(default=None, max_length=120)
     phone: str | None = Field(default=None, max_length=32)
+
+    @model_validator(mode="after")
+    def require_email_or_phone(self) -> "CustomerRegisterRequest":
+        if self.email is None and self.phone is None:
+            raise ValueError("customer_email_or_phone_required")
+        return self
 
 
 class CustomerLoginRequest(BaseModel):
-    email: str = Field(..., min_length=3, max_length=255)
+    email: str | None = Field(default=None, min_length=3, max_length=255)
+    phone: str | None = Field(default=None, max_length=32)
     password: str = Field(..., min_length=8, max_length=128)
+
+    @model_validator(mode="after")
+    def require_email_or_phone(self) -> "CustomerLoginRequest":
+        if self.email is None and self.phone is None:
+            raise ValueError("customer_email_or_phone_required")
+        return self
 
 
 class CustomerAuthResponse(BaseModel):

@@ -9,7 +9,7 @@ class OrderCheckoutRequest(BaseModel):
     cart_code: str = Field(..., min_length=1, max_length=96)
     recipient_name: str = Field(..., min_length=1, max_length=128)
     recipient_phone: str = Field(..., min_length=1, max_length=32)
-    shipping_country: str = Field(default="US", min_length=1, max_length=64)
+    shipping_country: str = Field(default="CN", min_length=1, max_length=64)
     shipping_province: str = Field(..., min_length=1, max_length=64)
     shipping_city: str = Field(..., min_length=1, max_length=64)
     shipping_district: str | None = Field(default=None, max_length=64)
